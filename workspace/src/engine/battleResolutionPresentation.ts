@@ -3438,21 +3438,43 @@ const SCENE_OFF_FORCED_SWITCH_OUT = Object.freeze({
  * dispatch D, SE_BALL_OPEN D + 2, healthbox gone D + 32, trainer slide (this model's el 0) D + 45 (lab: 2951 -> 2996), slide settled D + 83,
  * the win text's first row D + 86 (every lost battle: SE_BALL_OPEN + 84).
  * - LOSS_RECALL_LEAD_FRAMES: the script rows from the `switch-out` command's start (the row after the last "fainted!" box's A and the
- *   turn's remaining commands) to D. Kept from the measured SE_BALL_OPEN of aud241c / aud252 (command start + 22 = lead + 2), so the
- *   sound frame does not move; the picture now follows it.
+ *   turn's remaining commands) to D, for a target faint (command at A + 2, SE_BALL_OPEN at A + 28) and the end-of-turn faint (A + 0,
+ *   SE at A + 26; lrm1: ROM `BattleScript_GiveExp+0` + 19 = SE, GiveExp A + 9 after `BattleScript_MoveEnd`, A + 7 after `DoTurnDmgEnd`).
+ *   LOSS_RECALL_EXPLOSION_LEAD_FRAMES: the attacker faint of Explosion / Self-Destruct (GiveExp A + 5 after `ExplosionMissed`'s `end`,
+ *   command at A + 0, SE at A + 24: the aud241c / aud252 lab).
  * - LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES: D + 32 -> D + 45 (FreeMonSpriteAfterSwitchOutAnim's completion, waitstate,
  *   returnopponentmon2toball, waitstate, trainerslidein, the slide sprite's off-screen rows before this model's el 0).
  * - LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES: the slide settles (el 38) and printstring's first row shows 3 rows later
  *   (docs/terminal-seam-antecedent-boundary-probe.md §3: exec-flag sampling lag, waitstate's own row, the printer's render lag).
  */
-export const LOSS_RECALL_LEAD_FRAMES = 20;
+export const LOSS_RECALL_LEAD_FRAMES = 24;
+export const LOSS_RECALL_EXPLOSION_LEAD_FRAMES = 22;
+export const LOSS_RECALL_ITEM_CHAIN_LEAD_FRAMES = 20;
 export const LOSS_RECALL_TRAINER_SLIDE_GAP_FRAMES = 13;
 export const LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES = 3;
 export const LOSS_TAIL_SCRIPT_LABEL = "BattleScript_LocalBattleLostPrintTrainersWinText";
-const LOSS_RECALL_SWITCH_OUT = Object.freeze({
-  timing: Object.freeze({ minimumFrames: LOSS_RECALL_LEAD_FRAMES + RETURN_TO_BALL_SPAN_FRAMES }),
-  leadFrames: LOSS_RECALL_LEAD_FRAMES,
+const lossRecallSwitchOutAt = (leadFrames: number) => Object.freeze({
+  timing: Object.freeze({ minimumFrames: leadFrames + RETURN_TO_BALL_SPAN_FRAMES }),
+  leadFrames,
 });
+const LOSS_RECALL_SWITCH_OUT = lossRecallSwitchOutAt(LOSS_RECALL_LEAD_FRAMES);
+const LOSS_RECALL_EXPLOSION_SWITCH_OUT = lossRecallSwitchOutAt(LOSS_RECALL_EXPLOSION_LEAD_FRAMES);
+const LOSS_RECALL_ITEM_CHAIN_SWITCH_OUT = lossRecallSwitchOutAt(LOSS_RECALL_ITEM_CHAIN_LEAD_FRAMES);
+/**
+ * lrm1: which loss recall lead applies. The last faint came from the player's own Explosion / Self-Destruct (`FaintAttacker` after
+ * `tryexplosion`: 22), or a held-item chain (`general-animation`) runs between the faint and the recall (aud252: that chain has its own
+ * lead, 20), else the target / end-of-turn faint (24).
+ */
+function lossRecallSwitchOut(events: readonly BattleKernelSemanticEvent[], index: number) {
+  let faint = index - 1;
+  while (faint >= 0 && events[faint]!.payload.kind !== "faint-animation") faint -= 1;
+  if (faint < 0) return LOSS_RECALL_SWITCH_OUT;
+  if (events.slice(faint + 1, index).some((event) => event.payload.kind === "animation")) return LOSS_RECALL_ITEM_CHAIN_SWITCH_OUT;
+  return events[faint]!.provenance?.sourceLabel === "BattleScript_FaintAttacker"
+    && events.slice(0, faint).some((event) => event.provenance?.opcodeName === "B_SCR_OP_TRYEXPLOSION")
+    ? LOSS_RECALL_EXPLOSION_SWITCH_OUT
+    : LOSS_RECALL_SWITCH_OUT;
+}
 const LOSS_TAIL_TRAINER_SLIDE_TIMING = Object.freeze({ minimumFrames: 38, holdFrames: LOSS_TRAINER_SLIDE_PRINT_GAP_FRAMES } as const);
 /**
  * wtl1 (docs/wtl1-win-tail-timing.md): the win tail, `BattleScript_FrontierTrainerBattleWon` (battle_scripts_1.s:3027-3048).
@@ -6935,7 +6957,10 @@ export function projectBattleResolutionCommands(
         && event.provenance?.opcodeName === "B_SCR_OP_VARIOUS"
         && event.provenance.sourceLabel === LOSS_TAIL_SCRIPT_LABEL;
       if (lossRecall) {
-        commands.push(Object.freeze({ type: "switch-out", eventSequence: event.sequence, battler, ...LOSS_RECALL_SWITCH_OUT }));
+        commands.push(Object.freeze({
+          type: "switch-out", eventSequence: event.sequence, battler,
+          ...lossRecallSwitchOut(events, index),
+        }));
       }
       const transition = event.provenance?.opcodeName === "B_SCR_OP_MOVEEND"
         ? actionTransitionPauseFrames(events, index, commands, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0)

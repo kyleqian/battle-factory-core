@@ -103,8 +103,12 @@ describe("battle-end sounds match the ROM windows (aud241c)", () => {
   describeWindow("aud241c-win-off-window", { stage: "aud241c-win-off", scene: "off", dismisses: 3 }, 400, 8);
   describeWindow("aud241c-brain-on-window", { stage: "aud241c-brain-on", scene: "on", dismisses: 3 }, 400, 7);
   describeWindow("aud241c-brain-off-window", { stage: "aud241c-brain-off", scene: "off", dismisses: 3 }, 400, 7);
-  describeWindow("aud241c-loss-on-window", { stage: "aud241c-loss-on", scene: "on", dismisses: 3 }, 1400, 8);
-  describeWindow("aud241c-loss-off-window", { stage: "aud241c-loss-off", scene: "off", dismisses: 3 }, 700, 8);
+  // lrm1: the ROM fixtures are the player's own Explosion (SE_BALL_OPEN = faint box A + 24, engine lead 22); these stages are a target faint (the foe's
+  // Seismic Toss), whose ROM A -> SE_BALL_OPEN is 28 (lrm1-loss-targetfaint labs), so the third row (SE_BALL_OPEN) is +4 against the Explosion
+  // fixture: the stage / fixture mismatch, not an engine error (the lab pair and tests/lrc1LossRecall.test.ts pin the 28).
+  const targetFaintBall = [0, 0, 4, 0, 0, 0, 0, 0];
+  describeWindow("aud241c-loss-on-window", { stage: "aud241c-loss-on", scene: "on", dismisses: 3 }, 1400, 8, targetFaintBall);
+  describeWindow("aud241c-loss-off-window", { stage: "aud241c-loss-off", scene: "off", dismisses: 3 }, 700, 8, targetFaintBall);
 });
 
 describe("write-only and the low-HP loop (aud241c)", () => {

@@ -63,10 +63,12 @@ for (const scene of ["off", "on"] as const) {
     const at = (rel: number): Frame => frames[ball[0]!.frame + rel - 1]!;
     const view = (rel: number) => createBattleResolutionPresentationRenderView(at(rel).resolution!);
 
-    it("plays one SE_BALL_OPEN, 24 frames after the last faint box's A (aud241c / aud252 frame kept)", () => {
+    // lrm1: this stage is a target faint (the foe's Seismic Toss), the ROM's A -> SE_BALL_OPEN is 28 there (lrm1-loss-targetfaint-{on,off}: ROM A 3157 /
+    // SE 3185 OFF, 5957 / 5985 ON; T2 s4686 d6 388 -> 416); the 24 of aud241c / aud252 is the player's own Explosion (engine lead 22, an attacker faint).
+    it("plays one SE_BALL_OPEN, 28 frames after the last faint box's A (target faint, lrm1)", () => {
       expect(ball).toHaveLength(1);
       const dismiss = frames.filter((f) => f.frame < ball[0]!.frame && f.sounds.some((e) => e.kind === "se" && e.id === SE_SELECT)).at(-1)!;
-      expect(ball[0]!.frame - dismiss.frame).toBe(24);
+      expect(ball[0]!.frame - dismiss.frame).toBe(28);
     });
 
     it("projects the loss tail as switch-out (lead 20 + 32) -> recall receipt (13) -> trainer slide (38 + 3) -> win text", () => {
