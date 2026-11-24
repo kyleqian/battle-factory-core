@@ -25,7 +25,7 @@ export const IU120_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
  * Metal Claw (14) left the table in the tdr1 merge: the box's bdt1 window (154) models the same wait.
  */
 export const HIT1_CMD_END_SE_WAIT_ROWS: ReadonlyMap<number | string, number> = new Map<number | string, number>([
-  [7, 1], [9, 22], [16, 44], [41, 17], [48, 21], [52, 3], [64, 14], [74, 20], [75, 20], [105, 15], [124, 6], [158, 2], [176, 3], [179, 1],
+  [7, 1], [9, 22], [16, 44], [41, 17], [52, 3], [64, 14], [74, 20], [75, 20], [105, 15], [124, 6], [158, 2], [176, 3], [179, 1],
   [184, 14], [190, 1], [200, 1], [206, 13], [208, 17], [223, 46], [235, 10], [299, 9], [316, 63], [342, 4], [343, 21],
   [350, 1], [143, 1], ["143@180", 0], ["184@190", 12],
 ]);
@@ -100,7 +100,7 @@ const S_LEAD_RULE_IDS: ReadonlySet<number> = new Set([
 // b4l c-lead (test-side copy of production's C_LEAD_WINDOW_ADJUST + the kernel lead L = A0 - R - 3, ROM-measured by b4m / b4l): the lead rows are presented in front of the body, the window adjust
 // (ROM next command - engine next command) after it. Thunder Wave 86 / Stun Spore 78 / Sleep Powder 79 (9 / 9 / 7, +0), Sing 47 (7, +3), Grasswhistle 320 (7, -2), Confuse Ray 109 (6, +2),
 // Curse 174 (4, +4; its Ghost branch 6 / +4: ROM A1 430 -> first command 433 is the engine's 433), Lovely Kiss 142 (7, +3), Will-O-Wisp 261 (8, +2), Glare 137 (9, +2), Brick Break 280 (7, +3).
-const C_LEAD_RULE_IDS: ReadonlySet<number> = new Set([86, 78, 79, 47, 320, 109, 174, 142, 261, 137, 280]);
+const C_LEAD_RULE_IDS: ReadonlySet<number> = new Set([86, 78, 79, 47, 320, 109, 174, 142, 261, 137, 280, 48]);
 const cLead = (lead: number, tail: number): Iu120BodyRule => ({ defaultLead: lead, tail });
 const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu120BodyRule>([
   // hpd4 lead-table bodies (explicit tails)
@@ -117,10 +117,12 @@ const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu1
   [59, { ...shapeA(59), tail: 2 }],
   // b4l c-lead
   [86, cLead(9, 0)], [78, cLead(9, 0)], [79, cLead(7, 0)], [47, cLead(7, 3)], [320, cLead(7, 0)], [109, cLead(6, 2)], [174, cLead(4, 4)], [142, cLead(7, 3)], [261, cLead(8, 2)], [137, cLead(9, 2)], [280, cLead(7, 3)],
+  // ssl1: Supersonic 48 (lead 6, window adjust 28: ROM labs ttf1-supersonic-*, status exec 155 = print release 70 + 85)
+  [48, cLead(6, 28)],
 ]);
 export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([...IU120_BODY_RULES].filter(([, r]) => r.lead !== undefined).map(([id, r]): [number, number] => [id, r.lead!]));
 // liv2 / mxp1: Self-Destruct and Explosion have no body lead (their hp command carries it) but a 9-row hit tail after the live window; the age holds the last body row there.
-const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], [105, 6], [135, 5], [208, 6], [236, 4], [235, 7]]);
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], [187, 3], [105, 6], [135, 5], [208, 6], [236, 4], [235, 7]]);
 // sta5: ids whose age holds the last body row through the tail (test-side copy of production's STA5 status-tail class).
 const STA5_STATUS_TAIL_IDS: ReadonlySet<number> = new Set([260, 207, 147, 92, 95]);
 function hpd4BodyTail(id: number, side: Iu120Side, duration?: number): number {

@@ -2830,6 +2830,8 @@ function instantHpDropTiming(events: readonly BattleKernelSemanticEvent[], healt
  * rows (2 rows): 3 rows, 45 + 1 + 1 = G+97..G+143 then the glyph at G+144, both scenes, both sides (4 / 4 dense windows, 0 px).
  * Only the Substitute script is measured, so the rule requires its `attackanimation; waitanimation; healthbarupdate` lead-in (the
  * other `datahpupdate; printfromtable`, Leech Seed's turn-end drain, has no ROM window here).
+ * stm1 / ssl1: BattleScript_EffectBellyDrum's `attackanimation; waitanimation; healthbarupdate; datahpupdate; printstring` is the same controller flow with a printstring follower
+ * (lab stm1-bd-rockslide-on, both scenes: the print was 3 rows early, 231 vs 228).
  */
 const HP_PRINT_TAIL_FRAMES = 3;
 /** hpf5 S1 (hpf4m, both scenes): E 27 -> next exec +29, but cost bars E >= 28 are ROM-exact at tail 3 (sub183 dense windows, E 44 -> +47), so the tail stays 3 and only the 28 floor goes (a short bar was E 27 -> 31, now 30 = ROM + 1). */
@@ -2842,7 +2844,7 @@ function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly B
     if (at(-2) === "B_SCR_OP_ORWORD" && at(-3) === "B_SCR_OP_WAITANIMATION" && at(-4) === "B_SCR_OP_ATTACKANIMATION" && at(1) === "B_SCR_OP_COPYARRAY") return PAIN_SPLIT_ATTACKER_HP_TIMING;
     if (at(-2) === "B_SCR_OP_COPYARRAY" && at(-3) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTSTRING") return PAIN_SPLIT_TARGET_HP_TIMING;
   }
-  return at(0) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTFROMTABLE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
+  return at(0) === "B_SCR_OP_DATAHPUPDATE" && (at(1) === "B_SCR_OP_PRINTFROMTABLE" || at(1) === "B_SCR_OP_PRINTSTRING") && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
     && at(-2) === "B_SCR_OP_WAITANIMATION" && at(-3) === "B_SCR_OP_ATTACKANIMATION"
     ? SUBSTITUTE_COST_HP_TIMING
     : at(0) === "B_SCR_OP_DATAHPUPDATE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE" && at(-2) === "B_SCR_OP_ORWORD"
