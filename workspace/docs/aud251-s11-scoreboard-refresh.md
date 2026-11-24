@@ -4312,3 +4312,80 @@ Sum-check: ON 530 + 700 + 373 + 327 + 283 + 245 + 232 + 202 + 58 + 120 = 3,070; 
 **Recommended landing order** (largest certain saving per rule, most T2-exact windows first): (1) A, the loss-recall SE 15 (-125 .. -135, 26 windows in both scenes; first an lrc1 lab pair to settle the lab's +22 vs T2's +26); (2) hse1m + hit2 item 1 on OFF (-150 .. -230, M); (3) C, the Toxic next-action gap (-110 .. -150); (4) B, the Chesto chain after a sleep cure (-90); (5) s8612 d8 Rock Slide after a self-target stat move (-126, M) and the Focus Punch constant refit (-50..-60, M); (6) Supersonic with a lab pair (-78, M); (7) E, Ice Beam after `ConfusedNoMore` (-60). A + C + B alone are ~-340 of the 6,186 / 597.
 
 Not applied: no `src/` or `tests/` change; PROGRESS / ISSUES / ROADMAP / PAPERCUTS untouched (the step forbids editing them); no new tool (the t2k4 / t2k8 chain ran unchanged); `npm test` / `npm run typecheck` / `npm run build` not run (the step forbids them with the supervisor's soaks in flight; no `.ts` / test touched).
+
+## tnm1 (2026-11-24): the Toxic next-action gap (C) and the Rest -> Chesto chain (B) as ready recipes
+
+Measurement only (docs / labs): no `src/` or `tests/` change, engine frozen at c22d60e57 (ENGINE_BUILD `eb-98540cad897c0482`); the sources are t2k9 section 3.C / 3.B above. Tools: `tools/integration/labCompare.sh --scene on|off` (ROM `hcr3mProbe.py` + `soundEventProbe.py` against `b4mEngine.ts`), evidence under `.integration/evidence/tnm1/` (git-ignored: `toxic-base`, `ctl`, `ctloff`, `prz`, `offrows`, `chesto-base`, `chesto-off`, `t2p`). Print convention: ROM = first glyph (tp rise + 1), ENG = the `message` command's start, as labCompare prints it. Mass = sum of |ENG - ROM|.
+
+### 1. (C) Toxic next action: the cause is a status-infliction term, not a Toxic one
+
+**Lab.** `gsp3-toxic-{player,foe}-on` already is the lab (Toxic, then Seismic Toss, then the poison tick, 3 turns); no new Toxic lab file. labCompare `--scene on` (before): player SUMMARY exact 28 / offset 22, mass 46 (PRINTS exact 9 / offset 3, mass 10); foe exact 25 / offset 17, mass 44. It reproduces T2 s165 d14 exactly: the status animation chain (SE 148 x 6, `MoveEffectToxic+0x2`) is exact row by row, then everything after it is early.
+
+**ROM rows against engine commands (player ON, Toxic turn).**
+
+| row | ROM | ENG | ENG - ROM | engine command |
+| --- | --- | --- | --- | --- |
+| last SE 148 (`BattleScript_MoveEffectToxic+0x2`) | 366 | 366 | 0 | `status-animation PSN` @296 |
+| "was badly poisoned!" print (`MoveEffectToxic+0x5`) | 369 | 367 | **-2** | `message` @367 |
+| `updatestatusicon` (`UpdateEffectStatusIconRet+0x2`) | 463 | 460 | **-3** | `status-icon` @460 |
+| next print (`EffectLevelDamage+0x9`, Seismic Toss) | 482 | 478 | **-4** | `message` @478 |
+| everything after (hit SEs 238 / 214 / 131 / 13, tick print) | | | -4 carried | |
+
+The script is `statusanimation; printstring; waitmessage B_WAIT_TIME_LONG; goto UpdateEffectStatusIconRet` (`data/battle_scripts_1.s` 3916, 3873), and the gap is three additive terms, each measured on its own row:
+
+| term | what | scenes | rows | source row |
+| --- | --- | --- | --- | --- |
+| (c) | the status animation's controller rows before the print: the `status-animation` minimum is 2 short when the next instruction is the move-inflicted status print (print -2 -> 0) | ON only | +2 | print 369 vs 367 (OFF print is exact: 98 / 98) |
+| (a) | the print's hold: 64 -> 65 for the PSN / TOX / BRN / PRZ message that is followed by `goto BattleScript_UpdateEffectStatusIconRet` | both | +1 | icon -3 -> -1 -> 0 (ON), icon ENG 191 vs ROM 192 (OFF) |
+| (b) | `status-icon` -> the next used print | both | +1 | next print -4 -> 0 (ON), 209 vs 211 (OFF, after (a)) |
+
+ON total +4, OFF total +2 (OFF has no animation rows). Sleep Powder (ON lab) has a different shape (ENG message 360 vs print row 361, icon ENG 447 vs ROM 449): not claimed here; land (a) for PSN / TOX / BRN / PRZ only and re-measure SLP after (c) / (b) with `gsp3-sleeppowder-player-on`.
+
+**Same term in the other infliction scripts (controls, ON).** Will-O-Wisp (`gsp3-willowisp-player-on`): A1 321, ENG message 322 vs print 323, icon ENG 409 vs ROM 412, next 425 vs 429 = the same -1 / -3 / -4 shape. Thunder Wave / Stun Spore (PRZ, `b4m-thunderwave-player-on`, `b4m-stunspore-player-on`): A1 229, ENG message 230, icon ENG 344 vs ROM 347 = the same -3 icon. Sleep Powder: as above. OFF (`gsp3-toxic-player-off`, `gsp3-willowisp-player-off`): print exact, icon -1, next -2.
+
+**Exact landing recipe (engine command, constant, file, lines).**
+
+1. (c) `status-animation` (`battleResolutionPresentation.ts` 6864-6874, `minimumFrames: seGate + STATUS_ANIMATION_ADDED_ROWS[animation] + preMoveConfusionToUsedPrintRows(events, index)`): add `MOVE_INFLICTED_STATUS_ANIMATION_EXTRA_ROWS = 2` when the next receipt is the status print of a `BattleScript_MoveEffect{Toxic,Burn,Paralysis,Sleep}` script (the print's `launch`/source label, as `messageTimingFromSourceProvenance` 1400-1420 keys it). Do NOT change `STATUS_ANIMATION_ADDED_ROWS` (166-168: the pre-move / confusion / tick paths are exact at 71 / 39 / 97 / 100 and share it).
+2. (a) hold: in `messageTimingFromSourceProvenance` (1400-1420), the move-inflicted branch (`MOVE_INFLICTED_STATUS_ANIMATION_TIMING` 1378 ON, `MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING` 1374 OFF) adds 1 to `holdFrames` for PSN / TOX / BRN / PRZ only, i.e. when `instructions[programCounter + 2]` is `GOTO BattleScript_UpdateEffectStatusIconRet`. Not SLP (the sleep print is followed by the sleep icon script; hold exact).
+3. (b) `status-icon` (6883-6891, `STATUS_ICON_TIMING` 3330 = 1 frame): the icon that follows a move-inflicted status print gets `minimumFrames: 2` (both scenes). Keep `wakeUpIconTiming` first; leave the tick's `END_TURN_STATUS_DAMAGE_LEAD_ROWS` (1370) untouched (the gsp3 poison / burn tick lead is carried: after the fix the tick print is exact and its SE 148 sits +1, which is the known tick term).
+4. Guards that must stay exact: `gsp3-toxic-*-off`, `gsp3-willowisp-*-off`, `gsp3-sleeppowder-*-on`, `b4m-thunderwave-*-on`, `b4m-stunspore-*-on`, the sa125 / sag130 pre-move confusion rows (the `preMoveConfusionToUsedPrintRows` term, cfm1's lane), and `tests/` rows that pin `MOVE_INFLICTED_STATUS_*` (not edited here).
+
+**Expected mass.** Labs (estimate, not landed): ON player 46 -> about 10 (the offset rows after the print move by +2 / +3 / +4; the tick SE +1 rows and the carried tick term remain), foe 44 -> about 10. T2: the Toxic windows (s165 d14 and its kin, -110 .. -150 each ON) are about -148 in total; the same term on Paralysis windows is about -92 more if the lab shape holds (inferred from `b4m-*` labs, not T2-probed). OFF about -6 total. The T2 ON next action at s165 d14: ENG status-icon 438 vs ROM `UpdateEffectStatusIconRet+0x2` 442 (-4), ENG message 455 vs `EffectConfuse+0x2` 458 (-3): the same terms.
+
+### 2. (B) Rest -> Chesto berry cure chain +6
+
+**Labs (new, committed).** `tools/battle-lab/tnm1-rest-chesto-player-on.json` and `tools/battle-lab/tnm1-rest-chesto-opponent-on.json`: copies of `bdt1-rest-player-on` with `overrides.parties.<side>[0].item = 134` (Chesto Berry); Lv50 Rest x4 against a Lv12 Seismic Toss mon, trace `[A2, 18, A2, 1000, A2, 18, A2, 800]` (Rest on a damaged mon, Chesto cures the Rest sleep). labCompare `--scene on` (before): both labs mass 36 (one row 0 -> the berry segment).
+
+**ROM rows against engine commands (player ON).**
+
+| row | ROM | ENG | ENG - ROM | engine command |
+| --- | --- | --- | --- | --- |
+| `MoveEnd+0x0` / sprite-visibility end | 1416 | 1416 | 0 | `sprite-visibility` @1415 -> `status` @1416 (min 32) |
+| `BerryCureSlpRet+0x0` (status receipt) / `+0x7` = A0 (animation starts) | 1419 / 1420 | `general-animation HELD_ITEM_EFFECT` @1448 (min 192) | | |
+| SE 152 first / 228 / 102 (`+0x7`) | 1428 / 1524 / 1596 | 1434 / 1530 / 1602 | +6 | script frame 0 = command start + (min - 214) = 1426 |
+| berry print (`BerryCureSlpRet+0xa`) | 1634 | 1640 | **+6** | `message` @1640 |
+| `+0xf` (A1 1631 ... `updatestatusicon`) / `MoveEnd+0x6` | 1744 / 1747 | `status-icon` @1749 | | |
+| next print (`EffectLevelDamage+0x9`) | 1756 | 1750 | **-6** | `message` @1750 (then SE 238 -6 ...) |
+
+The berry run is short by +6 inside the segment and its tail is 12 short, so the tail turns +6 into -6: the chain +6 of T2 s319 d24 (ENG SE 152 694 vs ROM 688; message 900 vs ROM 893 / 894; status-icon 1015 vs 1010) and the -6 / -3 following windows (s5063 d1, s8612 d11).
+
+**Cause and recipe (two coupled parts; land both or neither).**
+
+- Part 1, the berry's start (+6 -> 0). A cure berry after a status receipt presents `status` (32) then `general-animation`, whose command min is `heldItem.frames - presented + HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES` (7181-7192; `HELD_ITEM_EFFECT_AFTER_STATUS_EXTRA_FRAMES` 249, CONTINUE lead 9 at 233, `HELD_ITEM_EFFECT_COMMAND_FRAMES` 214). The SE / drawn animation epoch is `command start + min - 214` = status start + 10 regardless of how `status` is cut, because `presented` follows the status command. The ROM epoch is `MoveEnd+0x0` + 4 (A0 1420 = `BerryCureSlpRet+0x7`, `MoveEnd+0x0` 1416). So the status command is cut to 26 (set in the `set-battler-status-data` branch, 6839-6858, for a status receipt whose source label is `BattleScript_BerryCureSlpRet` / the Rest -> berry path; `sceneOnStatusFrames` 2294 returns null for it today and leaves `STATUS_TIMING` 32 at 3321) while the general-animation min stays at the value 32 gave (192): subtract a fixed `HELD_ITEM_EFFECT_AFTER_STATUS_NOMINAL_PRESENTED = 32` rather than the status command's own minimum in the 7183 `presented` line. Result: SE 152 / 228 / 102 exact and the berry print exact (ENG 1634 = ROM 1634). The ordinary Cheri-after-hit berry (hie2 / hie3: status 32, epoch exact) must keep 32: key the cut on the Rest path (the status receipt is produced from `MoveEnd`'s berry check, not from the hit), and guard with `hie1-cheri-on` (ISSUES #220 lab).
+- Part 2, the berry print's tail (-6 -> 0 after part 1 it would be -12). ROM `waitmessage` -> `updatestatusicon` (+0xf) -> `MoveEnd+0x6` -> the next used print spends 12 more rows than ENG: +1 on the print's hold (the `message`'s `holdFrames`, `messageTimingFromSourceProvenance` 1400-1420 for the `BerryCure*Ret` print) and +11 between the `status-icon` (6883-6891, `STATUS_ICON_TIMING` 3330) and the next message (a berry-print icon min of 12 instead of 1). Part 2 alone makes the next action +6 (ENG 1750 + 12 against ROM 1756) and leaves the print +6; Part 1 alone makes the next action -12; the two together should make the print and the next action exact (the later hit SEs 238 / 214 / 131 / 13 follow the next action's offset). This is derived from the measured rows above, not landed: verify with the two labs after landing.
+- Source rows: ROM `MoveEnd+0x0` 1416, `BerryCureSlpRet+0x7` 1420, `+0xa` 1633 / glyph 1634, `+0xf` 1744, `MoveEnd+0x6` 1747, `EffectLevelDamage+0x0` 1752 / glyph 1756 (player ON lab; the opponent lab shows the same offsets).
+
+**OFF control (`tnm1-rest-chesto-*` with `--scene off`, `.integration/evidence/tnm1/chesto-off`).** Scene OFF has no animation rows: `status` 35 then `move-animation` 9 and the berry print is +5 off its ROM row; the same -12 tail follows. Not a T2 term (the OFF T2 windows have no Rest + Chesto), so land Part 2 in both scenes only if the OFF labs go to 0 with it; otherwise gate it ON.
+
+**Expected mass.** ON: -90 for the chain (s319 d24 = 90, ON), plus about -24 for the next-action windows (s5063 d1, s8612 d11: -6 + -6 rows each of mass 12), about -114 in total. Chain only (Part 1 + Part 2 on one lab without the T2 next-action windows) about -72. Lab: 36 -> about 0 for both Rest + Chesto labs (estimate: every offset row in the table above moves by the same -6 / +6 / +6 amounts).
+
+### 3. What not to chase
+
+- The Toxic term as a Toxic-only constant (it is shared by Will-O-Wisp / Paralysis / Sleep: land it once as the move-inflicted status print rule), and a change to `STATUS_ANIMATION_ADDED_ROWS` or `END_TURN_STATUS_DAMAGE_LEAD_ROWS` (both are exact for the paths that use them).
+- The ON - OFF source identity of the pre-move confusion +5 (cfm1) and the loss recall SE 15 (lrm1): other lanes, not touched here.
+- The lab's `PresentHealTarget+0x12` print -10 (a hold shape in the HP leg, absorbed by the time the berry status starts at 1416 = ROM `MoveEnd+0x0`).
+- Cutting the berry `status` command alone, with no tail (Part 1 without Part 2 turns the next action -6 into -12).
+
+### 4. State and verification
+
+No `src/` or `tests/` change; the code under test is c22d60e57 / HEAD parent (the engine is untouched); PROGRESS / ISSUES / ROADMAP / PAPERCUTS and the Factory acceptance ledgers untouched; `npm test` / typecheck / build not run (docs-only step). A live adapter is not whole-playable exactness: the recipes are measured on labs and T2 rows, not landed.
