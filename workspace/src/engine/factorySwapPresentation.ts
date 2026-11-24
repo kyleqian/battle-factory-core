@@ -78,11 +78,7 @@ export interface FactorySwapPresentationState {
   readonly summaryMode: "SUMMARY_MODE_NORMAL" | null;
   readonly summaryCurMonIndex: 0 | 1 | 2 | null;
   readonly summaryMaxMonIndex: 2 | null;
-  /**
-   * True after CB2_InitSwapScreen rebuilt the originating popup, and for the rest of the swap screen (unlike the ROM's
-   * `fromSummaryScreen`, which Swap_ShowMenuOptions clears): whether the popup shown is still that rebuilt one is
-   * `factorySwapSummaryReshowShown`.
-   */
+  /** True after CB2_InitSwapScreen rebuilt the popup, for the rest of the screen (the rebuilt one: factorySwapSummaryReshowShown). */
   readonly returnedFromSummary: boolean;
   /** The duplicate-error task rebuilt the enemy picker on the prior frame. */
   readonly returnedFromDuplicate?: boolean;
@@ -779,7 +775,8 @@ function advanceFactorySwapPresentationClocks(
   // swt1: only the popup CB2_InitSwapScreen rebuilt after a summary skips OpenMonPic (Swap_Task_HandleMenu STATE_MENU_INIT,
   // battle_factory_screen.c:2589-2593) and takes input one frame after the handover. Swap_ShowMenuOptions clears
   // fromSummaryScreen (:3706-3707), so a popup a later A on a ball opens waits for OpenMonPic (STATE_MENU_SHOW_OPTIONS,
-  // :2594-2600) like the screen's first one. `returnedFromSummary` alone stays set for the rest of the screen.
+  // :2594-2600) like the screen's first one. `returnedFromSummary` alone stays set for the rest of the screen. (The rebuilt popup's
+  // own first input is the summary B's +61 here, +42 on the ROM: docs/swt1-swap-popup-input-timing.md, "Seen, not fixed".)
   const effectiveDelay =
     controller.phase === "playerOptions" && factorySwapSummaryReshowShown(advanced)
       ? 1
