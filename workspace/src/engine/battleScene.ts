@@ -4605,6 +4605,12 @@ const liveCastformFormSides: { player: number | undefined; opponent: number | un
 const liveTransformSides: { player: LiveTransformSheetOverride | undefined; opponent: LiveTransformSheetOverride | undefined } =
   { player: undefined, opponent: undefined };
 type LiveTransformSheetOverride = Readonly<{ species: string; palette: readonly RgbColor[] }>;
+/**
+ * spd2: the spotted front picture of an opponent SPINDA shown during a live body (armed by renderBattleResolutionLiveView from the
+ * field art's pic, spd1's DrawSpindaSpots port): the opponent's species sheet map returns it for SPINDA (liveShownFormSheets), so the
+ * body draws the spots the field shows before and after it (the ROM's battler sprite keeps the tiles LoadSpecialPokePic spotted).
+ */
+const liveSpindaSpotSides: { opponent: Tileset | undefined } = { opponent: undefined };
 
 export function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): void {
   drawTileBgBase(fb, tileset, tilemap, subpalettes);
@@ -15808,6 +15814,12 @@ function liveShownFormSheets<T extends object>(sheets: T, side: "player" | "oppo
     const own = Reflect.get(sheets, transform.species) as object | undefined;
     const sheet = own === undefined ? undefined : { ...own, palette: transform.palette };
     return new Proxy(sheets, { get: (target, key) => (key === transform.species ? sheet : Reflect.get(target, key)) });
+  }
+  const spotted = side === "opponent" ? liveSpindaSpotSides.opponent : undefined;
+  if (spotted !== undefined) {
+    const own = Reflect.get(sheets, "SPINDA") as object | undefined;
+    const sheet = own === undefined ? undefined : { ...own, tileset: spotted };
+    return new Proxy(sheets, { get: (target, key) => (key === "SPINDA" ? sheet : Reflect.get(target, key)) });
   }
   const form = liveCastformFormSides[side];
   if (form === undefined) return sheets;
@@ -56693,6 +56705,9 @@ export function renderBattleResolutionLiveView(
   liveCastformFormSides.opponent = view.fieldArt.opponent.castformForm;
   liveTransformSides.player = liveTransformSheetOverride(view, "player");
   liveTransformSides.opponent = liveTransformSheetOverride(view, "opponent");
+  liveSpindaSpotSides.opponent = view.fieldArt.opponent.speciesSymbol === "SPINDA" && view.fieldArt.opponent.substituteDoll !== true
+    ? view.fieldArt.opponent.pic.tileset as Tileset
+    : undefined;
   // SpriteCB_EnemyShadow (battle_gfx_sfx_util.c:1214) also hides the shadow of an `invisible` battler sprite (hide66).
   // shadow105: a lead > 0 command's row 0 is the ROM's activation row, whose OAM still shows the shadow (the hide shows from row 1).
   liveOpponentShadow.species = effect?.type === "move" && view.field.opponent.hp !== 0 && !subbedOpponentAttacker
@@ -56711,6 +56726,7 @@ export function renderBattleResolutionLiveView(
     liveCastformFormSides.opponent = undefined;
     liveTransformSides.player = undefined;
     liveTransformSides.opponent = undefined;
+    liveSpindaSpotSides.opponent = undefined;
   }
   // Encore's hardware fade targets OBJ as well as BG3. The live seam
   // replaces the staged healthboxes below with their controller-owned

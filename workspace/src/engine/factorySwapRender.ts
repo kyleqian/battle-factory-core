@@ -133,6 +133,13 @@ export interface FactorySwapRenderView {
   readonly loadedDisplaySpecies?: string | null;
   /** The duplicate task has copied the logical species into its fade window. */
   readonly duplicateDisplayCopied?: boolean;
+  /**
+   * spd2: set while the pic is Swap_ShowSummaryMonSprite's (the popup rebuilt after a summary visit): the OT id of the player's mon
+   * under the cursor. The non-BUGFIX ROM hands CreateMonPicSprite_HandleDeoxys `personality` and `otId` swapped
+   * (battle_factory_screen.c:4089-4093), so LoadSpecialPokePic draws SPINDA's spots from the OT id's bytes; the shiny palette reads
+   * otId ^ personality and is unchanged. Absent: the pic is Swap_CreateMonSprite's (:4294-4310), spotted from the personality.
+   */
+  readonly summaryReshowOtId?: number | null;
 }
 
 function drawActionPiece(
@@ -737,14 +744,17 @@ export function renderFactorySwapPicker(view: FactorySwapRenderView): Uint8Array
       enemySwitch && phaseElapsed === 0
         ? { ...monPic, menuHighlightVisible: true }
         : monPic;
+    const picSpecies = duplicate ? selected.species : view.loadedDisplaySpecies ?? selected.species;
     drawMonPicFaded(
       fb,
       adjustedMonPic,
-      duplicate ? selected.species : view.loadedDisplaySpecies ?? selected.species,
+      picSpecies,
       48 * state.displayCursor + 72,
       bgFade,
       objFade,
       ballVisuals,
+      // spd2: the personality the pic's CreateMonPicSprite_HandleDeoxys call passes (SPINDA's spots, monPicRender.ts frontSprite).
+      view.summaryReshowOtId ?? (picSpecies === selected.species ? selected.personality : undefined),
     );
     if (
       adjustedMonPic.menuHighlightVisible &&

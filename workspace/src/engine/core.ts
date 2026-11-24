@@ -24,6 +24,7 @@ import {
   advanceRentConfirmRedraw,
   applyDeselect,
   applySelect,
+  chosenMonPersonalities,
   chosenMonSpecies,
   createDraftScreenStateFromRentalRecords,
   cursorMoveStallsBalls,
@@ -3292,6 +3293,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           // and start the 20-tick un-reveal (confirmReveal.ts's "closing").
           const slot = draftScreen.cursorPos;
           const decliningSpecies = chosenMonSpecies(draftScreen);
+          const decliningPersonalities = chosenMonPersonalities(draftScreen);
           // ISSUES #12: the window's background ball-grid layer keeps
           // rendering this slot as still-selected (frozen on its last live
           // frame) through the same elapsed 0-2 hold decliningSpecies covers
@@ -3314,7 +3316,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
             selectingMonsState,
             message: selectMonMessage(selectingMonsState),
           };
-          confirmReveal = { phase: "closing", elapsed: 0, decliningSpecies, decliningBallAnim };
+          confirmReveal = { phase: "closing", elapsed: 0, decliningSpecies, decliningPersonalities, decliningBallAnim };
         } else if (newKeys.has("A") && draftScreen.yesNoCursorPos === 0) {
           playSelectSe(); // :1543
           // battle_factory_screen.c:1544-1550: A-on-YES calls the SAME
@@ -4292,6 +4294,15 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       swap.controller.phase === "summaryReturn" ||
       swap.returnedFromSummary
     ) {
+      // pic5: the swap screen's SUMMARY shows the party being swapped from (Swap_ShowSummaryScreen: gPlayerParty), i.e. the
+      // round's own rental records, not the opening draft's first three rentals.
+      const summaryRentals = factorySwapSummaryRentals(state);
+      // spd2: once the summary has closed, the popup's pic is Swap_ShowSummaryMonSprite's, built from gPlayerParty[cursorPos] with its
+      // personality and OT id swapped (battle_factory_screen.c:4089-4093): SPINDA's spots come from the OT id.
+      const summaryReshowOtId =
+        swap.controller.phase === "summaryReturn" || swap.returnedFromSummary
+          ? summaryRentals[Math.min(swap.controller.cursor, 2)]?.ot.id ?? null
+          : null;
       const renderPopup = (bgY: number, objY: number): Uint8Array =>
         renderFactorySwapPicker({
           state: {
@@ -4329,10 +4340,8 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
               swap.selectedBallClock === null
               ? null
               : factorySwapPlayerOptionBallTile(swap.selectedBallClock),
+          summaryReshowOtId,
         });
-      // pic5: the swap screen's SUMMARY shows the party being swapped from (Swap_ShowSummaryScreen: gPlayerParty), i.e. the
-      // round's own rental records, not the opening draft's first three rentals.
-      const summaryRentals = factorySwapSummaryRentals(state);
       const summary = state.summaryScreen;
       const transition = summary.transition;
       const summaryMonAnimClock = summary.monAnimClock ?? summary.openElapsed + 1;

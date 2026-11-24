@@ -26,6 +26,7 @@ import pokeballData from "../assets/gen/pokeball.json" with { type: "json" };
 import arrowData from "../assets/gen/arrow.json" with { type: "json" };
 import frontSpritesData from "../assets/gen/front-sprites.json" with { type: "json" };
 import { frontPixels } from "./monPicPixels.ts";
+import { SPECIES_SPINDA_SYMBOL, spindaSpottedTileset } from "./spindaSpots.ts";
 
 interface TileGrid {
   columns: number;
@@ -53,9 +54,25 @@ const menuBg = menuBgData as unknown as {
 const pokeball = pokeballData as unknown as { tileset: TileGrid; grayPalette: RgbColor[] };
 const arrow = arrowData as unknown as { tileset: TileGrid; palette: RgbColor[] };
 const frontSprites = frontSpritesData as unknown as Record<string, { tileset: TileGrid; palette: RgbColor[] }>;
-function frontSprite(species: string): { tileset: TileGrid; palette: RgbColor[] } | undefined {
-  return frontSprites[species] ?? (frontPixels(species) as { tileset: TileGrid; palette: RgbColor[] } | undefined);
+/**
+ * The front picture CreateMonPicSprite_HandleDeoxys builds: gMonFrontPicTable through LoadSpecialPokePic, which draws SPINDA's spots
+ * from the personality it is handed (DrawSpindaSpots, decompress.c:85-112, pokemon.c:5808-5812; spd2). `spotPersonality` is that
+ * argument (the Factory screens pass the mon's personality, except the swap screen's post-summary redraw, which passes its OT id);
+ * undefined draws the plain picture.
+ */
+function frontSprite(species: string, spotPersonality?: number): { tileset: TileGrid; palette: RgbColor[] } | undefined {
+  const sprite = frontSprites[species] ?? (frontPixels(species) as { tileset: TileGrid; palette: RgbColor[] } | undefined);
+  if (sprite === undefined || species !== SPECIES_SPINDA_SYMBOL || spotPersonality === undefined) return sprite;
+  const key = spotPersonality >>> 0;
+  let tileset = spottedSpindaTilesets.get(key);
+  if (tileset === undefined) {
+    tileset = spindaSpottedTileset(sprite.tileset, key);
+    if (spottedSpindaTilesets.size > 64) spottedSpindaTilesets.clear();
+    spottedSpindaTilesets.set(key, tileset);
+  }
+  return { tileset, palette: sprite.palette };
 }
+const spottedSpindaTilesets = new Map<number, TileGrid>();
 
 const WINDOW_LEFT = 88;
 const WINDOW_RIGHT = 152; // exclusive
@@ -186,9 +203,12 @@ export function blend8(c1: RgbColor, c2: RgbColor | null): RgbColor {
   };
 }
 
-/** Select_CreateChosenMonsSprites: a chosen mon's front-pic sprite at an arbitrary center (the reveal's 3 positions, not the single-popup's fixed x=120,y=64). */
-export function drawChosenMonPic(fb: Uint8Array, species: string, centerX: number, centerY: number): void {
-  const sprite = frontSprite(species);
+/**
+ * Select_CreateChosenMonsSprites: a chosen mon's front-pic sprite at an arbitrary center (the reveal's 3 positions, not the
+ * single-popup's fixed x=120,y=64). `spotPersonality`: the mon's personality (:2067-2070; see frontSprite).
+ */
+export function drawChosenMonPic(fb: Uint8Array, species: string, centerX: number, centerY: number, spotPersonality?: number): void {
+  const sprite = frontSprite(species, spotPersonality);
   if (!sprite) return;
   drawSprite(fb, { tileset: sprite.tileset } as SpriteSheet, sprite.palette, centerX, centerY, 8, 8, 0);
 }
@@ -199,6 +219,8 @@ export function drawMonPic(
   species: string,
   cursorCenterX: number,
   balls: readonly BallVisual[] = [],
+  /** The personality the pic's CreateMonPicSprite_HandleDeoxys call hands LoadSpecialPokePic (see frontSprite); undefined = plain. */
+  spotPersonality?: number,
 ): void {
   if (visual.flashWidth > 0) {
     const left = FLASH_CENTER_X - Math.floor(visual.flashWidth / 2);
@@ -225,7 +247,7 @@ export function drawMonPic(
   }
 
   if (visual.spriteVisible) {
-    const sprite = frontSprite(species);
+    const sprite = frontSprite(species, spotPersonality);
     if (sprite) {
       drawSprite(fb, { tileset: sprite.tileset } as SpriteSheet, sprite.palette, 120, 64, 8, 8, 0);
     }
@@ -250,6 +272,8 @@ export function drawMonPicFaded(
   bgY: number,
   objY: number,
   balls: readonly BallVisual[] = [],
+  /** As drawMonPic's. */
+  spotPersonality?: number,
 ): void {
   if (visual.flashWidth > 0) {
     const left = FLASH_CENTER_X - Math.floor(visual.flashWidth / 2);
@@ -276,7 +300,7 @@ export function drawMonPicFaded(
   }
 
   if (visual.spriteVisible) {
-    const sprite = frontSprite(species);
+    const sprite = frontSprite(species, spotPersonality);
     if (sprite) {
       drawSpriteFaded(fb, { tileset: sprite.tileset } as SpriteSheet, sprite.palette, 120, 64, 8, 8, 0, objY);
     }

@@ -324,6 +324,24 @@ export function chosenMonSpecies(state: DraftScreenState): string[] {
 }
 
 /**
+ * spd2: the chosen mons' personalities in the same pick order as chosenMonSpecies - Select_CreateChosenMonsSprites hands each one to
+ * CreateMonPicSprite_HandleDeoxys (:2067-2070), so SPINDA's spots follow it (monPicRender.ts frontSprite).
+ */
+export function chosenMonPersonalities(state: DraftScreenState): number[] {
+  const bySlot = new Map<number, number>();
+  state.selectedIds.forEach((id, i) => {
+    const rental = state.rentals[i];
+    if (id > 0 && rental !== undefined) bySlot.set(id, rental.personality);
+  });
+  const result: number[] = [];
+  for (let rank = 1; rank <= FRONTIER_PARTY_SIZE; rank += 1) {
+    const personality = bySlot.get(rank);
+    if (personality !== undefined) result.push(personality);
+  }
+  return result;
+}
+
+/**
  * The three exact compact rental records in source pick-rank order.
  *
  * `selectedIds` belongs to each pool slot and stores a one-based rank. Keep
@@ -554,7 +572,10 @@ function drawConfirmReveal(
 
   if (visual.monsVisible) {
     const species = visual.monsSpeciesOverride ?? chosenMonSpecies(state);
-    species.forEach((s, i) => drawChosenMonPic(fb, s, REVEAL_MON_CENTERS_X[i]!, REVEAL_MON_CENTER_Y));
+    const personalities = visual.monsSpeciesOverride
+      ? visual.monsPersonalitiesOverride ?? []
+      : chosenMonPersonalities(state);
+    species.forEach((s, i) => drawChosenMonPic(fb, s, REVEAL_MON_CENTERS_X[i]!, REVEAL_MON_CENTER_Y, personalities[i]));
   }
   // Highlight sprite drawn BEFORE the text (same order as the RENT/SUMMARY/
   // OTHERS menu above): the highlight is an OAM sprite under the BG0 text
@@ -696,7 +717,8 @@ export function renderFactoryDraftScreen(state: DraftScreenState): Uint8Array {
     }
   }
 
-  if (slot) drawMonPic(fb, monPicVisual, slot.species, cursorCenterX, balls);
+  // Select_CreateMonSprite / Select_ReshowMonSprite (:2014-2053): the cursor mon's personality (spd2).
+  if (slot) drawMonPic(fb, monPicVisual, slot.species, cursorCenterX, balls, state.rentals[state.cursorPos]?.personality);
   drawConfirmReveal(fb, state, cursorCenterX, balls);
 
   return fb;
@@ -772,7 +794,7 @@ export function renderFactoryDraftScreenFaded(state: DraftScreenState, bgY: numb
     }
   }
 
-  if (slot) drawMonPicFaded(fb, monPicVisual, slot.species, cursorCenterX, bgY, objY, balls);
+  if (slot) drawMonPicFaded(fb, monPicVisual, slot.species, cursorCenterX, bgY, objY, balls, state.rentals[state.cursorPos]?.personality);
 
   return fb;
 }
