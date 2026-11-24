@@ -5034,7 +5034,7 @@ So everything after the pair is shifted by exactly -7 (s830) / -9 (s7295) and th
 | s830 d5 si 11 (11 rows) | 66 | **11** (SE 183 / 137 +1: Ice Beam's body SE sits 1 late against this print; an `usedMoveAnimSoundLead` of 1 for head turns would zero it, but it is Ice Beam's number, do not land it from one window) | |
 | s830 d5 carried: SE 14 -7, next move's three -8 | 31 | 3 (SE 14 0, three -1) | the same -7 |
 | s7295 d8 si 17 (9 rows) | 103 | **14 without lrm1** (5 x SE 162 -2 = 10, SE 15 -4), **10 with lrm1's lead 24** | SE 13 / cry / SE 16 -> 0; the box lands on the ROM tap (box start ROM 528 = engine 519 + 9, taps 543 / 560, takes 560: SE 5 exact), so the -17 cliff of lcm1 section 2 clears and SE 15 reads lrm1's -4 only |
-| total T2 | 200 | about 38 (-162; -166 with lrm1) | other ConfusedNoMore ON windows, if any, are in addition (see below) |
+| total T2 | 200 | about 28 (-172; -176 with lrm1) | other ConfusedNoMore ON windows, if any, are in addition (see below) |
 
 lcm1's earlier estimate for s7295 (103 -> ~34, "+6") assumed one constant with the body at -5; the measured split puts the body at -2 and the window at 10 - 14. The two windows are **one rule on two seeds**: same -5, and u - 2 = 2 / 4.
 
