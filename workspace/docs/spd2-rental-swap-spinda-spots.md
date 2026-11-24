@@ -111,3 +111,36 @@ screens). Not changed, and why:
 - On PKMN FOR SWAP the closing popup, the species name and the arrow jump to the party's slot 0 at once (the controller resets the cursor
   for the enemy screen and the render reads `party[cursor]`); the ROM keeps the chosen mon's pic and slot until the close ends (seed 28:
   ours 12479-12487 MURKROW vs ROM 12879-12887 SEALEO).
+
+## spd2b: the seed 28 trace re-made on master (2026-11-24)
+
+Why: the fixture's `swapSeed28` is fixed-frame presses recorded on 57c549323. Master f4d16a36a (spd2 merged with the 11-22/23 night run:
+battle timing, party menu, sound timing, press gates) desyncs it: battle 1's swap screen came at 18105, not 12295, and the swap went
+another way, so the swap test and the FAINT ATTACK body test failed (2 of 5). Pictures and spots were right; only the trace was stale.
+
+What changed: `makeSpinda.mjs` (the same driver: seed 28, Scene ON, `winning-swap`) re-made the trace on master. Same story: SPINDA
+2945348007 leads battle 1's opponent and uses FAINT ATTACK, swap 1 takes it from the enemy screen, swap 2 opens it, its SUMMARY and back.
+The fixture holds its first 26,089 frames (up to the popup's close). Test frames: 12740 -> 12726, 25830 -> 25789, 26080 -> 26039 (swaps),
+3140 -> 3150 (FAINT ATTACK body). `ROM_SPOTS` and `ROM_BODY_REGION_SHA256` are unchanged: in the new trace's catcher run the ROM frames
+equal to ours at those frames (13094, 26500, 26752; and 3320, the only ROM frame equal to ours at 3150 in the region) measure the same spot
+rows, and 3320's region hashes to the same value as spd2's 3334. Kyle's and seed 10's draft traces are unchanged.
+
+Catcher on the new trace (`KEEP=1`), fixed = master f4d16a36a, base = 6a29087e3 (master without spd2). Counts use `picmatch.py --win 80`,
+which gives spd2's table above on its own trace too; at the default 12 the post-summary pic and the FAINT ATTACK body lose 6 and about 150 frames
+on both traces (the ROM's menu anchor there falls mid-fade, so the aligned guess is off by more than 12; not a picture difference).
+
+| path | new trace, engine frames | fixed | base |
+|---|---|---|---|
+| swap, enemy SPINDA (accept prompt) | 12698-12754 | 57 / 57 | 0 / 57 (168 px) |
+| swap, player SPINDA, then its summary entry fade | 25759-25849 | 91 / 91 | 15 / 91 |
+| swap, after the summary (OT id spots), fade-in then settled | 25937-26003, 26004-26089 | 67 / 67 and 86 / 86 | 43 / 67 and 0 / 86 (216 px) |
+| battle 1 move bodies (80x72 region) | 3134-3371 (FAINT ATTACK), 3574-4419, 7193-7364 (TEETER DANCE) | 1,256 / 1,256 | 973 / 1,256 |
+| battle 1 ICE BALL body | 7909-8000 | 72 / 92; the other 20 differ only where an ice particle meets the sprite (no pixel where both sides draw SPINDA colours differs); spd2's trace gives the same at `--win 80` | 0 / 92 |
+
+Catcher totals, fixed / base: 194 / 214 picture differences (79 of 79 menus followed). The new test fails on base 4 of 5, as before.
+Evidence: `.integration/evidence/spd2b/` (`spd-swap-s28.json`; `catch-fix`, `catch-base`, and `catch-old`, spd2's trace on 049e5b3ee,
+which reproduces its 199 differences; `picmatch-all.sh`, `romregion.py`, `checkspots.py`, `swap-evidence.png`). Frame numbers in the
+sections above (and in "Seen, not fixed") are the original trace's.
+
+Gates: `NODE_OPTIONS=--max-old-space-size=8192 npx tsc -b` clean; the spd2 test 5 / 5; full `npm test` 1,975 files / 17,256 tests passed, 0 failed
+(44 files / 243 tests skipped).
