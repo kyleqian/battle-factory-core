@@ -5518,3 +5518,40 @@ Reading the table: class 1 is 44% of ON. Of its 2,237, the 1,358 mass in Â±1 / Â
 - `tools/integration/t2k10/classes.py`: `T2K4_DIR=DIR python3 tools/integration/t2k10/classes.py both 4` (table above, plus per-class top windows and the previous-command breakdown).
 - `tools/integration/t2k10/scratchT2.sh OUTDIR SCENE [SEED...]`: seeds-only re-score with the current engine.
 - `tools/integration/t2k10/seeddiff.py BASE.json NEW.json SCENE`: per-seed mass diff of two `soundScoreboard.py --per-seed --out` runs.
+
+## kst1 (2026-11-24): the t2k10 recipes 3 (Knock Off print tail) and 1 (Struggle body SE lead) landed (Scene ON first, OFF checked; presentation / sound timing only)
+
+Base: master `bc621934d`. The t2k10 section itself lives on the t2k10 branch (`5e74360be`, not an ancestor of this branch), so the "LANDED by kst1" marks belong on its recipe 1 and recipe 3 headings when the supervisor folds both: **recipe 1 (Struggle) LANDED by kst1, recipe 3 (Knock Off print tail) LANDED by kst1; recipe 2 (Ice Beam) stays negative.** Evidence (git-ignored): `.integration/evidence/kst1/`. Two commits, one per mechanism.
+
+### 1. Knock Off print tail: `ITEM_KNOCKOFF_PRINT_TAIL_ROWS` 4 -> 0 (commit `3f8def5ba`; constant and its branch in the `STRINGID_PKMNKNOCKEDOFF` message timing deleted)
+
+ROM-script reason. `BattleScript_KnockedOff` (`data/battle_scripts_1.s:3643`) is `playanimation; printstring STRINGID_PKMNKNOCKEDOFF; waitmessage B_WAIT_TIME_LONG; return`; the rows after the waitmessage (`+0xc`, `return`, MoveEnd, MoveEnd+0x6, 6 rows) are the same ROM rows the generic mover-to-mover `move-animation` stub (10 .. 14 rows, out2 section B: "MoveEnd + the next canceler") already presents between a first mover's last message and the next command; kno3 added 4 of them again on the message (the two `sprite-visibility` commands present 2, the stub the rest), so the next mover's "used" print came 4 rows late. Lab proof (`out2-knockoffrev-on`: Knock Off then the player's Defense Curl): Knock Off print ROM 290 / engine 290 (exact), next "used" print ROM 410 / engine 414 before, 410 / 410 after (gap Knock Off print -> next print = 120 rows in the ROM). Scene OFF (`out2-knockoffrev-off`): the same gap is ROM 205 -> 325 = 120; engine 203 -> 327 (+4 over) before, 203 -> 323 (exact gap, the lab's constant -2 carried) after.
+
+| | before | after |
+|---|---:|---:|
+| labs (labCompare, mass; ROM probe re-used from t2k10) out2-knockoff-on / -off | 12 / 0 | 12 / 0 |
+| out2-knockoffrev-on / -off | 20 / 2 | **8** / 2 (the OFF SE 239 row +2 -> -2, same mass; PRINTS mass on: 8 -> 0, 4 / 4 exact) |
+| out2-knockoffnoitem-on / -off | 12 / 0 | 12 / 0 |
+| T2 ON (full, 0 missing / 0 extra) | 5,122, exact 3,741 | **4,978**, exact 3,764 (-144: s165 -92, s499 -52) |
+| T2 OFF | 529, exact 912 | 529, 912 (no Knock Off window in the OFF seeds) |
+
+Pins: `tests/kno3ItemKnockoff.test.ts` constants `[43, 94, 3, 35, 44, 4]` -> `[43, 94, 3, 35, 44]` (the tail is gone; the 35-row OFF hold and the command lengths are untouched). `tests/randomRoundSoak.test.ts` seed 21 "seven generated wins": frames 43,655 -> 43,695, renderCalls 3,054 -> 3,056 (a trajectory pin: the strong-route policy reads presentation state; Received read before re-pinning; same battle 7 / turn 3 / state / outcome). All 47 test files naming Knock Off / 282, the soaks and lbrd passed otherwise.
+
+### 2. Struggle (165) body SE lead: `[165, -2]` in `BODY_SOUND_LEAD_ROWS` (commit `d52d09dbc`)
+
+ROM-script reason. `Move_STRUGGLE` (`data/battle_anim_scripts.s:3045`) has no `delay` before its first sound: `loopsewithpan SE_M_HEADBUTT` (162, delay 12, count 4) runs on the script's first rows, then `playsewithpan SE_M_MEGA_KICK2`; the engine's generic body clock runs the SEs 2 rows early relative to the rest of the turn. There is a ROM lab after all (`aud242j-struggle-player-on`, forced Struggle with the player's moves out of PP; the t2k10 text said none exists): ROM print 36 -> SE 162 at 75, 87, 100, 113, SE 141 at 141, hit SE 13 at 179, faint SE 16 at 446. Engine before: print 30, SEs 68 / 80 / 93 / 106 / 134 (**-7**) while the hit SE 13 and faint SE 16 sit at **-5** (and the print at -6): the five body rows were 2 rows earlier than every later row of the same window. After: SEs 70 / 82 / 95 / 108 / 136 (**-5**), equal to the rows after them. Lab mass 45 -> 35. The T2 population agrees (the recipe's -3 -> -1 in s5063 d43).
+
+| | before | after |
+|---|---:|---:|
+| lab aud242j-struggle-player-on (mass) | 45 | **35** |
+| T2 ON | 4,978, exact 3,764 | **4,908**, exact 3,779 (-70, all in s5063; the other two recipe seeds 2230 / 7295 do not move on this tree) |
+| T2 OFF | 529 | 529 (unchanged; OFF has no body) |
+
+Pin: `tests/aud242jMoveAnimSounds.test.ts` struggle-player "5 rows at ROM = ours + 7" -> `+ 5` (ROM fixture rows 75 / 87 / 100 / 113 / 141 against ours 70 / 82 / 95 / 108 / 136; the same -5 as the hit SE 13 in that lab). `tests/stl109Struggle.test.ts` and the other 112 test files naming Struggle / 165 pass; moveAnimSounds.ts and the animation scripts are not touched, so the `battleSoundTable --check` was not needed (fam1 passes).
+
+### 3. Combined acceptance (master `bc621934d` -> `d52d09dbc`)
+
+- T2 ON 5,122 -> **4,908** (-214; exact 3,741 -> 3,779; 0 missing / 0 extra); T2 OFF 529 -> 529 (912 exact, 0 / 0). Per-seed ON: s165 -92, s499 -52, s5063 -70, nothing else moved.
+- Census 0..199 (`lsd194Census.sh` shards 0 1, base `bc621934d` vs `d52d09dbc`, `rst197CensusDelta.py --digest`): ON eventsDigest + error identical 200 / 200, type-sequence changes 0, 12 battles changed commands; OFF identical 200 / 200, 0 type changes, 12 battles changed commands: every changed command is a Knock Off `message` (the Struggle lead is a sound age, not a command), -4 rows, the removed tail. The `tree/` copies were deleted.
+- Tests: the Knock Off set (56 files incl. soaks and lbrd), the Struggle / 165 set (126 files incl. soaks, lbrd, fam1*), re-pinned as above; `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests), `npm run build` green. No full `npm test` (the lane rule).
+- **Left**: the Knock Off item animation's own `+2` ON rows after the Defense Curl print in `out2-knockoffrev-on` (SE 220 / 239 +2, mass 8: a Defense Curl body term, not the tail); Struggle's body is one seed in T2 ON, so its single constant rests mostly on the lab; Scene OFF's Knock Off lab keeps its constant -2 print offset (a lab-start term, shared by the Knock Off print itself).
