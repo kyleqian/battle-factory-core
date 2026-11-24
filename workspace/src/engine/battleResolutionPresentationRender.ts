@@ -1682,7 +1682,7 @@ const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 4], [347
 // health" print was +19 / +5 / +4 / +21 with hie5's 25 / 10 / 8 / 27, now +0 with 6 / 5 / 4 / 6).
 const HIE5_RESTORE_HP_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[105, 6], [135, 5], [208, 6], [236, 4], [235, 7]]);
 // stm1 / ssl1: Belly Drum (187) holds its animation clear 3 rows so the hp command starts on the ROM's `healthbarupdate` (stm1-bd-rockslide-on: hp 172 -> 175).
-const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], [187, 3], [18, 6], [46, 6], ...HIE5_RESTORE_HP_BODY_TAIL_ROWS]);
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], [187, 3], [18, 6], [46, 6], [220, 6], ...HIE5_RESTORE_HP_BODY_TAIL_ROWS]);
 // hpd8: the shape-A bodies' tail is whatever the 3 pre + 3 post rows of the ROM span (lead + 3 + len + 4) leave over: 6 - pre - post (T 1 / 3 / 6 in hpd7).
 const HPD8_SHAPE_A_ROWS_AROUND_BODY = 6;
 export function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>, field: BattleResolutionDisplayedField): number {

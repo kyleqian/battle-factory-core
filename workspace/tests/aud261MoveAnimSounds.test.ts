@@ -90,7 +90,8 @@ describe("Pain Split (aud261)", () => {
       const romRows = rom.events.filter((e) => e.kind === "se" && e.id === 194);
       expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 25, 50]);
       expect(romRows.every((e) => e.pan === 0)).toBe(true);
-      expect(expectConstantOffset(rom, [194], 3)).toBe(-4);
+      // mtl1: Pain Split's body end (LIVE_MOVE_LEADLESS_TAIL_ROWS [220, 6]) and SE lead (BODY_SOUND_LEAD_ROWS [220, 3]) carry the ROM's rows: -4 -> -1 (labs mtl1-painsplit-leech-*: 50 -> 11 mass).
+      expect(expectConstantOffset(rom, [194], 3)).toBe(-1);
     });
   }
 });

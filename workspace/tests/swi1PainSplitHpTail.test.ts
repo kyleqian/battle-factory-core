@@ -13,7 +13,7 @@ const battler = (moveId: number, speed: number, hp: number) => {
 };
 
 describe("swi1: Pain Split hp tails", () => {
-  it("the attacker's bar holds bar + 1 + 3 and the target's bar + 1 + 6, both floor-free", () => {
+  it("the attacker's bar holds bar + 1 + 3 and the target's bar + 1 + 3, both floor-free", () => {
     const state = createFactoryFullTurnBattleState({ requestId: 1, rngSeed: 305419897, player: battler(PAIN_SPLIT, 120, 201), trainer: battler(DEFENSE_CURL, 40, 101) } as never);
     const before = state.rules.rulesContext;
     const a = submitFactoryFullTurnDecision(state, { requestId: 1, side: "player", decision: { kind: "use-move", moveSlot: 0, targetBattler: 1 } as never });
@@ -27,6 +27,6 @@ describe("swi1: Pain Split hp tails", () => {
     const hps = commands.filter((c) => c.type === "hp");
     expect(hps.length).toBeGreaterThanOrEqual(2);
     expect(hps[0]!.timing).toEqual({ minimumFrames: 0, tailFrames: 3 });
-    expect(hps[1]!.timing).toEqual({ minimumFrames: 0, tailFrames: 6 });
+    expect(hps[1]!.timing).toEqual({ minimumFrames: 0, tailFrames: 3 }); // mtl1: the ROM's target tail is 3 (the body end carries the other 3; mtl1-painsplit-leech-* prints exact)
   });
 });

@@ -2917,7 +2917,7 @@ const REST_SOUND_LEAD_ROWS = -2;
  * Wish 273 +5 (aud242k-wish-player-on, SE_M_REFLECT 91 / 96), Future Sight 248 +5 (etp1-futuresight-on), Soft Boiled 135 +5 (aud242r-softboiled-player-on),
  * Belly Drum 187 +4 (species-audit-golem-prep5-belly-drum-player), Mean Look 212 +3 (species-audit-golbat-prep4-mean-look-player), Swagger 207 +3 (aud242f-swagger-player-on).
  */
-const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3], [165, -2]]);
+const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3], [165, -2], [220, 3]]);
 const REST_HEAL_PRINT_TAIL_ROWS = 10;
 function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
   if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
@@ -3066,7 +3066,7 @@ function hpPrintTailTiming(event: BattleKernelSemanticEvent, events?: readonly B
 }
 /** swi1: BattleScript_EffectPainSplit's two `healthbarupdate; datahpupdate` runs, ROM exec rows (aud261 labs, s648 d10): the attacker's bar holds bar + 1 + 3 rows to the target's bar, the target's (0 bar) 1 + 6 rows to the printstring's first glyph; no 28 floor. */
 const PAIN_SPLIT_ATTACKER_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: 3 } as const);
-const PAIN_SPLIT_TARGET_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: 6 } as const);
+const PAIN_SPLIT_TARGET_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: 3 } as const);
 const shellBellNextUsedTimings = new Map<number, BattleHpTiming>();
 /**
  * shb1: the Shell Bell heal's `datahpupdate; return` falls into the first action's MoveEnd and straight into the next action's used print with no MoveEnd
