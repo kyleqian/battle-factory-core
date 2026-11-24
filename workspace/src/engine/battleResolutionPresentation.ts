@@ -1369,10 +1369,12 @@ const PRE_MOVE_STATUS_ANIMATION_TIMING = Object.freeze({
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS,
 } as const);
 /**
- * fpl1 (docs/aud251-s11-scoreboard-refresh.md "chp1"; T2 s499 / s7295 confusion heads, ROM `MoveUsedIsConfused` tp end -> `+0xc` ex2 = 66 = 64 + 2 in all seven
- * windows; Scene ON only, Scene OFF's head hold stays 64 + 3): the ON confusion head's wait ends one row before sta3's asleep-fitted 3.
+ * fpl1 (docs/aud251-s11-scoreboard-refresh.md "chp1"; Scene ON only, Scene OFF's head hold stays 64 + 3): the ON confusion head's wait ends before sta3's asleep-fitted 3.
+ * cfx1 ("cfx1"): 2 -> 1. fpl1's 2 (ROM tp end -> `+0xc` ex2 = 66, T2 s499 / s7295) was fitted while a head after a move-inflicted confusion print sat 2 rows early (the
+ * missing MOVE_INFLICTED_STATUS_ANIMATION_PRINT_EXTRA_ROWS on BattleScript_MoveEffectConfusion); with that print on the ROM's row the head's message is on the first-glyph row and
+ * the status animation starts on the ROM's `status2animation` exec row at 64 + 1 (labs aud242f-swagger-player-on / aud242b-flatter-player-on exact, T2 ON 4,902 -> 4,728).
  */
-export const PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS = 2;
+export const PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS = 1;
 const PRE_MOVE_CONFUSION_STATUS_ANIMATION_TIMING = Object.freeze({
   minimumFrames: 0,
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS,
@@ -1426,6 +1428,8 @@ const MOVE_INFLICTED_STATUS_ICON_SCRIPTS: ReadonlySet<string> = new Set([
   "BattleScript_MoveEffectBurn",
   "BattleScript_MoveEffectParalysis",
 ]);
+/** cfx1: BattleScript_MoveEffectConfusion (`chosenstatus2animation; printstring`) has the same +2 animation -> print rows (ROM SE 176 -> print 99 in labs aud242f-swagger / aud242b-flatter / cfa1-conf-psychic-s2, engine 97); it has no status icon. */
+const MOVE_EFFECT_CONFUSION_SCRIPT = "BattleScript_MoveEffectConfusion";
 function isMoveInflictedStatusIconScript(event: BattleKernelSemanticEvent | undefined): boolean {
   return MOVE_INFLICTED_STATUS_ICON_SCRIPTS.has(event?.provenance?.sourceLabel ?? "");
 }
@@ -7030,7 +7034,7 @@ export function projectBattleResolutionCommands(
           animation,
           timing: Object.freeze({
             minimumFrames: seGate + STATUS_ANIMATION_ADDED_ROWS[animation] + preMoveConfusionToUsedPrintRows(events, index)
-              + (isMoveInflictedStatusIconScript(event) ? MOVE_INFLICTED_STATUS_ANIMATION_PRINT_EXTRA_ROWS : 0),
+              + (isMoveInflictedStatusIconScript(event) || event.provenance?.sourceLabel === MOVE_EFFECT_CONFUSION_SCRIPT ? MOVE_INFLICTED_STATUS_ANIMATION_PRINT_EXTRA_ROWS : 0),
             ...(seGate > 0 ? { seGateFrames: seGate } : {}),
           }),
         }));

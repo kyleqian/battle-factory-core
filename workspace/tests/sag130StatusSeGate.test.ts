@@ -137,10 +137,10 @@ type Anchor = { k: number; animation: string; side: "player" | "opponent"; path:
 function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnimations: number } {
   const on = battleSegments(seed, "on").flatMap((s) => s.commands.map((c: any) => ({ c, events: s.events })));
   // hse2 item 2: the Scene OFF confusion print before the used print holds 64 + 3 + 4 (ROM print -> used print 94 vs ON 90, hpf4m-confuse-off,
-  // tests/hse2OffStatusHeads.test.ts); this test is about the status-SE gate alone, so read that print at the ON hold (fpl1: 64 + 2).
+  // tests/hse2OffStatusHeads.test.ts); this test is about the status-SE gate alone, so read that print at the ON hold (cfx1: 64 + 1).
   const confusionOffHold = (c: any, events: any[]) => c.type === "message" && (c.timing?.holdFrames === 71 || c.timing?.holdFrames === 67)
     && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED"
-    ? { ...c, timing: { ...c.timing, holdFrames: 66 } } : c;
+    ? { ...c, timing: { ...c.timing, holdFrames: 65 } } : c;
   const off = battleSegments(seed, "off").flatMap((s) => s.commands.map((c: any) => ({ c: confusionOffHold(c, s.events), events: s.events })));
   const messages = (l: typeof on) => l.filter((x) => x.c.type === "message").map((x) => x.c.messageId);
   expect(messages(on), `seed ${seed}: identical prints in both scenes`).toEqual(messages(off));
@@ -196,7 +196,7 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
 // print (preMoveConfusionToUsedPrintRows). cfm1 (2026-11-24, ROM probe of 15 chains in both scenes, docs/aud251-s11-scoreboard-refresh.md
 // "cfm1") showed the ROM identity holds (ON - OFF = 100 from `return` on) and the engine is right (OFF exact, ON within 1 row):
 // the extra here is this test's own normalisation of the OFF confusion hold (71 -> 67) applied to OFF only. fpl1 (chp1): the ON "is confused!" head
-// holds 64 + 2 (the ROM's tp end -> `+0xc` ex2 = 66, T2 s499 / s7295) against the normalised OFF 67, and the command carries 6 rows before the used
+// holds 64 + 1 (cfx1: 65; fpl1 had 64 + 2) against the normalised OFF 67, and the command carries 6 rows before the used
 // print (cfa1's 5 re-derived with the shorter head on the six cfa1 labs) or 4 before the self-hit print (ROM `DoSelfConfusionDmg` 104, not 105), so
 // ON - OFF is the command length less that 1-row hold difference. Not dropped: the rows are still inside the ON command (docs/aud251 "fpl1").
 // Only when the next message is the used / self-hit print (the engine's condition), so on this path the extra is 0, 4 or 6.
@@ -205,8 +205,10 @@ const cfa1PreMoveConfusionRows = (a: { animation: string; path: string; length: 
   return a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && (extra === 4 || extra === 6) ? extra : 0;
 };
 // tnl1 (ROM labs gsp3-toxic / b4m-thunderwave, docs/aud251-s11-scoreboard-refresh.md "tnm1" 1.C): a move-inflicted PSN / BRN / PRZ (BattleScript_MoveEffect{Poison,Toxic,Burn,Paralysis}) holds its animation 2 rows longer, the ROM's print row (369 vs 367).
+// cfx1: so does BattleScript_MoveEffectConfusion's chosenstatus2animation on every path but the pre-move head (labs aud242f-swagger-player-on / aud242b-flatter-player-on / cfa1-conf-psychic-s2-on: SE 176 -> print 99 rows, the engine's 97).
 const tnl1MoveInflictedRows = (a: { animation: string; path: string; length: number; gate: number }): number =>
-  a.path === "inflicted" && (a.animation === "PSN" || a.animation === "BRN" || a.animation === "PRZ") && a.length - a.gate - ROWS[a.animation]! === 2 ? 2 : 0;
+  ((a.path === "inflicted" && (a.animation === "PSN" || a.animation === "BRN" || a.animation === "PRZ")) || (a.animation === "CONFUSION" && a.path !== "STRINGID_PKMNISCONFUSED"))
+  && a.length - a.gate - ROWS[a.animation]! === 2 ? 2 : 0;
 describe("sag130: the IsBattleSEPlaying gate in production (census routes, Scene ON vs OFF)", () => {
   it("every gated class lands its following print on the ROM row: ON - OFF = gate + controller rows, gate == seg127's projection", () => {
     const covered = new Map<string, number[]>();
