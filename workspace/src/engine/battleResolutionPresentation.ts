@@ -2778,6 +2778,12 @@ const CHARGE_TURN_SOUND_LEAD_BASE_ROWS = 16;
  * (gap-print class) already carries them before its glyph.
  */
 const CHARGE_TURN_CHAIN_BASE_ROWS = 2;
+/**
+ * ttb1 (Scene ON; stm1 item 2): a confused charger's first turn returns from BattleScript_MoveUsedIsConfused to `FirstChargingTurn+0` and its SE sits 25 rows after
+ * that row (T2 s8108 d11: ROM 512 -> 5 x SE 175 at 537 ..., the same +25 as the clean turn), while the engine's opener message (min 8) starts the animation command 8
+ * rows after it: 28 - (25 - 8) = 11.
+ */
+const CHARGE_TURN_AFTER_CONFUSION_SOUND_LEAD_ROWS = 11;
 function chargeTurnOpenerExecution(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
   for (let i = index - 1; i >= 0; i -= 1) {
     const candidate = events[i]!;
@@ -2803,7 +2809,9 @@ function chargeTurnSoundLead(events: readonly BattleKernelSemanticEvent[], index
     if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3") {
       // A charger that woke up / thawed first (s2230 Bounce, E = 79) reaches the opener after a detour presented as its own commands: E is no longer the rows to the animation.
       const before = events[i - 1];
-      if (before !== undefined && instructionExecutionOf(before) < instructionExecutionOf(candidate)) return {};
+      if (before !== undefined && instructionExecutionOf(before) < instructionExecutionOf(candidate)) {
+        return before.provenance?.sourceLabel === CONFUSION_HEAD_SCRIPT ? { soundAgeLeadFrames: CHARGE_TURN_AFTER_CONFUSION_SOUND_LEAD_ROWS } : {};
+      }
       return { soundAgeLeadFrames: CHARGE_TURN_SOUND_LEAD_BASE_ROWS - instructionExecutionOf(candidate) };
     }
   }
