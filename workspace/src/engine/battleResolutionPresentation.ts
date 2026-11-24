@@ -1545,7 +1545,8 @@ function critMessageBeforeResultMessage(events: readonly BattleKernelSemanticEve
  * mtl1 (docs/aud251-s11-scoreboard-refresh.md "mtl1", T2 s648 d12, labs mtl1-confray-leech-*): `BattleScript_EffectConfuse` runs `seteffectprimary` (-> `BattleScript_MoveEffectConfusion`:
  * `chosenstatus2animation; printstring; waitmessage LONG; return`), then `resultmessage; waitmessage LONG; goto BattleScript_MoveEnd`. After the confusion print's 64-row wait the ROM
  * spends one row per command until the `goto` (`return`, `resultmessage`, a `waitmessage` that has nothing left to wait for): 3 rows before MoveEnd, where every other
- * `waitmessage; goto` message tail has none (ROM EffectConfuse+0x36 ex0 -> MoveEnd+0x0 = 3 rows; the engine's command list reached MoveEnd 3 rows early).
+ * `waitmessage; goto` message tail has none (ROM EffectConfuse+0x36 ex0 -> MoveEnd+0x0 = 3 rows; the engine's command list reached MoveEnd 3 rows early). When the next event is another
+ * action's message (T2 s8108 d0: the confused foe's head print) the engine's move-end gap before that action already spends these rows (ROM +0x36 -> first glyph 16 = the gap's 16), so only a tick / animation behind it gets them.
  */
 function confuseResultMessageTailRows(events: readonly BattleKernelSemanticEvent[], index: number): number {
   if (events[index]!.provenance?.sourceLabel !== MOVE_EFFECT_CONFUSION_SCRIPT) return 0;
@@ -1557,7 +1558,9 @@ function confuseResultMessageTailRows(events: readonly BattleKernelSemanticEvent
     while (instructions[pc]?.opcodeName !== "B_SCR_OP_SETEFFECTPRIMARY") pc += 1;
     let rows = 1;
     for (pc += 1; instructions[pc]!.opcodeName !== "B_SCR_OP_GOTO"; pc += 1) rows += 1;
-    return rows;
+    let next = index + 1;
+    while (events[next]?.provenance?.sourceLabel === "BattleScript_MoveEnd") next += 1;
+    return events[next]?.payload.kind === "message" ? 0 : rows;
   }
   return 0;
 }
