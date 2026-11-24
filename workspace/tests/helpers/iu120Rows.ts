@@ -123,10 +123,12 @@ export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([...IU12
 const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], [105, 6], [135, 5], [208, 6], [236, 4], [235, 7]]);
 // sta5: ids whose age holds the last body row through the tail (test-side copy of production's STA5 status-tail class).
 const STA5_STATUS_TAIL_IDS: ReadonlySet<number> = new Set([260, 207, 147, 92, 95]);
+// lpm1 / mhl1 (test-side copy of production's LSE4_WINDOW_SHORT_ROWS for the shape-A ids): Luster Purge 295 / Signal Beam 324 are one row short of the ROM's A + 1 (hit SE 401 / 213, hp row 249).
+const SHAPE_A_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[295, 1], [324, 1]]);
 function hpd4BodyTail(id: number, side: Iu120Side, duration?: number): number {
   const tail = IU120_BODY_RULES.get(id)?.tail;
   if (tail === undefined) return 0;
-  return tail === "shape-a" ? Math.max(0, 6 - iu120Pre(id, side) - iu120Post(id, side, duration)) : tail;
+  return tail === "shape-a" ? Math.max(0, 6 - iu120Pre(id, side) - iu120Post(id, side, duration)) + (SHAPE_A_WINDOW_SHORT_ROWS.get(id) ?? 0) : tail;
 }
 const defaultBodyLead = (id: number): number => IU120_BODY_RULES.get(id)?.defaultLead ?? 0;
 /** The rows an audited body's lead and hit tail add; 0 unless the caller passes the body's lead (Ice Ball: 10 on turn 1, 9 after; the others HPD4_BODY_LEAD_ROWS). */

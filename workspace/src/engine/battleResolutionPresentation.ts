@@ -2489,7 +2489,7 @@ const LSE4_GAP_PRINT_MOVE_IDS: ReadonlySet<number> = new Set([278, 13]);
 /** lse4 "lead-only": a body with no visible print after it (the ROM's gap is the generic action transition, played by `actionTransitionPauseFrames`): Wish 273. */
 const LSE4_LEAD_ONLY_MOVE_IDS: ReadonlySet<number> = new Set([273]);
 /** lse4: rows the accepted adapter window is short of the ROM's `len + 1` (`s`): Absorb (script runs 2 rows past the window), Razor Wind (len = live, both turns). Added to the rows after the body. */
-export const LSE4_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[71, 2], [13, 1]]);
+export const LSE4_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[71, 2], [13, 1], [295, 1], [324, 1]]);
 /**
  * b4l "c-lead" (docs/aud251-s11-scoreboard-refresh.md b4m / b4l): the B4 status / hit bodies whose kernel lead (the instruction rows from the used print's release to `attackanimation`,
  * ROM L = A0 - R - 3: 9 / 9 / 7 / 7 / 7 / 7 / 4 / 6 / 8 / 9 / 7) is presented in front of the body, with the lead-only class's tail plus a per-id window adjust: the rows after the body the
