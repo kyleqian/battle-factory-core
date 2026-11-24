@@ -5667,7 +5667,7 @@ Base `8a26355b3`; commit `043f34932`. Presentation / sound timing only (no rule,
 
 **Tests:** 244 test files (every tests/ file referencing `battleResolutionPresentation*`, `randomRoundSoak*`, `lbrd`, and every file naming WHIRLWIND / ROAR / move ids 18 / 46) green in three 2-worker runs, no re-pin needed. `npm run typecheck`, `npm run test:gate`, `npm run build` recorded in PROGRESS.md (the full `npm test` is not run by workers; test:gate plus the importer tests is the accepted substitute).
 
-### 2. Class 3 (end-of-turn tick carries): measured recipe, not landed
+### 2. Class 3 (end-of-turn tick carries): measured recipe — LANDED by mtl1 (Confuse Ray tail + Pain Split; the message-tail theory below was wrong for Pain Split, see "mtl1"); s165 d17 is a Mean Look body term, not this class
 
 s648 d12 (-3 at the tick), s648 d10 (-3), s165 d17 (status-animation 148, -6; not probed). Probed with `probe.sh 648 on 12|10|11 -40:2000` (ROM `hcr3mProbe` + engine cmdtrace, evidence under `.integration/evidence/snr1/k/p/on/`):
 
@@ -5677,7 +5677,7 @@ s648 d12 (-3 at the tick), s648 d10 (-3), s165 d17 (status-animation 148, -6; no
 
 ### 3. What is left
 
-Party-summary-after-faint (~50 mass per scene, needs a better AI-choice CPU-cost model, not a constant), switch-out SE 15 after a faint, OFF switch-in rows, ON s2 d6 / d12, the class 3 message tail above (and s165 d17 status 148 -6, not probed).
+Party-summary-after-faint (~50 mass per scene, needs a better AI-choice CPU-cost model, not a constant), switch-out SE 15 after a faint, OFF switch-in rows, ON s2 d6 / d12, the class 3 message tail above (LANDED by mtl1; s165 d17 status 148 -6 probed by mtl1: Mean Look body term).
 
 ## cre1 (2026-11-24, side lane, Scene ON first, OFF checked): cfx1's lab leftovers - the used print after a confusion head is a script-structure term (LANDED); the uniform +1 is the ROM's Confuse Ray CPU phase, not a term
 
@@ -5730,3 +5730,34 @@ Scene ON first, OFF as the control. Base `875ddb884` (fold-20261124b). Presentat
 - **s6 d1 Dig -3**: carried from the asleep head and the standing Dig first-turn offset below.
 - **Standing Dig first-turn SE -2 (after Light Screen) / -4 (after Swords Dance)**: no clean constant; the offsets differ by the previous move's body (a pmk1 / per-move body first-row constant), not by a Dig rule.
 - Razor Wind, Skull Bash, Sky Attack, Dive: no T2 window in these seeds; only the chg* labs cover them, unchanged.
+
+## mtl1 (2026-11-24, ts lane, both scenes; S11 sound timing, ISSUES #219): the Leech Seed tick behind Confuse Ray / Pain Split -- two different mechanisms LANDED, s165 d17 is a Mean Look term
+
+Base `5872b1497`; commits `0247732ab` (Confuse Ray tail), `820078ab7` (Confuse Ray scope fix), `6940e8a34` (Pain Split). Presentation / sound timing only (census eventsDigest identical).
+
+### 1. The general mem1 rule is not true
+
+The hypothesis (engine message command is L+64, the ROM adds one row per script command after `waitmessage`) was tested against the scripts: it does not generalise.
+- **Confuse Ray success**: `BattleScript_EffectConfuse` runs `seteffectprimary` -> `BattleScript_MoveEffectConfusion` (`chosenstatus2animation; printstring; waitmessage LONG; return`), then `resultmessage; waitmessage; goto BattleScript_MoveEnd`. After the confusion print's wait the ROM spends `return`, `resultmessage`, `waitmessage` (MSG_DISPLAY set by `resultmessage`, nothing to wait for) and `goto`: 4 rows against 1 for a plain `waitmessage; goto` (DoLeechSeed, exact). +3.
+- **Pain Split** is `printstring; waitmessage; goto MoveEnd`, the same shape as Leech Seed, so its -3 is **not** a message tail: the engine's body ended 6 rows early (attacker bar command 1695 vs ROM `+0x1c ex1` 1701), the Pain Split SEs (id 194) were +3 late, and the target bar's tail (6, swi1) was 3 too long (-6 body + 3 tail = -3 at the tick).
+
+### 2. Landed
+
+- `confuseResultMessageTailRows` (new, `battleResolutionPresentation.ts`) + the message `timing` IIFE: the result message of `BattleScript_MoveEffectConfusion` holds the rows from `SETEFFECTPRIMARY` to the `GOTO` (3, read from `BATTLE_SCRIPT_PROGRAM`). **Scope** (`820078ab7`): only when a tick / animation follows. When the next event after `BattleScript_MoveEnd` is another action's message (the confused foe's head print, T2 s8108 d0, s2 / s165 / s5569) the engine's move-end gap before that action already spends the rows (ROM +0x36 -> first glyph 16 = the gap's 16); applying the tail there regressed those seeds by +18..21. The first commit alone (no scope) made T2 ON worse (4,293 -> 4,301); the scope fix removes it.
+- Pain Split: `PAIN_SPLIT_TARGET_HP_TIMING` tail 6 -> 3, `[220, 3]` in `BODY_SOUND_LEAD_ROWS`, `[220, 6]` in `LIVE_MOVE_LEADLESS_TAIL_ROWS` (`battleResolutionPresentationRender.ts`).
+
+### 3. Numbers (before -> after)
+
+Labs (`labCompare.sh --reuse-rom`, SE mass): mtl1-confray-leech-s1-on / s2-on 41 -> 11 (prints 3 -> 0; the 11 left is Leech Seed turn-1 body SE -1, not this step), mtl1-painsplit-leech-s1-on / s2-on 50 -> 11 (prints 6 -> 0), aud261-painsplit-player-on / opponent-on 24 -> 3 each, OFF: mtl1-confray-leech-s1-off tick print 3 -> 0, mtl1-painsplit-leech-s1-off prints 6 -> 0, mechanic-pain-split-misdreavus-shuckle-off print 6 -> 0 (SE 3 -> 0), mechanic-pain-split-{player,opponent}-misdreavus-*-gengar print 3 -> 0. New labs (generator `tools/integration/mtl1Labs.py KIND SEED SCENE`, KIND confray|painsplit): `mtl1-confray-leech-s1-{on,off}`, `-s2-on`, `mtl1-painsplit-leech-s1-{on,off}`, `-s2-on`.
+
+T2 (`rescoreAll.sh` into `.integration/evidence/mtl1/t2-{base,after}`, 0 missing / 0 extra): Scene ON mass 4,293 -> 4,224 (exact 4,062 -> 4,082; s648 158 -> 89, no seed worse); Scene OFF 470 unchanged (923 exact unchanged).
+
+Census 0..199, both scenes, `5872b1497` vs HEAD: eventsDigest + error identical 200 / 200 (ON 21 battles, OFF 13 battles change commands). Tests: 208 files (every tests/ file referencing `battleResolutionPresentation*`, `randomRoundSoak*`, `lbrd`) green; re-pinned `tests/swi1PainSplitHpTail.test.ts` (target tail 6 -> 3, ROM target tail) and `tests/aud261MoveAnimSounds.test.ts` (Pain Split SE offset -4 -> -1, `mtl1-painsplit` mass 50 -> 11). `typecheck`, `test:gate` (360 files), `build` green. No move animation script / moveAnimSounds.ts touched.
+
+### 4. s165 d17 (status 148 -6) is not this class
+
+Probe `probe.sh 165 on 17 -40:2000`: the previous command is **Mean Look** (move 335), not Confuse Ray / Pain Split. The engine's Mean Look print starts 6 rows before the ROM's (ENG 327 vs ROM `EffectMeanLook+0x2a ex1` 333) and its message end 8 before `MoveEnd` (419 vs 427), so the poison tick's SE 148 is -6 (526 vs 532). A stat-move body term (sdb1's class), not a tail rule; left.
+
+### 5. What is left
+
+Leech Seed turn-1 body SE -1 (new labs, 11 mass each), Mean Look body -6 / -8 (s165 d17), the T2 OFF scene has no Pain Split / Confuse Ray tick window so OFF is unchanged. No other commands following a Confuse Ray were labelled besides the tick and the next-action message (the latter is covered by the T2 seeds named above).

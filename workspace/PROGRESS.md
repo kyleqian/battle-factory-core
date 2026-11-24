@@ -5,6 +5,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-24 — mtl1 (worker, ts lane, both scenes): the Leech Seed tick behind Confuse Ray / Pain Split landed as two mechanisms (T2 ON 4,293 -> 4,224, OFF 470 unchanged); s165 d17 is a Mean Look term
+
+- **State:** master, commits `0247732ab` `820078ab7` (Confuse Ray tail + scope) `6940e8a34` (Pain Split) + this docs / PROGRESS commit; no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200; 208 importer / soak / lbrd test files green (re-pinned swi1PainSplitHpTail target tail 6 -> 3, aud261 painsplit offset -4 -> -1); typecheck, test:gate (360 files), build green.
+- **Did:** mem1's "one row per command after waitmessage" is not general. Confuse Ray: +3 rows (`return; resultmessage; waitmessage; goto`) only when a tick / animation follows (`confuseResultMessageTailRows`, message `timing` IIFE; next-action message already carries them: first version regressed T2 ON seeds 2 / 165 / 5569 / 8108 by ~+19 each). Pain Split (not a message tail): body end +6 (`LIVE_MOVE_LEADLESS_TAIL_ROWS` [220, 6]), SE lead +3 (`BODY_SOUND_LEAD_ROWS` [220, 3]), target hp tail 6 -> 3 (`PAIN_SPLIT_TARGET_HP_TIMING`). Labs: confray on 41 -> 11, painsplit on 50 -> 11, aud261-painsplit 24 -> 3, OFF prints 3 / 6 -> 0.
+- **Next:** s165 d17 -6 is Mean Look's body (print 6 early, end 8 early; sdb1 class); Leech Seed turn-1 body SE -1 in the new labs. Details: `docs/aud251-s11-scoreboard-refresh.md` "mtl1".
+- **Notes:** play change (ROM-faithful, both scenes): the Confuse Ray result message holds 3 rows longer before a tick; Pain Split's print / body / SEs move to the ROM's rows. Evidence `.integration/evidence/mtl1/` (git-ignored). PAPERCUT: `rescoreAll.sh` takes ~5 min per scene and a foreground call over 120 s is auto-backgrounded unless `timeout` is passed; per-seed `aud249Rescore.sh` runs (~30 s) are the fast way to isolate a T2 regression. `npm test` (full) not run (worker rules).
+
+---
+
 ## 2026-11-24 — snr1 (worker, ts lane, Scene ON first, OFF checked): Roar / Whirlwind drag send-in landed (T2 ON 4,477 -> 4,391, OFF 475 unchanged); party summary after a faint and the class 3 Leech Seed carry are recipes
 
 - **State:** master, commit `043f34932` (+ this docs / PROGRESS commit); no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200 (ON 21 battles change commands, OFF 0); 244 importer / soak / lbrd / ROAR-WHIRLWIND test files green with no re-pin; `npm run typecheck`, `npm run test:gate` (360 files), `npm run build` green. Full `npm test` not run (worker rule); test:gate + importer tests is the substitute.
