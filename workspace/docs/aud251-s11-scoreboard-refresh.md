@@ -5194,7 +5194,7 @@ So with L + H every confusion head's SE 176 is **+1** (the plain-print conventio
 2. ecm1's edit 2: the head's `u - 2` hold in Scene ON (hold only, not the sound-lead stamp).
 3. Self-hit print: `PRE_MOVE_CONFUSION_TO_USED_PRINT_ROWS - 1` for `STRINGID_ITHURTCONFUSION` (D3).
 4. Then the ssm1 chain recipe (hit SE 2 rows after its command, hit minimum 36, hp tail +2) and the Psych Up S-lead + trail; with 1 - 3 in place the s499 d13 / d14 "+3 late" that made the chain lose +36 is gone, which is what ssm1 asked for.
-5. Re-derive cfa1's used-print 5 on the six labs together with 1 (labs read +1 mass after 1 alone) before landing, and re-run all 25 ON seeds + Scene OFF unchanged (the head hold is Scene OFF's already).
+5. Re-derive cfa1's used-print 5 on the six labs together with 1 (the labs' used print reads -2 / -1 after 1 alone) before landing, and re-run all 25 ON seeds + Scene OFF unchanged (the head hold is Scene OFF's already).
 
 ### Not done / caveats
 
