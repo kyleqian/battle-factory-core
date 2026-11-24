@@ -323,7 +323,9 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
         // ftp1: attackcanceler's natural thaw (`BattleScript_MoveUsedUnfroze`: printfromtable one row after the write, no pre-hold) lasts the rows to the print (ROM s97 d11: print row 10 = the engine's, SE 184 exact).
         const thaw = x.events[at].provenance?.opcodeName === "B_SCR_OP_ATTACKCANCELER" && (print === "STRINGID_PKMNWASDEFROSTED2" || print === "STRINGID_PKMNWASDEFROSTEDBY");
         const thawRows = thaw ? x.events[at + 1].provenance.instructionExecution - x.events[at].provenance.instructionExecution : 0;
-        const want = faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : wakeUp ? (at === 0 ? Math.max(0, wakeUpExec - 3) : wakeUpRows) : thaw ? thawRows : 32;
+        // tnl1 (tnm1 B): the MoveEnd status write of a Chesto Berry cure (BattleScript_BerryCureSlpRet's HELD_ITEM_EFFECT follows) lasts 26: ROM MoveEnd+0x0 -> the animation epoch (Rest lab 1416 -> A0 1420).
+        const berryCureSlp = following[0]?.payload.kind === "animation" && following[0].provenance?.sourceLabel === "BattleScript_BerryCureSlpRet";
+        const want = berryCureSlp ? 26 : faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : wakeUp ? (at === 0 ? Math.max(0, wakeUpExec - 3) : wakeUpRows) : thaw ? thawRows : 32;
         if (wakeUp) wakeUps.push(`${at === 0 ? `head u${wakeUpExec}` : `mid ${wakeUpRows}`}->${x.c.timing.minimumFrames}`);
         expect(x.c.timing.minimumFrames, `seed ${seed} status ${k} ${print}`).toBe(want);
         if (faintClear) faintClears += 1;

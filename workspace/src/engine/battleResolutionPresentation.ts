@@ -1406,6 +1406,16 @@ const MOVE_INFLICTED_STATUS_ICON_SCRIPTS: ReadonlySet<string> = new Set([
 function isMoveInflictedStatusIconScript(event: BattleKernelSemanticEvent | undefined): boolean {
   return MOVE_INFLICTED_STATUS_ICON_SCRIPTS.has(event?.provenance?.sourceLabel ?? "");
 }
+/**
+ * tnl1 (tnm1 B): BattleScript_BerryCureSlpRet after a status receipt (Rest -> Chesto; ROM MoveEnd+0x0 1416, A0 1420, print 1634, icon 1744, next print 1756).
+ * The status command lasts 26 (the animation epoch moves 6 rows earlier) while the HELD_ITEM_EFFECT command keeps the minimum the 32-row status gave,
+ * the print holds one row more and the icon spends 12 rows before the next print.
+ */
+const BERRY_CURE_SLP_SCRIPT = "BattleScript_BerryCureSlpRet";
+export const BERRY_CURE_SLP_STATUS_FRAMES = 26;
+export const HELD_ITEM_EFFECT_AFTER_STATUS_NOMINAL_PRESENTED = 32;
+export const BERRY_CURE_SLP_PRINT_HOLD_EXTRA_ROWS = 1;
+export const BERRY_CURE_SLP_ICON_FRAMES = 12;
 function isMoveInflictedStatusLaunch(programCounter: number): boolean {
   const instructions = BATTLE_SCRIPT_PROGRAM.instructions;
   return instructions[programCounter]?.opcodeName === "B_SCR_OP_PRINTFROMTABLE"
@@ -1438,6 +1448,9 @@ function messageTimingFromSourceProvenance(
     if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") return PRE_MOVE_STATUS_ANIMATION_TIMING;
     if (MOVE_INFLICTED_STATUS_ICON_SCRIPTS.has(event.provenance?.sourceLabel ?? "")) {
       return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + MOVE_INFLICTED_STATUS_PRINT_HOLD_EXTRA_ROWS });
+    }
+    if (event.provenance?.sourceLabel === BERRY_CURE_SLP_SCRIPT) {
+      return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + BERRY_CURE_SLP_PRINT_HOLD_EXTRA_ROWS });
     }
     if (!isMoveInflictedStatusLaunch(programCounter)) return WAITMESSAGE_LONG_TIMING;
     return sceneOff ? MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING : sceneOnMoveAnimationSeen ? MOVE_INFLICTED_STATUS_ANIMATION_TIMING : WAITMESSAGE_LONG_TIMING;
@@ -3355,6 +3368,10 @@ const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
 const MOVE_INFLICTED_STATUS_ICON_TIMING = Object.freeze({ minimumFrames: MOVE_INFLICTED_STATUS_ICON_FRAMES } as const);
 function moveInflictedStatusIconTiming(events: readonly BattleKernelSemanticEvent[], iconIndex: number) {
+  if (
+    events[iconIndex]!.provenance?.sourceLabel === BERRY_CURE_SLP_SCRIPT
+    && events[iconIndex - 1]?.payload.kind === "message" && events[iconIndex - 1]!.provenance?.sourceLabel === BERRY_CURE_SLP_SCRIPT
+  ) return Object.freeze({ minimumFrames: BERRY_CURE_SLP_ICON_FRAMES } as const);
   return events[iconIndex]!.provenance?.sourceLabel === "BattleScript_UpdateEffectStatusIconRet"
     && events[iconIndex - 1]?.payload.kind === "message" && isMoveInflictedStatusIconScript(events[iconIndex - 1])
     ? MOVE_INFLICTED_STATUS_ICON_TIMING : null;
@@ -6370,7 +6387,7 @@ export function projectBattleResolutionCommands(
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
   const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
   let playerSendInEnd = -1;
-  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; seGate?: number; trapMove?: number; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | "INGRAIN_HEAL" | "TURN_TRAP" }[] = [];
+  const heldItemEffects: { at: number; battler: 0 | 1; sequence: number; frames: number; afterStatus: boolean; berryCureSlp?: boolean; seGate?: number; trapMove?: number; animation: "HELD_ITEM_EFFECT" | "WISH_HEAL" | "FUTURE_SIGHT_HIT" | "FOCUS_BAND" | "ITEM_KNOCKOFF" | "INGRAIN_HEAL" | "TURN_TRAP" }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -6658,6 +6675,7 @@ export function projectBattleResolutionCommands(
         frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
         afterStatus: events[index - 1]?.payload.kind === "set-battler-status-data" && commands[commands.length - 1]?.type === "status",
         animation: "HELD_ITEM_EFFECT",
+        ...(event.provenance?.sourceLabel === BERRY_CURE_SLP_SCRIPT ? { berryCureSlp: true } : {}),
       });
       continue;
     }
@@ -6908,7 +6926,9 @@ export function projectBattleResolutionCommands(
         battler,
         before: beforeRules.battlers[battler]!.status1,
         after: payload.status1,
-        timing: sceneOffStatus === null ? STATUS_TIMING : Object.freeze({ minimumFrames: sceneOffStatus }),
+        timing: sceneOffStatus !== null ? Object.freeze({ minimumFrames: sceneOffStatus })
+          : events[index + 1]?.payload.kind === "animation" && events[index + 1]!.provenance?.sourceLabel === BERRY_CURE_SLP_SCRIPT
+            ? Object.freeze({ minimumFrames: BERRY_CURE_SLP_STATUS_FRAMES }) : STATUS_TIMING,
       }));
       continue;
     }
@@ -7238,7 +7258,8 @@ export function projectBattleResolutionCommands(
           const atStart = battleResolutionFieldBeforeCommand(field, ordered, ordered.length);
           if ((heldItem.battler === 0 ? atStart.player : atStart.opponent).substituteDoll !== true) {
             const statusBefore = ordered[ordered.length - 1];
-            const presented = heldItem.afterStatus && statusBefore?.type === "status" ? statusBefore.timing.minimumFrames : 0;
+            const presented = heldItem.afterStatus && statusBefore?.type === "status"
+              ? (heldItem.berryCureSlp === true && statusBefore.timing.minimumFrames === BERRY_CURE_SLP_STATUS_FRAMES ? HELD_ITEM_EFFECT_AFTER_STATUS_NOMINAL_PRESENTED : statusBefore.timing.minimumFrames) : 0;
             ordered.push(Object.freeze({
               type: "general-animation" as const, eventSequence: heldItem.sequence, battler: heldItem.battler,
               animation: heldItem.animation,
