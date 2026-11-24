@@ -201,6 +201,9 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
 // ON - OFF must carry the same extra.
 const cfa1PreMoveConfusionRows = (a: { animation: string; path: string; length: number; gate: number }): number =>
   a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && a.length - a.gate - ROWS[a.animation]! === 5 ? 5 : 0;
+// tnl1 (ROM labs gsp3-toxic / b4m-thunderwave, docs/aud251-s11-scoreboard-refresh.md "tnm1" 1.C): a move-inflicted PSN / BRN / PRZ (BattleScript_MoveEffect{Poison,Toxic,Burn,Paralysis}) holds its animation 2 rows longer, the ROM's print row (369 vs 367).
+const tnl1MoveInflictedRows = (a: { animation: string; path: string; length: number; gate: number }): number =>
+  a.path === "inflicted" && (a.animation === "PSN" || a.animation === "BRN" || a.animation === "PRZ") && a.length - a.gate - ROWS[a.animation]! === 2 ? 2 : 0;
 describe("sag130: the IsBattleSEPlaying gate in production (census routes, Scene ON vs OFF)", () => {
   it("every gated class lands its following print on the ROM row: ON - OFF = gate + controller rows, gate == seg127's projection", () => {
     const covered = new Map<string, number[]>();
@@ -220,11 +223,11 @@ describe("sag130: the IsBattleSEPlaying gate in production (census routes, Scene
           expect(a.gate, `seed ${seed} #${a.k}: not an open receipt -> gate 0`).toBe(0);
         }
         expect(a.orderOk, `${seed} ${a.animation} ${a.path}`).toBe(true);
-        expect(a.length, `${seed} #${a.k} ${a.animation}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a));
-        expect(a.on - a.off, `${seed} #${a.k} ${a.animation} ${a.side} ${a.path}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a));
+        expect(a.length, `${seed} #${a.k} ${a.animation}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a) + tnl1MoveInflictedRows(a));
+        expect(a.on - a.off, `${seed} #${a.k} ${a.animation} ${a.side} ${a.path}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a) + tnl1MoveInflictedRows(a));
         if (a.gate === 0) continue;
         // sa125's gate-0 rule: short by exactly the gate on every gated anchor
-        expect(a.on - a.off - ROWS[a.animation]!, `${seed} #${a.k}`).toBe(a.gate);
+        expect(a.on - a.off - ROWS[a.animation]!, `${seed} #${a.k}`).toBe(a.gate + tnl1MoveInflictedRows(a));
         gatedTotal += 1;
         gateFrames += a.gate;
         const key = `${a.gatePath}|${a.animation}|${a.side}`;

@@ -1387,6 +1387,25 @@ const MOVE_INFLICTED_STATUS_SHAPE = Object.freeze([
   "B_SCR_OP_SETBYTE",
   "B_SCR_OP_SETEFFECTPRIMARY",
 ]);
+/**
+ * tnl1 (docs/aud251-s11-scoreboard-refresh.md "tnm1" 1.C; ROM labs gsp3-{toxic,willowisp}-{player,foe}-on, b4m-{thunderwave,stunspore}-player-on, T2 s165 d14):
+ * a move-inflicted PSN / TOX / BRN / PRZ (`BattleScript_MoveEffect{Poison,Toxic,Burn,Paralysis}`: statusanimation; print; waitmessage LONG;
+ * goto BattleScript_UpdateEffectStatusIconRet) spends rows the engine did not: +2 on the ON animation before the print (print 367 -> 369),
+ * +1 on the print's hold (icon 460 -> 463 with the next term) and +1 on the status icon request before the next print (478 -> 482). Sleep's
+ * script falls through to the icon with a different shape (not claimed).
+ */
+export const MOVE_INFLICTED_STATUS_ANIMATION_PRINT_EXTRA_ROWS = 2;
+export const MOVE_INFLICTED_STATUS_PRINT_HOLD_EXTRA_ROWS = 1;
+export const MOVE_INFLICTED_STATUS_ICON_FRAMES = 2;
+const MOVE_INFLICTED_STATUS_ICON_SCRIPTS: ReadonlySet<string> = new Set([
+  "BattleScript_MoveEffectPoison",
+  "BattleScript_MoveEffectToxic",
+  "BattleScript_MoveEffectBurn",
+  "BattleScript_MoveEffectParalysis",
+]);
+function isMoveInflictedStatusIconScript(event: BattleKernelSemanticEvent | undefined): boolean {
+  return MOVE_INFLICTED_STATUS_ICON_SCRIPTS.has(event?.provenance?.sourceLabel ?? "");
+}
 function isMoveInflictedStatusLaunch(programCounter: number): boolean {
   const instructions = BATTLE_SCRIPT_PROGRAM.instructions;
   return instructions[programCounter]?.opcodeName === "B_SCR_OP_PRINTFROMTABLE"
@@ -1417,6 +1436,9 @@ function messageTimingFromSourceProvenance(
     if (tickLead !== undefined) return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + tickLead });
     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
     if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") return PRE_MOVE_STATUS_ANIMATION_TIMING;
+    if (MOVE_INFLICTED_STATUS_ICON_SCRIPTS.has(event.provenance?.sourceLabel ?? "")) {
+      return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + MOVE_INFLICTED_STATUS_PRINT_HOLD_EXTRA_ROWS });
+    }
     if (!isMoveInflictedStatusLaunch(programCounter)) return WAITMESSAGE_LONG_TIMING;
     return sceneOff ? MOVE_INFLICTED_STATUS_SCENE_OFF_TIMING : sceneOnMoveAnimationSeen ? MOVE_INFLICTED_STATUS_ANIMATION_TIMING : WAITMESSAGE_LONG_TIMING;
   }
@@ -3331,6 +3353,12 @@ const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
  * one callback, independent of any skipped Scene-OFF status animation.
  */
 const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
+const MOVE_INFLICTED_STATUS_ICON_TIMING = Object.freeze({ minimumFrames: MOVE_INFLICTED_STATUS_ICON_FRAMES } as const);
+function moveInflictedStatusIconTiming(events: readonly BattleKernelSemanticEvent[], iconIndex: number) {
+  return events[iconIndex]!.provenance?.sourceLabel === "BattleScript_UpdateEffectStatusIconRet"
+    && events[iconIndex - 1]?.payload.kind === "message" && isMoveInflictedStatusIconScript(events[iconIndex - 1])
+    ? MOVE_INFLICTED_STATUS_ICON_TIMING : null;
+}
 function wakeUpIconTiming(events: readonly BattleKernelSemanticEvent[], iconIndex: number) {
   const frames = wakeUpStatusIconFrames(events, iconIndex);
   return frames === null ? null : Object.freeze({ minimumFrames: frames });
@@ -6894,7 +6922,8 @@ export function projectBattleResolutionCommands(
           battler: singlesBattler(payload.battler, "status animation"),
           animation,
           timing: Object.freeze({
-            minimumFrames: seGate + STATUS_ANIMATION_ADDED_ROWS[animation] + preMoveConfusionToUsedPrintRows(events, index),
+            minimumFrames: seGate + STATUS_ANIMATION_ADDED_ROWS[animation] + preMoveConfusionToUsedPrintRows(events, index)
+              + (isMoveInflictedStatusIconScript(event) ? MOVE_INFLICTED_STATUS_ANIMATION_PRINT_EXTRA_ROWS : 0),
             ...(seGate > 0 ? { seGateFrames: seGate } : {}),
           }),
         }));
@@ -6914,7 +6943,7 @@ export function projectBattleResolutionCommands(
         battler: singlesBattler(payload.battler, "status icon update"),
         status1: payload.status1,
         status2: payload.status2,
-        timing: wakeUpIconTiming(events, index) ?? STATUS_ICON_TIMING,
+        timing: wakeUpIconTiming(events, index) ?? moveInflictedStatusIconTiming(events, index) ?? STATUS_ICON_TIMING,
       }));
       continue;
     }

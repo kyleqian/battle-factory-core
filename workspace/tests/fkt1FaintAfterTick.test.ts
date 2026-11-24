@@ -41,7 +41,8 @@ function faintRows(name: string): { se16: number; print: number } {
 describe("fkt1: Scene ON faint SE after an end-turn tick", () => {
   it.each([
     ["fkt1-kols-on", 920, 939],
-    ["fkt1-kotoxic-on", 883, 902],
+    // tnl1: the Toxic status animation / print / icon rows are the ROM's (print 369, next print 484 exact): +4 over the old 883 / 902 (ROM 907 / 926: the lab's later -20 is the missing mv33 body, not this rule)
+    ["fkt1-kotoxic-on", 887, 906],
     ["fkt1-kosand-on", 1123, 1142],
   ])("%s: SE 16 %i, faint box %i (SE 16 -> box 19 = ROM)", (name, se16, print) => {
     const rows = faintRows(name);

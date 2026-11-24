@@ -4,6 +4,7 @@
 // message and feeds its own presses.
 import { describe, expect, it } from "vitest";
 import {
+  MOVE_INFLICTED_STATUS_PRINT_HOLD_EXTRA_ROWS,
   PROMPT_SCROLL_ROWS,
   messageCommandTypedRows,
   promptGatedMessageCommands,
@@ -127,7 +128,8 @@ describe("btn1: mid-string gates (`\\l` scroll, `\\p` clear)", () => {
     expect(rest.advance).toBe("automatic");
     expect(rest.leadFrames).toBe(PROMPT_SCROLL_ROWS);
     expect(rest.lines[1]).toBe("It may be unable to move!");
-    expect(rest.timing.holdFrames).toBe(64);
+    // tnl1: Static's print is BattleScript_MoveEffectParalysis: the 64-row waitmessage + the `goto` row before updatestatusicon (ROM MoveEffectParalysis+0xa, b4m-thunderwave 716 -> 717)
+    expect(rest.timing.holdFrames).toBe(64 + MOVE_INFLICTED_STATUS_PRINT_HOLD_EXTRA_ROWS);
     const g: Gated = { cursor, typedRows: messageCommandTypedRows(first) };
     expect(stall(g, g.typedRows + HOLD_ROWS)).toBe(true);
     expect(releaseRow(g, "B", g.typedRows + 1 - GATE_ACCEPT_LEAD_ROWS)).toBe(g.typedRows + 1 - GATE_ACCEPT_LEAD_ROWS);
