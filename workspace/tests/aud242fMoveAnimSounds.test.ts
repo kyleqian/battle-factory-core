@@ -72,8 +72,8 @@ const SPECS: Record<string, Spec> = {
   "icebeam-player": { delta: 0 },
   "swagger-player": { delta: 0, romOnlyFrom: 300 }, // pmc1: Swagger sound lead 3 (the -3 residual was the clock; lab aud242f-swagger-player-on mass 15 -> 0)
   "hiddenpower-player": { delta: 0 },
-  // aud242h: the second SE152 (after the blend_color_cycle wait) is emitted now and exact at the same -4.
-  "growth-player": { delta: -4, romOnlyFrom: 300 },
+  // aud242h: the second SE152 (after the blend_color_cycle wait) is emitted now; sdb1: Growth body sound lead 4 closes the -4 (ROM SE152 at 58 / 90 in aud242f-growth-player-on).
+  "growth-player": { delta: 0, romOnlyFrom: 300 },
 };
 
 describe("move-animation SEs after the aud242f sprite lifetime waits", () => {
