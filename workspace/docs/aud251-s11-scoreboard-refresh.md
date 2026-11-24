@@ -5105,3 +5105,45 @@ Not a clean compare: SUMMARY exact 11 / offset 11 / missing 5 / extra 4, mass 14
 - Turn 3 in both scenes diverges after the print (ENG `message` @1320 extra; ROM strike SE 13 @1318, faint SE 16 @1465, missing in ENG; ENG hit SE @1491 = +173): an RNG / KO-order divergence of the lab's Bounce strike against a foe already at ~half HP, not timing; do not read the lab past the T3 print (`--span 970:1260`).
 - The Scene OFF `PRINTS` line reads exact 6 / offset 4 / missing 1 / extra 2 and SUMMARY SE exact 2 / missing 3: only the span up to the T3 print is meaningful.
 - Two samples for the -5 / -6 question (lab, T2 s2230 d5) and only Leftovers after a Bounce-miss (T2: the foe's mv246 miss on a woken Bounce user); Sitrus / a berry, or a miss on a non-semi-invulnerable target, were not tried.
+
+## fpm1 (2026-11-24, measurement only): the lost-focus print row is a rule, not a constant (17 after a printed hit message, 7 after an hp command)
+
+No `src/` or `tests/` change (the engine stays at c22d60e57). Evidence: the fpf1 probes `.integration/evidence/fpf1/p/on/{310-d3,1415-d49,1415-d47,310-d2.base}.cmp.txt` (main tree, git-ignored), plus labCompare runs of `aud250-focuspunch-player-on`, `aud250-focuspunch-opponent-on` (Scene ON) and `mechanic-focus-punch-damaged-off` (Scene OFF) into `/tmp/fpm1` (not kept; the numbers are below). One temporary edit of the constant (16 -> 7) was run engine-only on the three labs and reverted (`git checkout`, tree clean).
+
+**Source rows (`BattleScript_EffectFocusPunch`, battle_scripts_1.s:2260).** `attackcanceler`, `jumpifnodamage BattleScript_HitFromAccCheck`, `ppreduce`, `printstring STRINGID_PKMNLOSTFOCUS`, `waitmessage B_WAIT_TIME_LONG`, `goto BattleScript_MoveEnd`. The lost-focus path is taken when `gProtectStructs[attacker].physicalDmg || specialDmg` (`Cmd_jumpifnodamage`, battle_script_commands.c:9148); `Cmd_attackcanceler` (:915) finishes in one row on this path (no Protect / Snatch / Magic Coat / disobedience). There is no `attackstring`, no `waitstate`, no pause before the print. Each command is one row (`RunBattleScriptCommands_PopCallbacksStack`, battle_main.c:5251, one command per frame while `gBattleControllerExecFlags == 0`).
+
+**Every row between the previous action's `MoveEnd` and the print** (ROM, s310 d3 / s1415 d49, lab aud250 player / opponent, Scene OFF lab; all identical):
+
+| rows after `BattleScript_MoveEnd+0x0` ex0 | what |
+| --- | --- |
+| 0 | `moveendall` (the row the probe labels `MoveEnd+0x0`) |
+| 1 .. 7 | `end` (`Cmd_end`: `gCurrentActionFuncId = B_ACTION_TRY_FINISH`), `RunBattleScriptCommands_PopCallbacksStack` pop to `RunTurnActionsFunctions`, `HandleAction_TryFinish`, `HandleAction_ActionFinished` (next action), `HandleAction_UseMove` (`BattleScriptExecute`) and the callback hand-back: **8** rows to `EffectFocusPunch+0x0` ex0 (s310 d3 548 -> 556, s1415 d49 656 -> 664, the lab 575 -> 583, aud250 opponent likewise). The same gap is 7 or 8 for every next-action script (27 `MoveEnd` -> next-label pairs in the evidence: GiveExp 6, SemiInvulnerable 7, FocusPunch 7 / 8, EffectHit-family 8 / 9); it is the generic action prologue, not Focus Punch's. It is 7 after a charging turn (s1415 d49 Bounce 1552 -> 1559) and 8 after a damaging hit. |
+| 8 | `attackcanceler` (`EffectFocusPunch+0x0`) |
+| 9 | `jumpifnodamage` (taken to `+0x6`) |
+| 10 | `ppreduce` |
+| 11 | `printstring` |
+| 12 | `waitmessage` first row (`+0xa` ex1 / ex2): 4 rows after `+0x0` in all four windows |
+| 13 | **first glyph**: in every lab print row the first glyph is the `printstring` / waitmessage ex row + 1 (FocusPunchSetUp+0x10 154 -> 155, EffectLevelDamage+0x9 257 -> 258, the lost focus 587 -> 588) |
+
+So the lost-focus first glyph is **MoveEnd + 13** (+ 12 when the prologue is 7). Nothing in this path is a wait: no row in the 13 is a `waitstate`, and the text itself (44 rows to `waitmessage` ex0 at +0xa, then the 64-row hold, `MoveEnd` 65 rows after that) is the generic print.
+
+**Why 16 fits both T2 windows but is not a rule.** The engine's command start is not the ROM's `MoveEnd`; it depends on the previous engine command. The engine row of the lost-focus message (the command start) relative to the ROM `MoveEnd+0x0`:
+
+| previous engine command | command start - ROM `MoveEnd` | source row |
+| --- | --- | --- |
+| a printed hit message ("not very effective" / "super effective"): sprite-visibility pair then the message | **-4** (s310 d3 544 vs 548; s1415 d49 652 vs 656) | ROM hit message print + waitmessage(64) + `tryfaintmon` + `moveendall`; the engine's message hold ends 4 rows earlier than the ROM's `MoveEnd` |
+| an `hp` command (a hit with no effectiveness message: Seismic Toss in the labs) | **+6** (lab 581 vs 575; the hp command's tail + sprite-visibility pair end 6 rows after the ROM's `MoveEnd`) | |
+
+Needed lead = 13 - (command start - `MoveEnd`) = **17 after a hit message, 7 after an hp command**. The constant 16 is the first value ( = the ROM `+0xa` ex row, one row before the glyph) for the first case, and is wrong by +9 (print late) for the second.
+
+**Measured, three labs, both scenes (`labCompare.sh --scene auto`, `PRINTS` rows, Focus Punch lost-focus print, ENG - ROM):**
+
+| lab | scene | ROM glyph | ENG at 16 (now) | ENG at 7 (temporary edit) |
+| --- | --- | --- | --- | --- |
+| aud250-focuspunch-player-on | ON | 588 | 597 (+9) | 588 (+0) |
+| aud250-focuspunch-opponent-on | ON | 588 | 597 (+9) | 588 (+0) |
+| mechanic-focus-punch-damaged-off | OFF | 357 | 366 (+9) | 357 (+0) |
+
+PRINTS mass for each lab 17 -> 8 (the rest is the generic -4 of plain prints, unchanged); SE summary of the three labs unchanged (3 / 12 / 12), the item rows were not part of these labs. T2 windows: s310 d3 and s1415 d49 are the only lost-focus windows in the 49-seed set and both follow a printed hit message, so the constant has no T2 witness for the hp-preceded case; this is why no T2 scoring caught it. Scene ON and OFF follow the same rows (the OFF lab is +9 at 16 and exact at 7).
+
+**Recipe (for an engine step; not landed).** In `battleResolutionPresentation.ts` the lead for `BattleScript_EffectFocusPunch` messages should depend on the previous presentation command: `17` when the previous command before the sprite-visibility pair is a `message`, `7` when it is an `hp` command (the fpf1 refit plateau 17 at 7,957 vs 7,968 is this first case, consistent with the glyph being the ex row + 1: the T2 SE chains move by +1 and nothing else). For a non-damaged-then-charging prologue (7 rows instead of 8, s1415 d49 Bounce path, no lost focus) the print is not a lost-focus print and the lead does not apply. Acceptance: labs above exact (ENG - ROM 0) with the hp rule, T2 ON 7,968 -> about 7,957, eventsDigest unchanged. Open: the engine's `MoveEnd`-relative start for the message and hp cases differs by 10 rows (-4 vs +6); the 17 / 7 pair absorbs it for this print only, other first rows of a next action after an hp command vs a message may carry the same 10-row spread (not measured here).
