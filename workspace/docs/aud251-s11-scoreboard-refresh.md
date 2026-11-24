@@ -5580,7 +5580,7 @@ Commits `621144966` (confusion) and `cd6047bac` (Psych Up helpers); no push. Evi
 
 - T2 ON: 0 missing / 0 extra; of the seeds that changed only s2 is worse (+5), the other eight improved. Lab movers: aud242f-swagger 6 -> 0, aud242b / p-flatter 12 -> 6, cfa1 psychic s1 10 -> 0; **worse**: psychic s2 / s3 6 -> 16, psychup s1 6 -> 11, s2 / s3 17 -> 34.
 - Census 0..199 (`lsd194Census.sh` shards 0 1): ON eventsDigest + error identical 200 / 200, 0 type changes, 69 battles changed commands; OFF identical 200 / 200, 0 changed commands.
-- Tests: 35 files naming the confusion head / aud242* / sta3 / sa125 / sag130 and 23 aud249 / animation-live / chp1-fpl1 / soak / lbrd files pass (2,344 + 287 tests); `npm run typecheck`, `npm run build` green; `npm run test:gate` below.
+- Tests: 35 files naming the confusion head / aud242* / sta3 / sa125 / sag130 and 23 aud249 / animation-live / chp1-fpl1 / soak / lbrd files pass (2,344 + 287 tests); `npm run typecheck`, `npm run build` green; `npm run test:gate` green (360 files / 2,839 tests). No full `npm test` (the lane rule).
 
 ### 4. What is left
 
