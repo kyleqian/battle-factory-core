@@ -5162,7 +5162,7 @@ PRINTS mass for each lab 17 -> 8 (the rest is the generic -4 of plain prints, un
 
 **Recipe (for an engine step; not landed).** In `battleResolutionPresentation.ts` the lead for `BattleScript_EffectFocusPunch` messages should depend on the previous presentation command: `17` when the previous command before the sprite-visibility pair is a `message`, `7` when it is an `hp` command (the fpf1 refit plateau 17 at 7,957 vs 7,968 is this first case, consistent with the glyph being the ex row + 1: the T2 SE chains move by +1 and nothing else). For a non-damaged-then-charging prologue (7 rows instead of 8, s1415 d49 Bounce path, no lost focus) the print is not a lost-focus print and the lead does not apply. Acceptance: labs above exact (ENG - ROM 0) with the hp rule, T2 ON 7,968 -> about 7,957, eventsDigest unchanged. Open: the engine's `MoveEnd`-relative start for the message and hp cases differs by 10 rows (-4 vs +6); the 17 / 7 pair absorbs it for this print only, other first rows of a next action after an hp command vs a message may carry the same 10-row spread (not measured here).
 
-## chp1 (2026-11-24): the confusion head's SE 176 spread (+1 .. +4 on T2 s499, -1 on s7295) is three stacked terms, not a phase; recipe named, not landed
+## chp1 (2026-11-24): the confusion head's SE 176 spread (+1 .. +4 on T2 s499, -1 on s7295) is three stacked terms, not a phase; recipe named, not landed — LANDED by cfx1 (the MoveEffectConfusion print +2 and the head's 64 + 1; see the cfx1 section)
 
 **LANDED by fpl1 (`8b9cc0b49`), edit L restricted to the confusion head, Scene ON only; H and D as named; cfa1's used-print rows re-derived to 6.**
 
@@ -5310,7 +5310,7 @@ Dropping the OFF-hold normalisation (71 -> 67 for STRINGID_PKMNISCONFUSED, and t
 - Tests: all 259 test files importing `battleResolutionPresentation` / `battleEndSounds` plus `randomRoundSoak*` and `lbrd`: 259 / 259 files green (2,413 tests); `test:gate` 360 files / 2,839 tests green; `typecheck` 0; `build` 0. No residual SELF-DESTRUCT / EXPLOSION / LOSS_RECALL / NoMore pins found beyond the ones re-pinned above.
 - Left: cfm1's source-side move (above); the ON confusion head / InLove holds; ssl1 / mhl1 moves untouched.
 
-## fpl1 (2026-11-24, ts lane, Scene ON first, OFF checked): fpm1 + chp1 + ssm1 Psych Up chain landed (T2 ON 5,895 -> 5,835, OFF 537 unchanged)
+## fpl1 (2026-11-24, ts lane, Scene ON first, OFF checked): fpm1 + chp1 + ssm1 Psych Up chain landed (T2 ON 5,895 -> 5,835, OFF 537 unchanged) — chp1's head hold (66) and the Psych Up aud249 / livePrep16 pins reconciled by cfx1
 
 Three commits on master, no push: `537d1ba7f` (fpm1), `8b9cc0b49` (chp1), `51a5d3d23` (ssm1 chain). Presentation / sound timing only: census 0..199 eventsDigest + error identical 200 / 200 in both scenes after each of chp1 and ssm1 (OFF: 200 / 200 battles command-identical; ON: 66 / 58 battles with changed command timing). Evidence (git-ignored): `.integration/evidence/fpl1/`.
 
@@ -5611,3 +5611,35 @@ Scene ON first, Scene OFF as the control. Base master `bc621934d`; the t2k10 sec
 **Left.**
 - The remaining class 7 mass is the faint windows with their own cause: hit chains with a recoil / drain hp before the faint (the hp-conditioned case above, ROM +1 by hpd4's lag still), send-in after the faint, and s6568 d104 (harness press pulse, Mac-owned tool, untouched).
 - **Class 3 (end-of-turn tick, s648 d12 Leech Seed -5 / s648 d10 -7 / s165 d17 gen:148 -8): no own rule.** Plain Leech Seed ticks are exact in every existing lab (etp1-leechseed / leechseed2 / leechseedc, aud250-leechseed-player / opponent, lse1-leechseed-player: mass 0 each), Toxic / poison ticks +1 .. +3 per turn (etp1-toxic 6, toxic3 18, poison 6, willowisp 1 / 3, the known tick term). The -5 / -7 / -8 windows therefore come from the command before the tick (Confuse Ray / Pain Split / the previous send-in, the t2k10 note), not from the tick. Next: a lab that puts the Leech Seed tick behind that exact previous command (ROM `gCurrentMove` of the window's seed 648 and 165 rows), then compare its first tick row; etk1-leech-hold / spam (1,025 mass, 6 missing) are a different (hold / spam) shape and not that lab.
+
+## cfx1 (2026-11-24, side lane, Scene ON first, OFF checked): the six post-fpl1 test failures resolved; the chp1 confusion-head hold is 64 + 1, not 64 + 2 (presentation / sound timing only)
+
+Commits `621144966` (confusion) and `cd6047bac` (Psych Up helpers); no push. Evidence (git-ignored): `.integration/evidence/cfx1/`.
+
+### 1. aud249 aud242c-flatter-player / aud242f-swagger-player (second confusion play 1 frame early)
+
+- **Source-backed term found, so no mass-based choice was needed.** `BattleScript_MoveEffectConfusion`'s animation -> print was 2 rows short in the engine (ROM 99 rows SE -> print, engine 97; seen in labs aud242f-swagger, aud242b-flatter, cfa1-conf-psychic-s2). It is the same term tnl1 landed for PSN / BRN / PRZ (`MOVE_INFLICTED_STATUS_ANIMATION_PRINT_EXTRA_ROWS` 2), now also applied to a status-animation whose source label is `BattleScript_MoveEffectConfusion` (`MOVE_EFFECT_CONFUSION_SCRIPT`). With it the message sits on the ROM's first-glyph row (print exec row + 2), and the head's ON hold falls to `PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS` 1 (64 + 1 = 65; chp1's 2 had absorbed the missing 2 rows in the other direction; ROM SE 176 = status animation start + 3).
+- Pins: `sta3PreMoveStatusTiming` (lead 1; status start - message start = launch - print - 2 for the confusion head: ROM first glyph 632 -> launch 720 = 88 in aud242f-swagger-player-on), `sa125StatusAnimationCommand` / `sag130StatusSeGate` (the OFF confusion head is read at 65; `tnl1MoveInflictedRows` now counts a CONFUSION animation on every path except the self-hit head STRINGID_PKMNISCONFUSED). `aud249GeneralAnimSounds` passes unchanged.
+
+### 2. Psych Up 244 body (livePrep16MoveAdapters PSYCH_UP 66/7, 15/28; liveR2GatesRoutes 244 seeds 336 / 713)
+
+- The ROM agrees with production's 187-row body (fpl1's ssm1 S-lead + trail -1): lab `ztl1-psychup-player-on` has the body SEs 200 x10 / 189 and the prints after them at +0 (the lab's remaining mass 14 is later, unrelated rows: unchanged from fpl1). The tests' helper was stale, not production.
+- `tests/helpers/iu120Rows.ts`: 244 in `S_LEAD_RULE_IDS` and `244: 5` in `ONT193_SCRIPT_TAIL_FRAMES` (mirrors production); the prep16 route length is `iu120Ages(id, ages).length`.
+
+### 3. Acceptance (base `186c99eba` -> `cd6047bac`)
+
+| | before | after |
+|---|---:|---:|
+| T2 ON mass (exact) | 4,902 (3,792) | **4,728** (3,909) |
+| T2 OFF mass (exact) | 475 (919) | 475 (919), unchanged |
+| labs (9: aud242f-swagger, aud242b / p-flatter, cfa1 psychic s1-3, cfa1 psychup s1-3 + ztl1-psychup) | 92 | 123 (see below) |
+
+- T2 ON: 0 missing / 0 extra; of the seeds that changed only s2 is worse (+5), the other eight improved. Lab movers: aud242f-swagger 6 -> 0, aud242b / p-flatter 12 -> 6, cfa1 psychic s1 10 -> 0; **worse**: psychic s2 / s3 6 -> 16, psychup s1 6 -> 11, s2 / s3 17 -> 34.
+- Census 0..199 (`lsd194Census.sh` shards 0 1): ON eventsDigest + error identical 200 / 200, 0 type changes, 69 battles changed commands; OFF identical 200 / 200, 0 changed commands.
+- Tests: 35 files naming the confusion head / aud242* / sta3 / sa125 / sag130 and 23 aud249 / animation-live / chp1-fpl1 / soak / lbrd files pass (2,344 + 287 tests); `npm run typecheck`, `npm run build` green; `npm run test:gate` green (360 files / 2,839 tests). No full `npm test` (the lane rule).
+
+### 4. What is left
+
+- The cfa1 Confuse Ray / Psych Up labs rose by a uniform +1 per window: the Confuse Ray entry term (EffectConfuse +0x2e -> status animation, ex1 vs ex2) was cancelled by the old -1 / -2 error and now shows. Not fixed here (the lab regression 92 -> 123 is that term; T2 ON improved 174).
+- Psych Up's own print after the S-lead body (+1 in psychup s1) and s2 +5 in T2 ON.
+- cfm1: the sa125 / sag130 cfa1 exception stays.
