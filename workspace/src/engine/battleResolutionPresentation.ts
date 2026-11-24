@@ -2482,6 +2482,13 @@ const HSW1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([2, 5, 11, 16, 88, 26
 // mhs1: Triple Kick (167), Bonemerang (155), Spike Cannon (131): hit 1 of the DoMultiHit / DoTripleKickAttack loops is shape A (labs mhs1-*-pfirst-on, aud242r spikecannon-player ROM trace). mhl1 (mhm1): Twineedle (41), Pin Missile (42), Rock Blast (350) joined (labs mhm1-*-pfirst-on, trim 7). Fury Attack, Bullet Seed, Icicle Spear stay out.
 const MHS1_SHAPE_A_MOVE_IDS: ReadonlySet<number> = new Set([167, 155, 131, 42, 350, 41]);
 /**
+ * msc1: the shape-A multi-hit bodies (every hit) move their audible SEs with the presented lead: the table clock (calibrated on a 7-row lead) is shifted by `lead - 6`, so the SE is
+ * emitted 1 tick after its stamped ROM row, as the hit / effectiveness SE is (`MHS1_BODY_SOUND_TICK_LEAD`, `USED_MOVE_SOUND_LEAD`). Before, the stamp alone carried the `lead - 7` and play heard
+ * the SE `lead - 6` rows early against its hit (Twineedle seed 363: effectiveness 65 / 62 rows after SE 160, ROM 56 / 56).
+ */
+const MHS1_BODY_SOUND_CLOCK_LEAD = 6;
+const MHS1_BODY_SOUND_TICK_LEAD = 1;
+/**
  * lse4 "gap-print": the lead is the kernel counter, the rows after the body are `T = 2 + gap - pre - post + s` with the ROM gap of the next command: a print (`printfromtable` / `printstring`) is
  * Delta + 1 (Recycle 3, the Razor Wind charge turn 7), any other next command is shape A (gap 4). Recycle 278, Razor Wind 13 (both turns).
  */
@@ -2510,6 +2517,7 @@ export function lse2BodySoundAgeShift(moveId: number, bodyLeadFrames: number | u
   const calibrated = LSE2_SOUND_CLOCK_LEADS.get(moveId);
   if (calibrated !== undefined) return bodyLeadFrames! - calibrated;
   if (C_LEAD_WINDOW_ADJUST.has(moveId)) return bodyLeadFrames! - (C_LEAD_SOUND_CLOCK_LEADS.get(moveId) ?? LEAD4_SOUND_CLOCK_LEAD);
+  if (MHS1_SHAPE_A_MOVE_IDS.has(moveId) && bodyLeadFrames! >= PLAIN_BODY_SOUND_LEAD_MIN_L) return bodyLeadFrames! - MHS1_BODY_SOUND_CLOCK_LEAD;
   return LEAD4_S_LEAD_MOVE_IDS.has(moveId) ? bodyLeadFrames! + precedingRows - (LEAD4_SOUND_CLOCK_LEADS.get(moveId) ?? LEAD4_SOUND_CLOCK_LEAD) : 0;
 }
 /**
@@ -7735,6 +7743,7 @@ export function usedMoveBodySoundLeadOf(state: BattleResolutionPresentationState
   const lead = command.timing.bodyLeadFrames ?? 0;
   // b4l: a c-lead body presents its lead for real, so the sound clock follows it (`lse2BodySoundAgeShift`, L - 7) and the 7 - L tick lead is dropped.
   if (C_LEAD_WINDOW_ADJUST.has(command.animation.moveId)) return 0;
+  if (lead >= PLAIN_BODY_SOUND_LEAD_MIN_L && MHS1_SHAPE_A_MOVE_IDS.has(command.animation.moveId)) return MHS1_BODY_SOUND_TICK_LEAD;
   if (lead < PLAIN_BODY_SOUND_LEAD_MIN_L || lse2BodySoundAgeShift(command.animation.moveId, lead) !== 0) return base;
   return MOVE_BODY_SOUND_CLOCK_LEAD - lead;
 }
