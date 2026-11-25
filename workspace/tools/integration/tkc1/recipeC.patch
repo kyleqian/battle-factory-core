@@ -1,0 +1,30 @@
+diff --git a/src/engine/battleResolutionPresentation.ts b/src/engine/battleResolutionPresentation.ts
+index ed359f49a..b282dc75a 100644
+--- a/src/engine/battleResolutionPresentation.ts
++++ b/src/engine/battleResolutionPresentation.ts
+@@ -1499,6 +1499,7 @@ function messageTimingFromSourceProvenance(
+   event: BattleKernelSemanticEvent,
+   sceneOnMoveAnimationSeen: boolean,
+   sceneOff: boolean,
++  keepTickLead = false,
+ ): BattleMessageTiming | null {
+   const programCounter = event.provenance?.programCounter;
+   if (programCounter === undefined || programCounter < 0) return null;
+@@ -1510,7 +1511,7 @@ function messageTimingFromSourceProvenance(
+     && following.operands[0]!.expression === "B_WAIT_TIME_LONG"
+   ) {
+     const tickLead = END_TURN_STATUS_DAMAGE_LEAD_ROWS[event.provenance?.sourceLabel ?? ""];
+-    if (tickLead !== undefined) return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + tickLead });
++    if (tickLead !== undefined) return Object.freeze({ minimumFrames: 0, holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + tickLead - (keepTickLead ? 0 : 1) });
+     const launch = BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 2]?.opcodeName;
+     if (launch === "B_SCR_OP_STATUS2ANIMATION" || launch === "B_SCR_OP_STATUSANIMATION") {
+       if (!sceneOff && event.provenance?.sourceLabel === IN_LOVE_HEAD_SCRIPT) return PRE_MOVE_IN_LOVE_STATUS_ANIMATION_TIMING;
+@@ -6822,7 +6823,7 @@ export function projectBattleResolutionCommands(
+                   : ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 || event.provenance?.sourceLabel === CONFUSION_NO_MORE_HEAD_SCRIPT)
+                     && preMoveOffUsedPrintTiming(events, index) !== null
+                   ? preMoveOffUsedPrintTiming(events, index)!
+-                  : messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0)
++                  : messageTimingFromSourceProvenance(event, sceneOnMoveAnimationSeen, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0, events[index - 1]?.payload.kind === "switch-in-animation")
+                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId) || payload.messageId === SUBSTITUTE_FADED_MESSAGE_ID
+                   ? WAITMESSAGE_LONG_TIMING
+                   : MESSAGE_TIMING);

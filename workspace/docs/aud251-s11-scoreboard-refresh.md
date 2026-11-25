@@ -6093,3 +6093,53 @@ The +13 is the same for every move with a body adapter, so the rule is a propert
 - **Caveats.** Player side only (the foe-side lab was not built: a foe that rests then charges depends on the AI picking Rest at full HP; the code path is side-agnostic). Skull Bash cannot be confirmed at the SE level (no mv130 body adapter); it takes the same lead through the same branch. The Bounce wake-up lab needed no seed override but the strike-turn rows were not checked against other seeds.
 
 **Thaw: does NOT share the rule on the evidence, and the patch leaves it out.** The patch keys on `WAKE_UP_SCRIPT`; `BattleScript_MoveUsedUnfroze` (`THAW_SCRIPT`) falls through to `{}` as before. Structurally the thaw detour differs (no `bicword`, and ftp1 measured its ROM print -> icon at 91 rows against the wake-up's 81 / 82), so the 13 cannot be assumed. A frozen-charger lab cannot be built deterministically (freeze is a 10% roll, thaw 20% per turn, both seed-dependent in the ROM and engine), and no T2 window or census seed with thaw -> charge was found (the T2 engine / cmdtrace files carry no script labels; a census scan for `MoveUsedUnfroze` followed by `BattleScriptFirstChargingTurn` was not run). Recipe for later: search the 0..199 census for that pair, ROM-probe the seed with `labCompare` / a T2 replay, and add a thaw constant only if its first-SE offset is not 13.
+
+## tkc1 — t2k11 recipe C measured: the end-of-turn poison / burn tick SE is +1 except after a send-in (measurement only; no src/ or tests/ change)
+
+Base: `ffe35b64a` (engine frozen; `git diff ffe35b64a -- src tests` empty). Evidence (git-ignored): `.integration/evidence/tkc1/` (`b/`, `a1/`, `a2/` = `ticks.sh` runs on seeds 165 / 499 / 3738 at base / first scratch / final scratch, `full-a2-{on,off}/` = the scratch engine on every ON / OFF T2 seed, `lab-gsp3-a2/`, `lab-on-a2/`, `lab-off-a2/`, `lab-base/` the lab compares, `a2.patch`). Tools: `tools/integration/tkc1/ticks.sh OUTDIR "SEED..."` (cmdtrace replay + `t2k4/attr.py` for the given T2 seeds, then `tickrows.py`: one line per end-of-turn tick with the first-row offset, the previous row's offset, the step and the previous command), `tickrows.py`, `after.py` (the rows after each tick, several attr files side by side), `recipeC.patch` (the scratch edit, `git apply` from `workspace/`).
+
+### 1. The 20 end-of-turn ticks of ON T2 grouped by what precedes the tick (SE 148, `mv 0`, `ecmd status-animation`; `step` = tick offset minus the previous row's offset)
+
+| preceding command | ticks | step at base | seeds / decisions |
+|---|---:|---|---|
+| a hit SE (SE 12 / 13, hit-animation) | 7 | +1 x7 (3 of them carry a prior -1 / -3: absolute 0 / -2 / 0) | s165 d23, s499 d1 / d13 / d14, s3738 d55 / d56 / d57 |
+| a move body (Block, Confuse Ray, 2 x Toxic) | 4 | +1 x4, all clean | s165 d14 / d17, s499 d19, s3738 d59 |
+| a stat SE 239 | 2 | +1 x2 (s499 d3 carries -5: absolute -4) | s499 d2 / d3 |
+| an hp / SE 90 command | 2 | +1 (s165 d11); **-1** (s3738 d61, SE 90 after a self-confusion hit) | |
+| segment start (after a Safeguard expiry print) | 1 | +1 (s499 d20) | |
+| a wore-off print (Safeguard -> tick, ptc1) | 1 | 0 (s3738 d60) | |
+| **a send-in** (`FaintedMonSendOutNew`: party-sendout 185 / 83, switch-in 198) | 3 | **0 x3** | s165 d16 / d22, s499 d12 |
+
+So the +1 does not depend on a hit / body / print / item heal in front of it: 15 of 20 ticks are +1 (11 of them clean, prev offset 0), 4 are 0 and 1 is -1. The 0 cases are all the three send-ins (plus the one wore-off tick), so the split t2k11 asked for is "after a send-in or not", not by command type. There is no item-heal group (no tick follows a Leftovers / berry row in T2).
+
+### 2. ROM / engine rows
+
+`BattleScript_PoisonTurnDmg` / `BurnTurnDmg`: `printstring; waitmessage LONG; goto BattleScript_DoStatusTurnDmg` (statusanimation row, `B_ANIM_STATUS_PSN` / `BRN`, then `datahpupdate`, `end2`). The engine models it as the tick print command whose hold is `WAITMESSAGE_LONG_HOLD_FRAMES + END_TURN_STATUS_DAMAGE_LEAD_ROWS[label]` (`battleResolutionPresentation.ts` ~1437: Poison 2, Burn 3, read in `messageTimingFromSourceProvenance` ~1512), then the `status-animation` command whose SE age is `statusAnimationScriptAge` 0 for `BattleScript_DoStatusTurnDmg` (`moveAnimSounds.ts` ~255). Lab `gsp3-toxic-player-on` at base: the tick print first glyph is exact (810 / 810, 1578 / 1578, 2600 / 2600) and the first tick SE is ROM 904 / ENG 905, every tick (+1 x6 per tick, 18 mass), burn the same (3 / 3). So the hold after the tick print is one row too long, in the labs and in T2.
+
+Why the earlier scratch edits failed: (a) `statusAnimationScriptAge` +1 moves the SE the wrong way (+84) and -1 loses SE row 0 (a negative script age is not an input: +1,142); (b) the lead 2 -> 1 for every tick moved the three send-in ticks from 0 to -1 (s165 d16 / d22, s499 d12: 18 mass) and cancelled most of the gain (-13).
+
+### 3. The recipe (measured, not landed)
+
+`tools/integration/tkc1/recipeC.patch` (3 insertions / 2 deletions, `battleResolutionPresentation.ts` only): `messageTimingFromSourceProvenance` takes a `keepTickLead` flag and returns `holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES + tickLead - (keepTickLead ? 0 : 1)`; the call site (~6826) passes `events[index - 1]?.payload.kind === "switch-in-animation"`. In words: the Poison / Burn tick print's hold is one row shorter (Poison 2 -> 1, Burn 3 -> 2) unless the tick print directly follows a faint send-in (`BattleScript_FaintedMonSendOutNew`). The constants `END_TURN_STATUS_DAMAGE_LEAD_ROWS` stay as the send-in values. No change to `statusAnimationScriptAge` and no change to the rows after the status animation (the tick's own length is the old hold, the whole chain after the tick moves 1 earlier with the print hold, which is what the ROM shows: the cry@faint / SE 16 after a KO tick were +1 with the tick).
+
+Measured with the patch (scratch, then reverted):
+
+| | before | after | notes |
+|---|---:|---:|---|
+| T2 ON mass / exact / offset | 3,659 / 4,292 / 1,585 | **3,624 / 4,349 / 1,528** | -35 mass, +57 exact; move-animation 2,928 -> 2,896, cry 153 -> 151, controller 480 -> 479; seeds: s165 112 -> 88, s499 158 -> 153, s1028 39 -> 35, s3738 228 -> 226, no other ON seed changes |
+| T2 OFF mass / exact / offset | 470 / 923 / 210 | 467 / 929 / 204 | s1028 15 -> 13, s3738 33 -> 31, s499 19 -> 20 |
+| ticks with step 0 (ON, 3 seeds) | 4 of 20 | **18 of 20** | the 2 left: s3738 d60 (wore-off -> tick, 0 -> -1) and s3738 d61 (after a self-confusion hit, -1 -> -2) |
+| labs `gsp3-{toxic,willowisp}-{player,foe}-on` SE mass | 18 / 12 / 3 / 3 | **0 / 0 / 0 / 0** | all SE rows exact, print first glyphs unchanged (12 / 8 / 12 / 12 exact) |
+| `etp1-{poison,toxic,toxic3,willowisp,willowisp3}-{on,off}`, `aud242e-toxic-player-on`, `aud260-willowisp-{player,opponent}-on`, `hcr2-toxic-foe-on`, `gsp3-{toxic,willowisp}-player-off`, `hcr1b-toxic-foe-off`, `fkt1-kotoxic-off` | exact on the after tree (no regression) | 18 labs, mass 0 | |
+| `fkt1-kotoxic-on` | 154 | 161 | the lab's own -21 print offset (a desynced lab), the tick is moved 1 earlier on top of it |
+| `hpf4m-{burn,toxic}-{on,off}`, `hpf4m-faintpoison-{on,off}` | desynced labs (missing rows) | 22,349 -> 22,348, 34,812 -> 34,800, 3,377 -> 3,414 (ON); OFF 11 -> 10 | not readable |
+
+The gain is 10 clean ticks (-6 each, -8 with a KO) = -68; the loss is the ticks that sit on a negative carry (s499 d3 stat -5, d13 / d14 and s3738 d56 hit -1 / -3, d60, d61: +39), where the +1 and an earlier -1 .. -5 had cancelled: when the hit SE -1 (D4) / stat -5 windows are fixed those losses turn into gains, so the true value of the rule is about -70 ON.
+
+Landing checklist (not done: engine frozen): apply the patch; the nine test files that name the tick (`gaf140StatusGateAge`, `sag130StatusSeGate`, `randomRoundSoak`, `swt1OpponentSendInNextPrint`, `sub157SceneOffSubstitute`, `sa125StatusAnimationCommand`, `ptc2WoreOffTick`, `trn178ActionTransition`, `factoryRoundBattleOrchestrator`) pass with the patch applied (166 tests, vitest run in this session), so no re-pin is expected; add a Tier-1 pin of the tick print -> status-animation start row (lab gsp3-toxic-player-on: print 810, status-animation start 904) and run `rescoreAll.sh` on both scenes.
+
+### 4. Caveats / next
+- The send-in exception is measured on three T2 windows only (no lab): the tick after a send-in is exact at lead 2 and -1 at lead 1 in all three. A lab with a poisoned mon whose end-of-turn tick follows the foe's faint replacement (`FaintedMonSendOutNew`) would pin it; staging it needs a KO plus a replacement in one turn, not built here (time).
+- s3738 d61 (-1 -> -2, tick after a self-confusion hit) and d60 (the Safeguard wore-off tick, 0 -> -1; s499 d20, the same shape, is +1) are one window each and are not modelled.
+- Scene OFF takes the same -1 (labs OFF exact, T2 OFF -3); gating it to Scene ON would give up the 3 OFF mass for no reason.
+- Not a gameplay / RNG change (the hold is presentation timing); a census digest check was not run (measurement only).
