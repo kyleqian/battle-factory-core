@@ -64,6 +64,36 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
 - Once the repo is public, everything committed is published at the next push. Keep secrets, server addresses and
   personal paths out of commits, as before.
 
+## From the Mac, 2026-11-24 (top layer): fast-forward, SPINDA's spots, and the swap screen's popup after a summary
+
+- **Where these came from:** Kyle's live play on the website on 11-24 (build `eb-bc9f337e6d54769f`) and his ask for a fast-forward key.
+  Kyle approved each fix ("Yes, fix it" / "Yes, deploy it"). Each doc has the ROM evidence and the tests.
+  - The website runs all five since 11-24 19:40 UTC (build `eb-175f3e18f45d40fb`).
+  - **Delivered as branch `box-merge-20261125`:** Mac master `904fec842` (your 11-22/23 night run `fe5ffd11f` plus the five merges below),
+    then your 11-23 and 11-24 runs (cax31/master `68c79c902`) merged, then this handoff.
+    - One conflict: `tests/randomRoundSoak.test.ts` seed 1's frames pin. Both sides moved it (yours to 58901, the Mac's to 57761).
+      Measured on the merged tree: **59054**, same battle 3 / depth 2 / turn 19 / roundLost. Seed 0 (40615) is unmoved.
+- **ffw1, fast-forward** (`docs/ffw1-fast-forward.md`): `FactoryGame.setSpeed(1..8)`. The loop runs that many of the same ticks per
+  display frame, so traces, events and replays are identical at any speed; only real time is shorter. Sound is muted above 1 and the
+  music is restored at the live frame on return to 1. The website offers it to listed player ids only.
+- **spd2 / spd2b, SPINDA's spots** (`docs/spd2-rental-swap-spinda-spots.md`): the rental and swap screens' pictures and live move bodies
+  now draw SPINDA's spots from the mon's personality, as `LoadSpecialPokePic` -> `DrawSpindaSpots` does. Pictures only.
+- **swp1, the swap popup after a summary** (`docs/swp1-swap-popup.md`): after a SUMMARY visit the SUMMARY/SWAP/RECHOOSE popup no longer
+  stays drawn for the rest of the swap screen, and PKMN FOR SWAP keeps the chosen mon instead of party slot 0. Pictures only.
+- **swi1, the next popup's input gate** (`docs/swi1-swap-popup-input-timing.md`): after a summary visit, a later popup opened from the
+  picker took input from +1; it now waits for its OpenMonPic (+58), as `Swap_Task_HandleMenu` does. Gameplay timing.
+- **srt1, the rebuilt popup takes input inside the fade-in** (`docs/srt1-swap-summary-return-input.md`): the popup rebuilt by
+  `CB2_InitSwapScreen` after a summary's B takes input from +42 (the ROM's), not +61. Gameplay timing; a summary opened from it inside
+  the fade starts its own clock there.
+- **Open, not fixed (found while measuring; each needs Kyle's word before a fix):**
+  - SWAP -> enemy picker: the engine takes input at +133, the ROM at +134.
+  - The rental (select) screen: the cursor popup's input gate opens at +27 (the engine waits for the 27-row pic table), the ROM's at
+    +25; and +53 vs the ROM's +57 (the ROM waits for `gPaletteFade.active`).
+- **Website only, nothing for you:** challenges started on an older build now also get that build's pictures and move-animation files
+  (11-25 04:30 UTC). Without them an old challenge froze at its first picture and the page reloaded it.
+- **What this means for you:** randomRoundSoak seed 1's pin moved (above). The census line pin in
+  `tools/report/ability-item-parity-census.ts` is 132 (srt1). Keep `setSpeed` out of anything that compares real time.
+
 ## From the Mac, 2026-11-23 (top layer): first-use move animations and sounds on the website
 
 - **Where these came from:** Kyle's live play on the website on 11-22 (build `eb-aeaa423d18bf34fe`). These were the problems:
