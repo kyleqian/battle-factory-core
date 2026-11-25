@@ -5975,3 +5975,66 @@ Base: fold-20261124e (`c4755ad68`). Evidence (git-ignored): `.integration/eviden
 - **Pre-existing, not lpa1's:** `tests/animation/liveFieldfxMoveAdapters.test.ts` (BLOCK) and `tests/animation/liveHBufferS1MoveAdapters.test.ts` (MEAN_LOOK) fail on the base `450e6e58e` too (their command-row lists are 7 rows shorter than the engine's since mlb1's Mean Look / Block tail 7): they need mlb1's re-pin, verified by running them with this patch reverted.
 - **Left:** Roar opponent +3; Recycle held-item rows +1 and aud262-present-player +1 .. (separate terms); Scene ON called-move (Metronome) lead has no ROM row.
 
+
+## t2k11 — re-rank of the S11 sound-timing mass at the frozen engine `ffe35b64a`, ranked "Next" list for the next run (measurement only; no src/ or tests/ change)
+
+Base: `ffe35b64a` (lpa1 landed, supervisor T2 ON 3,659 / exact 4,292, OFF 470 / 923). Tools: `tools/integration/t2k11/` (`detail.py`, `permove.py`, `repeats.py`) on top of `tools/integration/t2k10/classes.py` and `tools/integration/t2k4/`. Evidence (git-ignored): `.integration/evidence/t2k11/` (`t2/` the rescoreAll output, `c/` cmdtrace, `classes.txt`, `detail-{on,off}.txt`, `permove-{on,off}.txt`, `repeats-{on,off}.txt`, `s-poison/`, `s-tick/`, `s-tick1/`, `p/on/` probes, `lab-gsp3-base/`). The T2 seeds are the main tree's t2n dir (read-only); the engine replay and every output stayed in this worktree.
+
+### 1. T2 on this tree (rescoreAll.sh, both scenes, run split by scene)
+
+| Scene | mass | exact / offset | missing / extra | families |
+|---|---:|---:|---:|---|
+| ON | 3,659 | 4,292 / 1,585 | 0 / 0 | move-anim 2,928, controller 480, cry 153, stat 95, bgm 3 |
+| OFF | 470 | 923 / 210 | 0 / 0 | controller 300, cry 87, stat 81, bgm 2 |
+
+Matches the supervisor's figures exactly.
+
+### 2. Ranking by mechanism class (`classes.py`; every owned window, one class each)
+
+"clean" = window starts from a zero previous offset (the class's own term); the rest is carried from an earlier window. "<=2" = mass in windows with |step| <= 2, the D4 / VBlank-phase size (`docs/faithful-timing.md`), not an engine rule.
+
+| # | class | ON mass / win (clean) | OFF mass / win (clean) | <=2 share ON / OFF | carries it | own or inherited | likely engine site | status |
+|---|---|---:|---:|---|---|---|---|---|
+| 1 | 07a move body first row (per-move constant) | 1,458 / 192 (1,043) | 0 | 803 of 1,458 (55%) / – | after hit SE 578, segment start 330, after a move body 308, after a stat SE 114 | the <=2 part (144 windows) is D4; 3-5: 322 (32 win), >5: 333 (16 win), per move (below) | `BODY_SOUND_LEAD_ROWS` (`battleResolutionPresentation.ts` ~3016), per-move rows in `moveAnimSounds.ts` | no per-class recipe; see the per-move rows below (Charm = recipe B) |
+| 2 | 02 held-item / berry chain (SE 152 / 102 / 228) | 615 / 52 (255) | 0 | 380 of 615 (62%) / – | after a move body 250, after a hit SE 165, s1415 255, s5063 110, s2230 75, s8108 70 | 220 of the <=2 is carried; 4 windows > 5 = 200 | held-item rows (`HELD_ITEM_*` leads, `battleResolutionPresentation.ts`) | **hic1 Yawn overshoot after Curse (s1415 d21 -7, 50 mass) has a recipe**; s1415 d1 +19 (95) is ihl1; s5063 / s1415 loops are one seed each |
+| 3 | 05 end-of-turn tick / status animation (gen:148 / 197 / 219 / 140 / 189 / 242 / 180) | 446 / 51 (229) | 0 | 212 of 446 (48%) / – | after hit SE 170, after a move body 132, after a send-in / cry 50 | gen:148 116 / 16 win (+1 x11 of 12 clean, own); gen:197 77; gen:219 75 (s2741 d9 +6 x11 rows); gen:140 56 (s3738 d30 -10) | tick table + `statusAnimationScriptAge` (`moveAnimSounds.ts` ~255) | **recipe C below (gen:148 +1)**; no other recipe |
+| 4 | 03 hit SE 12 / 13 / 14 | 314 / 118 (133) | 200 / 61 (174) | 245 of 314 (78%) / 89 of 200 (45%) | ON: after a move body 306 / 117 win; OFF: segment start 90, after a hit SE 71 | ON mostly D4 (-1 x13 of 19 clean at ctl-hit:13 hit-animation); OFF own but spread: s7682 46, s1415 38, s6079 18 | hit-SE tail after the body | D4 for the -1 / -2 part; OFF s7682 d107 -13 / d28 -12 (28 mass) are one-seed; **fpr1 s1415 d50 -3 (42) has a recipe** |
+| 5 | 04 Focus Punch setup / lost-focus / item rows | 236 / 19 (83) | 0 | 29 of 236 (12%) / – | after a move body 117, hp / SE 90 50, gen 40 | s1415 d50 gen:171 -17 (55), s1415 body FOCUS_PUNCH 102 over 10 windows (+2 / +3 / +5), s310 d2 / s1415 d47 -3 (25 each) | Focus Punch rows | **fpr1 s1415 d50 forced-turn pre-pass is the recipe** (the -17 / -3 pair, ~97 mass); the +3 / +5 body windows are s1415 only |
+| 6 | 06 two-turn charge / second turn | 190 / 23 (130) | 0 | 96 of 190 (51%) / – | after a move body 118 | Dig 137 / 11 win: -2 x7 of 8 clean (s8108 5 windows = 66, s3738 1); s6 d1 -3 (30); s3738 d47 -4 (20); Bounce s2230 d5 +13 (13) | Dig second-turn rows | **dgt1 mechanism 2 (not folded: Bounce after a wake-up, s2230 d5 +13) needs a wake-up -> charge lab pair**; the Dig -2 is a candidate constant (s8108-heavy) |
+| 7 | 01b send-in / recall / party summary (SE 15 / 114) | 116 / 38 (82) | 100 / 31 (66) | 71 of 116 / 63 of 100 | after a faint 72 / 74 | party-summary 75 / 19 win ON (-1 x5, -2 x4 clean of 12), OFF 40 / 16; s6568 d104 -16 (OFF, harness pulse) | send-in rows | **snr1 party summary after a faint = measured negative, do not retry**; s6568 is a harness artifact |
+| 8 | 01a faint chain (SE 16, cry@faint) | 92 / 12 (34) | 78 / 16 (28) | 32 of 92 / 42 of 78 | after hit SE 72 / 54 | cry@faint +1 clean x7 of 12 (OFF), x3 of 7 (ON); s3738 d62 -8 (22 / 18), s7295 d1 -2 / -1 (20) | cry-at-faint delay | possible own rule (cry@faint +1, one lab missing); fcl1 landed the lead-body part |
+| 9 | 07b status-application body (B4) | 102 / 27 (84) | 0 | 93 of 102 / – | after a move body 70 | CONFUSE_RAY 24 / 3 win (+1 x3 of 3), SLEEP_POWDER 14, BRICK_BREAK 12, THUNDER_WAVE 10 | B4 body rows | **cre1 Confuse Ray 269 / 270 phase (the uniform +1) applies**; D4-sized |
+| 10 | 08 stat SE 239 / 245 | 74 / 23 (58) | 87 / 30 (82) | 40 of 74 / 29 of 87 | after a hit SE 27, move body 26 (ON); hit SE 44, segment start 33 (OFF) | s7295 d0 / d1 stat -8 / -9 x2 (cross-scene, recipe A), s5569 d7 -11 (OFF, recipe B) | hp -> stat tail (`HP_STAT_NEXT_TAIL_FRAMES`) | **recipes A and B below** |
+| 11 | 09 SE 90 / hp command | 14 / 14 | 3 / 2 | all <=2 | – | – | – | noise |
+| 12 | 10 other bgm | 2 / 2 | 2 / 2 | – | – | – | – | noise |
+
+Total ON 3,659 / OFF 470 (classes sum exactly). The <=2 buckets add up to 2,017 mass in 445 windows of ON (55%) and 228 in 106 windows of OFF (49%): about half of what is left is the D4 / VBlank-phase class and is not an engine rule.
+
+### 3. Class 1 per move (`permove.py`; windows grouped by the move whose body starts them)
+
+ON 1,458 over 192 windows. Largest: DOUBLE_EDGE 138 / 15 win (+1 x10 of 11 clean; s5063 alone is 9 windows = 36, a one-seed segment-start loop, so not a rule), ICE_BEAM 108 / 6 (s6079 d0 -4; t2k10 recipe 2 is a measured negative), CONFUSION 101 / 5 (s8108 d8 -7 = 72, d44 -13 = 26: one confusion head in one seed, two windows), YAWN 68 / 8, DOUBLE_TEAM 60 / 3 (s1415 d47 -3 is cross-scene), SURF 56 / 7, THUNDERBOLT 54 / 5, ANCIENT_POWER 45 / 12 (D4), CHARM 44 / 1 (s5569 d7 -11, recipe B), BLIZZARD 40, FRUSTRATION 39 (s6079 d6 -3, cross-scene), AGILITY 36, STRUGGLE 34 (s5063 3 windows), SPORE 34, GIGA_DRAIN 30 (s830 d10 -6), BITE 28. Every per-move row is below 140 mass.
+
+### 4. Next (ranked for the next run; recipe first where one exists)
+
+Recipes already measured in earlier sections, with the T2 mass they sit on in this ranking:
+1. **hic1 Yawn overshoot after Curse** (class 2, ON): s1415 d21 gen:152 -7 behind `body:CURSE`, 50 mass (+ the s1415 d1 +19 item-heal window is ihl1's, 95). Recipe in the hic1 section (check it against a lab of its own before landing).
+2. **fpr1 s1415 d50 forced-turn pre-pass** (classes 4 + 3, ON): gen:171 -17 (55) + the hit SE -3 (42) in the same forced turn, ~97 mass; fpr1 section 4 names the pre-pass -11.
+3. **dgt1 mechanism 2** (class 6, ON 13 now): not folded, one window (s2230 d5 Bounce +13), land it only with a wake-up -> charge lab pair (`CHARGE_TURN_AFTER_WAKE_UP_SOUND_LEAD_ROWS` 13, branch `worker/integration-20261124-230452`, `64ca8a034`).
+4. **cre1 Confuse Ray 269 / 270 phase** (class 9, ON 24 / 3 windows, +1 each): the uniform +1 of the ROM's Confuse Ray, D4-sized; no landing without a lab.
+5. **snr1 party summary after a faint** (class 7, ON 75 / OFF 40): measured negative; do not retry without a new lab shape.
+6. **lpa1 Roar foe +3**, **sdb1 Growl / Harden**, **mmc1 / dgt1 lab-start charge glyph 5-8 early**, **opr1 Yawn OFF after a hit / Curse**: all four have NO T2 mass at this base (Roar windows are inside the class 7 switch-out 22 ON, not a window of their own; Growl-family moves never appear in T2 matched rows; lab-start has no previous action so no T2 segment; OFF class 2 is 0). They are lab-only residuals; do not spend a T2 run on them.
+
+New recipes from this run (all measured on the T2 seeds, none landed):
+- **A. AllStatsUp hp -> stat SE early** (class 10 + the chain after it, cross-scene own term): s7295 d0 / d1 stat:239 -8 (ON) / -9 (OFF) clean, then the carried chain: ON 199 mass (the s7295 d0 Double-Edge -2 window carries -8: 50, the cry@faint after it 20, the stat windows 16, the rest), OFF 65 (stat 18, cry@faint 20, hit -1 behind it 10). Site: the hp -> stat tail (`HP_STAT_NEXT_TAIL_FRAMES` / `_OFF`, `battleResolutionPresentation.ts` ~3225-3234), a per-effect lead for the AllStatsUp stat row. Probe: `p/on/7295-d0*` (ON and OFF).
+- **B. Charm after `SafeguardProtected` -11** (class 1 ON 44 / OFF 11, one window each, s5569 d7): the Charm body SE sits 11 rows early after the Safeguard protected print. Probe `p/on/5569-d7`. One seed, so it needs a Safeguard -> Charm lab pair before landing.
+- **C. End-of-turn poison / burn tick SE is +1** (class 3 gen:148, 116 mass in 16 windows, +1 x11 of 12 clean): the gsp3 labs still show it (toxic-player-on 18, toxic-foe-on 12, willowisp 3 / 3), so it is a real rule, not phase. Two scratch edits on seeds 165 / 499 / 3738 (base 112 / 158 / 228): `END_TURN_STATUS_DAMAGE_LEAD_ROWS` `BattleScript_PoisonTurnDmg` 2 -> 1 gives only -13 (s165 -12, s499 +1, s3738 -2); `statusAnimationScriptAge` for `BattleScript_DoStatusTurnDmg` 0 -> 1 gives +84 (worse), 0 -> -1 gives +1,142 (a negative age is not a usable input, the rows are lost). Not the fix; next try: split the +1 by the previous command's tail (after a hit SE vs after a move body: 26 / 24 mass, 4 windows each) and use the gsp3 labs as the check. Both edits reverted.
+
+Cross-scene scene-free windows (the same window in ON and OFF, so the cause is not scene-specific): Ice Beam s6079 d0 -4, Charm s5569 d7, Double Team s1415 d47 -3, Frustration s6079 d6 -3, Dig s3738 d47 -4, the s7295 d0 / d1 stat chain (recipe A).
+
+Not chased: the <=2 clean windows of classes 1, 2 (carried part), 3 and 4 (D4 / VBlank phase, 2,017 ON + 228 OFF); one-seed loops (s5063 Double-Edge / Amnesia / Curse segment-start, s1415 Cross Chop x8, s3738 Metal Claw x6, s7682 hit SE x7 OFF, `repeats.py`); s6568 d104 (harness press pulse); the Ice Beam -4 (t2k10 recipe 2, negative).
+
+### 5. Tools
+- `tools/integration/t2k11/detail.py`: `T2K4_DIR=DIR python3 tools/integration/t2k11/detail.py SCENE [TOPN]` (per class: mass by |step| bucket x clean / carried, seed concentration, per-cause steps, top windows; needs `attr-{on,off}.json`).
+- `tools/integration/t2k11/permove.py`: per-cause / per-move window mass, the mode of the clean steps and the mass a constant would remove ("constgain").
+- `tools/integration/t2k11/repeats.py`: windows grouped by (class, cause, previous command, command type, step) with the seed count, to tell a rule from one seed's loop.
+- Reused: `tools/integration/t2k10/{classes.py,scratchT2.sh,seeddiff.py}`.
