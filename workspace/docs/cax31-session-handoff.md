@@ -73,6 +73,12 @@ Kyle plans to make this repo public with its full history (no rewrite, no licens
     then your 11-23 and 11-24 runs (cax31/master `68c79c902`) merged, then this handoff.
     - One conflict: `tests/randomRoundSoak.test.ts` seed 1's frames pin. Both sides moved it (yours to 58901, the Mac's to 57761).
       Measured on the merged tree: **59054**, same battle 3 / depth 2 / turn 19 / roundLost. Seed 0 (40615) is unmoved.
+    - **spd2c:** your battle timing desynced spd2's fixed-press seed 28 trace (no swap screen at all), so 2 of the 5
+      `tests/spd2RentalSwapSpindaSpots.test.ts` tests failed. Re-made with the same driver on the merged tree, same story, test frames
+      re-fit (`docs/spd2-rental-swap-spinda-spots.md`, "spd2c"). If your timing moves it again, re-make it the same way
+      (`.integration/evidence/spd2b/makeSpinda.mjs` on the Mac; the doc has the recipe); the ROM constants do not change.
+    - On the merged tree: `tsc -b` clean; full suite 1,997 files / 17,345 tests passed, and the 2 spd2 tests above (5/5 after spd2c);
+      `battleSoundTable.ts --check`: current.
 - **ffw1, fast-forward** (`docs/ffw1-fast-forward.md`): `FactoryGame.setSpeed(1..8)`. The loop runs that many of the same ticks per
   display frame, so traces, events and replays are identical at any speed; only real time is shorter. Sound is muted above 1 and the
   music is restored at the live frame on return to 1. The website offers it to listed player ids only.
