@@ -3013,7 +3013,7 @@ const REST_SOUND_LEAD_ROWS = -2;
  * fpr1: the opposite sign for Focus Punch 264 (-2, like Struggle / Rest): `Move_FOCUS_PUNCH` reaches its first `playsewithpan` after two loadspritegfx, `delay 1`, the IsContest / IsTargetPlayerSide task + jump pairs, waitbgfadein, monbg and setalpha;
  * the four body SEs are 2 rows early on the clock in the mechanic-focus-punch-*-on labs and T2 s1415 (every strike window -2).
  */
-const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3], [165, -2], [220, 3], [111, 4], [74, 4], [264, -2], [335, 3]]);
+const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3], [165, -2], [220, 4], [111, 4], [74, 4], [264, -2], [335, 3], [278, 5]]);
 const REST_HEAL_PRINT_TAIL_ROWS = 10;
 function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
   if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
@@ -8064,6 +8064,42 @@ function usedMoveSoundLeadsOf(state: BattleResolutionPresentationState, u: numbe
     ? { hit: USED_MOVE_SOUND_LEAD, script: USED_MOVE_SOUND_LEAD, anim: USED_MOVE_SOUND_LEAD }
     : { hit: USED_MOVE_SOUND_LEAD, script: 0, anim: Math.min(u - USED_MOVE_LEAD_MIN_U, USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON) };
 }
+/**
+ * mlb1 (Scene ON; ROM labs hie5-swordsdance-foe-on / cre1-conf-swordsdance-s1-on / mtl1-painsplit-leech-s1-on): the table-SE tick lead min(u - 2, 2) is the
+ * lead of the action's OWN used print (its instructionExecution u), not of the turn's first one: a second action presents Swords Dance's command -> SE gap 12 / 13
+ * (u 4 after a first u 3; u 73 after a confused head) against the ROM's 11, and Leech Seed's 42 (u 2 after a first u 3) against 43. Null for the turn's first action
+ * (the turn-level lead stays), a continuation segment, Scene OFF or a command without a used print in front of it.
+ */
+function laterActionPrintU(state: BattleResolutionPresentationState): number | null {
+  if (sceneOffOf(state) || state.usedMovePrintU === undefined || state.segmentIndex !== 0) return null;
+  const segment = state.segments[0];
+  const command = segment?.commands[state.commandIndex];
+  if (segment === undefined || command === undefined || !("eventSequence" in command)) return null;
+  const at = segment.events.findIndex((event) => event.sequence === command.eventSequence);
+  const isUsed = (event: (typeof segment.events)[number]) => event.payload.kind === "message" && event.payload.messageId === "STRINGID_USEDMOVE";
+  const firstUsed = segment.events.findIndex(isUsed);
+  for (let i = at; i > firstUsed && i >= 0; i -= 1) {
+    if (!isUsed(segment.events[i]!)) continue;
+    // The called move's print inside a calling move's action (Metronome / Mirror Move / Sleep Talk / Assist / Nature Power) is not a later action: no Scene ON ROM row measures it, so it keeps the turn-level lead.
+    for (let j = i - 1; j >= firstUsed; j -= 1) {
+      if (!isUsed(segment.events[j]!)) continue;
+      const previous = (segment.events[j]!.payload as { actionSnapshot?: { currentMove?: number } }).actionSnapshot?.currentMove;
+      if (previous !== undefined && [118, 119, 214, 267, 274].includes(previous)) return null;
+      break;
+    }
+    const u = segment.events[i]!.provenance?.instructionExecution;
+    return u === undefined || u < USED_MOVE_LEAD_MIN_U ? null : u;
+  }
+  return null;
+}
+function actionSoundLeadBase(state: BattleResolutionPresentationState): number {
+  const u = laterActionPrintU(state);
+  return u === null ? Math.min((state.usedMovePrintU ?? 0) - USED_MOVE_LEAD_MIN_U, USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON) : Math.min(u - USED_MOVE_LEAD_MIN_U, USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON);
+}
+export function usedMoveAnimSoundLeadOf(state: BattleResolutionPresentationState): number {
+  const u = laterActionPrintU(state);
+  return u === null ? state.usedMoveAnimSoundLead ?? 0 : Math.min(u - USED_MOVE_LEAD_MIN_U, USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON);
+}
 export function usedMoveBodySoundLeadOf(state: BattleResolutionPresentationState): number {
   // mvs1 x hcr1b (merge of the box's 2026-11-20 run with the Mac's 11-21 fixes): Scene OFF plays move-body SEs only for Transform and Substitute
   // (Cmd_attackanimation's HITMARKER_NO_ANIMATIONS exception), on mvs1's script clock (`moveAnimationScriptStartRow`), whose + 4 was fitted to the ROM's SE log
@@ -8073,7 +8109,7 @@ export function usedMoveBodySoundLeadOf(state: BattleResolutionPresentationState
   if (sceneOffOf(state)) return 0;
   const u = state.usedMovePrintU;
   if (u === undefined) return state.usedMoveAnimSoundLead ?? 0;
-  const base = Math.min(u - USED_MOVE_LEAD_MIN_U, USED_MOVE_ANIM_SOUND_LEAD_SCENE_ON);
+  const base = actionSoundLeadBase(state);
   const commands = state.segments[state.segmentIndex]?.commands ?? [];
   const command = commands[state.commandIndex];
   if (command?.type !== "move-animation" || command.animation === undefined) return base;
