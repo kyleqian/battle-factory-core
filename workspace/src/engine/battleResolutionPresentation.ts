@@ -2291,6 +2291,32 @@ function heldItemEffectAfterAsleepLead(events: readonly BattleKernelSemanticEven
     ? HELD_ITEM_EFFECT_AFTER_ASLEEP_LEAD_FRAMES : null;
 }
 /**
+ * opr1 (lab fpr1-rest-leftovers-off, ISSUES #219): Scene OFF's Leftovers print after `BattleScript_MoveUsedIsAsleep` (no status animation is drawn; the 3-row jump to MoveEnd, then the
+ * item script restarts) is ROM MoveEnd+0x0 1627 -> `ItemHealHP_Ret+0xa` print 1672 = 45 rows; the 15-row restart lead put it 53 after (+8), so the hold's lead is 7. Scene OFF only (the caller).
+ */
+export const HELD_ITEM_EFFECT_AFTER_ASLEEP_OFF_LEAD_FRAMES = 7;
+/**
+ * opr1 (lab hic1-yawn-leftovers-off): Scene OFF has no SLP status animation, so `BattleScript_YawnMakesAsleep`'s print is the engine's MoveEnd row + 1 where the ROM's is MoveEnd + 12
+ * (ROM MoveEnd+0x0 1638, Yawn+0x0 1647, print 1650; the 8-row YAWN_SLEEP_ANIMATION_LEAD_ROWS plus the skipped animation command's 3 rows), -11 / -12 in every OFF Yawn lab: a pause before the print.
+ * The Leftovers print after it then comes 9 rows too late, so its hold lead is 6.
+ */
+export const YAWN_SLEEP_OFF_PRINT_LEAD_FRAMES = 11;
+export const HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_OFF_LEAD_FRAMES = 6;
+function yawnSleepOffPrintLeadFrames(event: BattleKernelSemanticEvent): number {
+  const provenance = event.provenance;
+  if (provenance === undefined || provenance.sourceLabel !== YAWN_MAKES_ASLEEP_SCRIPT || provenance.programCounter < 1) return 0;
+  return BATTLE_SCRIPT_PROGRAM.instructions[provenance.programCounter - 1]?.opcodeName === "B_SCR_OP_STATUSANIMATION" ? YAWN_SLEEP_OFF_PRINT_LEAD_FRAMES : 0;
+}
+function heldItemEffectAfterAsleepOffLead(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  if (heldItemEffectAfterYawnSleepLead(events, index) !== null) return HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_OFF_LEAD_FRAMES;
+  let print = index - 1;
+  while (print >= 0 && events[print]!.provenance?.sourceLabel === "BattleScript_MoveEnd") print -= 1;
+  if (print < 0 || print === index - 1) return null;
+  const event = events[print]!;
+  return event.payload.kind === "message" && event.provenance?.sourceLabel === "BattleScript_MoveUsedIsAsleep"
+    ? HELD_ITEM_EFFECT_AFTER_ASLEEP_OFF_LEAD_FRAMES : null;
+}
+/**
  * hie1: Scene OFF's presented hold for an item print whose source is `playanimation ..., B_ANIM_HELD_ITEM_EFFECT` right before it
  * (battle_script_commands.c:4014-4018 -> BattleScript_Pausex20, `pause B_WAIT_TIME_SHORT` = 32 frames). Every instruction from the
  * previous receipt to the print runs once per frame (the pause's own blocked retries included), so the hold is that execution count
@@ -2356,6 +2382,7 @@ export const HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA = 5;
 const HELD_ITEM_LEAD_DELTA_MESSAGE_LEADS: Readonly<Record<string, number>> = {
   BattleScript_HitFromAtkAnimation: HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES,
   BattleScript_MoveMissed: HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES,
+  BattleScript_ButItFailed: HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES,
 };
 function itemHealAfterResultMessage(events: readonly BattleKernelSemanticEvent[], messageIndex: number, lead: number): boolean {
   let before = messageIndex - 1;
@@ -2377,7 +2404,8 @@ function heldItemEffectOffHoldFrames(
   ) return null;
   if (instruction.operands.some((operand) => operand.expression === "B_ANIM_ITEM_KNOCKOFF")) return ITEM_KNOCKOFF_OFF_HOLD_FRAMES;
   const { executions, lead } = heldItemEffectExecutionsAndLead(events, messageIndex);
-  const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined) ?? lead;
+  const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined)
+    ?? (lead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterAsleepOffLead(events, messageIndex) : null) ?? lead;
   return (executionsPresented ? 0 : executions) + leadFrames - (itemHealAfterResultMessage(events, messageIndex, lead) ? HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA : 0);
 }
 /**
@@ -6709,6 +6737,15 @@ export function projectBattleResolutionCommands(
         }
       }
       const selfConfusionOff = payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+      const yawnOffLead = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 ? yawnSleepOffPrintLeadFrames(event) : 0;
+      if (yawnOffLead > 0) {
+        commands.push(Object.freeze({
+          type: "move-animation",
+          eventSequence: event.sequence,
+          battler: lastMoveAttacker ?? 0,
+          timing: Object.freeze({ minimumFrames: yawnOffLead }),
+        }));
+      }
       const prePrintPause = anchorlessPrePrintPauseFrames(event);
       if (prePrintPause !== null) {
         commands.push(Object.freeze({
