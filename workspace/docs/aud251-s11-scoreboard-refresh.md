@@ -5817,8 +5817,8 @@ Items 1 - 3 only improve together: the predicate alone, or the predicate with th
 **Tests:** 237 files / 2,070 tests (every file importing `battleResolutionPresentation.ts` / `liveMoveAnimation.ts`, `randomRoundSoak*`, `lbrd`) and 39 further files / 924 tests (grep of Fly / Dig / Bounce / continuation / chg / aud2 / fam1 / apx / fch) green, no pin moved; `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests), `npm run build` green. No move animation script or `moveAnimSounds.ts` was touched (`battleSoundTable --check` / `fam1*` not needed; fam1 files were run anyway).
 
 **Left:**
-- **s3738 d47 (player's Dig after the foe's Sand-Attack miss)**: the engine's first-turn tail of the player's Dig is 7 .. 10 rows short (turn-end at 578 against ROM `FirstTurnSemiInvulnerable+0x5` 588), so the second turn is -9 with the player lead and -16 without it. Fix the Dig first-turn tail, then drop the player lead.
-- **s2230 d5 Bounce (+13) and chg2 Bounce labs (314 / 5114)**: unchanged; Bounce's chain has its own paralysis / wake-up offsets.
+- **LANDED by dgt1 (346591ce2).** **s3738 d47 (player's Dig after the foe's Sand-Attack miss)**: the engine's first-turn tail of the player's Dig is 7 .. 10 rows short (turn-end at 578 against ROM `FirstTurnSemiInvulnerable+0x5` 588), so the second turn is -9 with the player lead and -16 without it. Fix the Dig first-turn tail, then drop the player lead.
+- **LANDED by dgt1 (64ca8a034; s2230 d5 +13) / measured by dgt1 (the chg2 Bounce lab masses are an RNG artifact, see dgt1).** **s2230 d5 Bounce (+13) and chg2 Bounce labs (314 / 5114)**: unchanged; Bounce's chain has its own paralysis / wake-up offsets.
 - **Fly / Dig second-turn lead for other previous bodies** (placeholder Tackle / Growl) still rely on the lead as cover.
 - The after-confusion constant has a second fit (63) that one window prefers.
 
@@ -5849,8 +5849,8 @@ Base: fold-20261124d (`1af980e6d`). Commits: `a4475a832` (264 body lead), `04e84
 
 ### 4. What is left (measured, not landed)
 - s1415 d50 second Focus Punch pre-pass SE 171 is -11: the turn is a forced (menu-less) one; the ROM has ~11 extra rows (foe AI choose-move rows 705 -> 713, then `BattleScript_FocusPunchSetUp` at 718), the engine's message -> SE gap is 11 in both cases. Needs a forced-turn lead for the pre-pass message in the same place as the Struggle forced-handoff hold (`tests/enc276ForcedTurnNoMenu.test.ts`); one window, not landed.
-- s1415 res1 / 11 / 15 / 18 and s2230 res2 item chains after the SLP animation did not move (their receipts before the item script differ from the lab's); the recipe above covers only the status-animation + MoveEnd shape. Re-probe those seeds' preceding events before widening it.
-- Scene OFF: the Leftovers print after the asleep turn is +8 in `fpr1-rest-leftovers-on.off` (print only, no SE, so T2 OFF cannot see it).
+- **LANDED by hic1 (the Yawn-sleep shape: `BattleScript_YawnMakesAsleep` SLP animation + Leftovers chain; see "hic1")** s1415 res1 / 11 / 15 / 18 and s2230 res2 item chains after the SLP animation did not move (their receipts before the item script differ from the lab's); the recipe above covers only the status-animation + MoveEnd shape. Re-probe those seeds' preceding events before widening it.
+- **LANDED by opr1 (see "opr1")** Scene OFF: the Leftovers print after the asleep turn is +8 in `fpr1-rest-leftovers-on.off` (print only, no SE, so T2 OFF cannot see it).
 - SE 90 -> item chain -3 / -4 (s310 d2, s1415 d47 / d48): mostly carried from fpf1's remaining -5; +-1 / +2 body windows after Rest / Yawn / Cross Chop are jitter / carried from the preceding command.
 
 ## mlb1 (2026-11-25, ts lane, Scene ON first, OFF checked; S11 sound timing, ISSUES #219): Mean Look / Block print rows + Block SE lead (LANDED); Swords Dance and Leech Seed share one per-action used-print lead term (measured, patch carried, tests need re-pins)
@@ -5873,3 +5873,93 @@ Base: fold-20261124d (`1af980e6d`). Commits: `a4475a832` (264 body lead), `04e84
 - Spider Web 169 (shares `EffectMeanLook`) has no lab; the Tackle (mv33) body SE missing in the Mean Look labs (mass 14 each).
 - Per-action lead patch above (-274 T2 ON mass), then Pain Split `[220, 3]` and Roar-opponent refits.
 - Not run by this worker: `npm run test:gate` / `npm run build` if listed in PROGRESS.md as not run (see the top entry).
+
+## hic1 (2026-11-24, side lane, Scene ON first, OFF checked): t2k10 class 2 (held-item / berry chains) - the end-turn Yawn-sleep chain LANDED (SLP animation lead + item restart lead); the other groups are jitter or carried
+
+### 1. Re-measure and grouping
+Fresh `rescoreAll.sh` (base `2064b6f3d`) + `t2k4/cmd.sh` + `attr.py` + `t2k10/classes.py on 12`: ON T2 exact 4108 / offset 1769 / 0 missing / 0 extra / mass 4103; class 02 (held-item / berry chain) 710 mass over 59 windows, class 05 (tick / status animation) 455. Class-2 windows grouped by the command before the item script:
+- **Yawn makes asleep (s1415 d11 / d15 / d18 / d1, s2230 d2)**: `BattleScript_YawnMakesAsleep` (`statusanimation; printstring FELLASLEEP; waitmessage LONG; updatestatusicon; waitstate; makevisible; end2`) then a Leftovers `ItemHealHP` chain. Item windows +6 (about 105 mass) plus the SLP SE 197 windows in class 05 (-8 .. -12, about 59 mass). **LANDED.**
+- stat-message then item (+1 jitter), message-message-item (-1 jitter), hit / hp / item (-1 / -2): carried from the preceding command; not a lead.
+- Not landed: s1415 d1 +19 (a second chain, status-icon 12 + berry; the ihl1 / gen:102 case), s8108 d44 (+1 after hit SE 14, previous -13), s648 d6 (Leech Seed + heal), s1415 d21 (-7 after Curse), s1415 d50 (forced-turn pre-pass, fpr1 item).
+
+### 2. Landed (Scene ON only, `battleResolutionPresentation.ts`)
+- `YAWN_SLEEP_ANIMATION_LEAD_ROWS` = 8, `yawnSleepAnimationLeadRows`: the `BattleScript_YawnMakesAsleep` SLP status-animation command gets `seGateFrames` 8 (when the real IsBattleSEPlaying gate is 0), so the SE and the message after it shift together. ROM (probe s1415 d11, s2230 d2): `MoveEnd+0` -> `YawnMakesAsleep+0` is 8 rows, SLP SE at MoveEnd + 12 / 13; the engine's command started on the MoveEnd row (SE at +4).
+- `HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_LEAD_FRAMES` = 9 (`heldItemEffectAfterYawnSleepLead`, sibling of fpr1's asleep lead, keyed on the previous command's source label): the Leftovers command after the Yawn sleep print is 6 rows shorter than the generic 15-row restart lead (T2 item SEs +6 against the SLP SE; lab +8 -> +1).
+- Lab `tools/battle-lab/hic1-yawn-leftovers-{on,off}.json` (new; Yawn foe with Leftovers, three turns, Sonic Boom so the foe survives); pin `tests/hic1YawnSleepChain.test.ts`.
+
+### 3. Acceptance (`2064b6f3d` -> `642af57f0`)
+| | before | after |
+|---|---:|---:|
+| T2 ON exact / offset / mass | 4108 / 1769 / 4103 | 4121 / 1756 / 4021 |
+| T2 OFF exact / offset / mass | 923 / 210 / 470 | 923 / 210 / 470 |
+| missing / extra | 0 / 0 | 0 / 0 (both scenes) |
+| class 02 mass (windows) | 710 (59) | 615 (54) |
+| class 05 mass | 455 | 468 (the SLP SE windows with a -8 head now over-shoot a few rows; net class 2 + 5 -82) |
+| lab hic1-yawn-leftovers-on SE mass / PRINTS mass | 34 / 25 | 28 / 17 |
+| lab hic1-yawn-leftovers-off SE / PRINTS mass | 0 / 27 | 0 / 27 |
+
+- Census 0..199 (`lsd194Census.sh` shards 0 1, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 in ON and OFF; OFF byte-identical 2 / 2, ON 4 of 200 battles changed in timing fields only (0 type changes). tree/ copies deleted.
+- Tests: tests importing the changed file + `randomRoundSoak*` + `lbrd` pass; no pin needed re-pinning.
+- Play change named: Scene ON, the end-turn Yawn sleep animation / message starts 8 rows later and a Leftovers animation after it 6 rows earlier (ROM-faithful); no rule / RNG / event-order change.
+
+### 4. What is left (measured, not landed)
+- The Yawn SLP offset depends on the preceding command's tail: ROM MoveEnd -> SE is +12 after ButItFailed / hit messages but the engine's command begins 8 .. 12 rows early depending on the preceding print hold (Curse stat print vs ButItFailed); a single constant of 8 over-shoots the Curse shape (s2230 d2, s310 d3) by about 4 rows. A per-previous-command lead needs the hie5-style kernel term (exec counts do not explain it: T = 1 / 2 / 1 for the three shapes).
+- The items listed under 1 "Not landed". Scene OFF: the Leftovers print after Yawn sleep is -2 (turn 2) / +5 (turn 3), the hie turn-1 +6 term; print only, T2 OFF cannot see it.
+
+## dgt1 (2026-11-24): the player's Dig first-turn tail and s2230 d5 Bounce -- LANDED (two commits)
+
+Scene ON first, OFF as the control. Base `ae7e7d3fd` (mmc1 tip). Code commits `346591ce2` (mechanism 1) and `64ca8a034` (mechanism 2, tree `2c2cc650a`). Presentation / sound timing only: census eventsDigest identical. Evidence (git-ignored): `.integration/evidence/dgt1/`.
+
+**Mechanism 1 (`346591ce2`): the player's charging turn after a modelled action, then the player's second-turn lead dropped.** ROM (chg4-dig-lightscreen-on, T2 s3738 d47): `BattleScriptFirstChargingTurn` animation end 468 -> dug-hole glyph 476 (the orword / setmoveeffect / seteffectprimary / copybyte / printfromtable rows), glyph -> `FirstTurnSemiInvulnerable+0x5` 560 (84 rows against the engine's 83), `MoveEnd` 562 -> next turn's used print 585 (25 against 23). The engine's glyph was 10 rows early and the chain to the next print 13 rows short; the second-turn press lead (`twoTurnSecondPrintLead`) was cover. Rule (`playerChargePrintAfterModelledAction`, Scene ON, player attacker, Dig / Fly / Dive / Bounce / Skull Bash / Sky Attack, previous action ends in `BattleScript_MoveEnd` with a modelled body): the dug-hole glyph gets `leadFrames` 10 and its hold +3; the same moves' second-turn lead is then dropped exactly as for the foe (mmc1) and Solar Beam (ttb1).
+- **Play change named (Scene ON, ROM-faithful):** the player's Dig / Fly / Dive / Bounce / Skull Bash / Sky Attack first charging turn after a modelled action opens its dug-hole glyph 10 rows later with 3 more hold rows, and its second turn starts without the press lead.
+- Labs: chg4-dig-lightscreen-on 44 -> 20, stm1-sd-dig-on 50 -> 24, the other 39 labs unchanged. T2 ON mass 4,246 -> 4,195 (exact 4,068, only s3738 moves: 323 -> 272; res47 second-turn SEs -9 -> -3). The first-turn SE 175 stays -4 there (a standing body-dependent offset, not touched).
+- Pins: new `tests/dgt1PlayerDigTail.test.ts` (chg4-dig-lightscreen-on SE 141 / 13 at 808 / 846 and 1756 / 1794; fails on the base with 802 / 1750). `tests/animation/liveFlyBounce.test.ts` was already red on the mmc1 tip: the Fly strike body is 76 rows since mmc1's Fly shape-a body (it pinned 68); re-pinned `rows: [43, 76]` (not caused by dgt1; measured at the base with the file checked out).
+
+**Mechanism 2 (`64ca8a034`): a charger that woke up first (s2230 d5, Bounce).** The T2 window is the player's turn opening with `BattleScript_MoveUsedWokeUp` (wake-up print + status icon), then the Bounce charge. `chargeTurnSoundLead` returned no lead for any detour except confusion, so the first SE 203 sat at engine 129 against ROM 116 (+13, all later rows of the turn within 1). Rule: `CHARGE_TURN_AFTER_WAKE_UP_SOUND_LEAD_ROWS` = 13 (sound clock only, the command durations and pixels are untouched), the wake-up twin of the after-confusion 11. One ROM window only (no lab has a woken charger); thaw is not covered.
+- Labs: all 38 compared labs identical (no lab has a woken charger). T2 ON 4,195 -> **4,182** (exact 4,068 -> 4,069, only s2230: 368 -> 355). No pin moved (80 test files naming Bounce / wake / soundAgeLeadFrames green).
+
+**Bounce labs (the 314 / 5114 masses): measured, no rule needed.** `chg2-bounce-opponent-on` 314 and `chg2-bounce-player-on` 5,114 .. 6,138 are an RNG artifact: with the default engine RNG the foe's / player's accuracy rolls disagree with the ROM, so the engine misses (or hits) where the ROM does the opposite and the rows no longer pair. With `ENGINE_RNG_SEED` 2 .. 6 (opponent lab) the mass is 5; with `ENGINE_RNG_SEED=5` (player lab) it is 192 (`b4mEngine.ts` documents the seed; the lab list does not carry it). What remains in the player lab at seed 5 is the no-previous-action first turn: dug-hole glyph -8 (Dig / Bounce -8, Dive -7, Fly -5, Sky Attack -2 at lab start, every lab above: E - 2 rows), the following print -8 .. -10 and the foe's hit SEs -9.
+
+**Left (recipe).**
+- **Lab-start (no previous action) first charging turn:** the glyph is E - 2 rows early (Dig / Bounce 8, Dive 7, Fly 5), and the rows are not just a lead: in the Dig labs the next foe chain (`PrintMoveMissed` -> `MoveMissed`) reconverges to 0 at `MoveMissed+0x2` with the glyph 8 early, so a flat +8 lead makes it +8 late; the foe's hit SEs after a Bounce (seed 5) stay -9 until the MoveMissed first-print rule (mmc1: 11 rows early) is separated from the glyph lead. Recipe: give the player's lab-start glyph its E - 2 lead only when the next action is not a miss chain, and re-measure bdt1-dig-player / chg2-bounce-player (ENGINE_RNG_SEED=5) / prep11-bounce-alt-ponyta.
+- Wake-up first Bounce: only one window; a second ROM window (a woken Dig / Fly) would confirm 13 for the other moves.
+- Standing: first-turn SE 175 -2 .. -4 on the Dig labs (chg4 opener).
+
+**T2 (25 ON / 24 OFF aligned seeds, 0 missing / 0 extra):** ON mass 4,246 -> **4,182** (exact 4,068 -> 4,069; changed seeds s3738 323 -> 272, s2230 368 -> 355), OFF 470 -> 470 (exact 923 / offset 210, unchanged).
+**Census 0..199** (`lsd194Census.sh` shards 0 1, base `ae7e7d3fd` vs the working tree of each commit): eventsDigest + error identical 200 / 200 in both scenes after mechanism 1 (ON 4 battles with changed command timing, OFF byte-identical 200 / 200) and after mechanism 2 (ON 200 / 200 identical commands, only the sound rows move). Tree copies deleted.
+**Tests:** 423 files / 5,711 tests (every file importing `battleResolutionPresentation.ts` / `liveMoveAnimation.ts`, `randomRoundSoak*`, `lbrd`, Dig / Fly / Bounce / continuation / chg greps) green after mechanism 1 except the mmc1-stale `liveFlyBounce` pin (re-pinned); 80 files naming Bounce / wake / `soundAgeLeadFrames` green after mechanism 2; `npm run typecheck`, `npm run test:gate` (360 files / 2,839 tests), `npm run build` green. No move animation script or `moveAnimSounds.ts` was touched.
+
+**Supervisor fold note (2026-11-25):** mechanism 1 (`346591ce2`, the player's charging-turn tail) is folded. Mechanism 2 (`64ca8a034`, `CHARGE_TURN_AFTER_WAKE_UP_SOUND_LEAD_ROWS` 13 for a charger that woke up first) is **not folded**: it rests on one T2 window (s2230 d5) with no lab, the same bar under which ttf1's Solar Beam-only drop and ait1's 102 tray were held. It stays on branch `worker/integration-20261124-230452` as a recipe; land it with a wake-up -> charge lab pair. The liveFlyBounce re-pin to the literal 76 was replaced by the mmc1 helper form (68 + `hpd4BodyRows`).
+
+- The items listed under 1 "Not landed". **LANDED by opr1 (see "opr1")** Scene OFF: the Leftovers print after Yawn sleep is -2 (turn 2) / +5 (turn 3); print only, T2 OFF cannot see it.
+
+## opr1 (2026-11-25, side lane, Scene OFF): the two print-only Scene OFF item residuals LANDED (Leftovers after an asleep turn, Yawn sleep print + Leftovers / berry after it, Leftovers after a ButItFailed print)
+
+Base: fold-20261124e (`c4755ad68`). Evidence (git-ignored): `.integration/evidence/opr1/` (`lab-base`, `lab-base2`, `lab-a1`, `lab-a2`, `lab-after`, `t2-{base,after}`). All in `battleResolutionPresentation.ts`, Scene OFF hold only (the ON path is unchanged).
+
+### 1. Item print after an asleep turn (fpr1 section 4 bullet): LANDED by opr1 (`HELD_ITEM_EFFECT_AFTER_ASLEEP_OFF_LEAD_FRAMES` 7, `heldItemEffectAfterAsleepOffLead`)
+- Scene OFF skips `statusanimation`, so the kernel has no status-animation receipt: the event before the item chain is the `BattleScript_MoveUsedIsAsleep` print + MoveEnd. ROM (`fpr1-rest-leftovers-off`): `MoveEnd+0x0` 1627 -> `ItemHealHP_End2+0x0` 1635 -> Pausex20 -> `ItemHealHP_Ret+0xa` print 1672 = 45 rows; the engine's 15-row restart lead put it at 1680 (+8). The hold's lead is now 7 (the hold is the 36 script executions + lead).
+
+### 2. Yawn sleep print and the item chain after it (hic1 section 4 bullet): LANDED by opr1 (`YAWN_SLEEP_OFF_PRINT_LEAD_FRAMES` 11, `HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_OFF_LEAD_FRAMES` 6, `BattleScript_ButItFailed` in `HELD_ITEM_LEAD_DELTA_MESSAGE_LEADS`)
+- `BattleScript_YawnMakesAsleep` print (Scene OFF, `statusanimation` skipped): ROM `MoveEnd+0x0` 1638 -> `YawnMakesAsleep+0x0` 1647 -> print 1650 = MoveEnd + 12; the engine printed on MoveEnd + 1 (-11 / -12 in every OFF Yawn lab). A `move-animation` hold of 11 rows now sits before the print (a new presentation command in the segment; no event change).
+- The Leftovers / Chesto print after it then came 9 rows late (-2 + 11), so the item hold's lead after the Yawn print is 6 (15 - 9): ROM print 1777 = engine 1777; the Chesto berry print in `mechanic-yawn-endturn-items2-chesto-off` -3 -> -1.
+- Turn 3 shape (Yawn fails: `ButItFailed` print, MoveEnd, Leftovers): the ROM print is MoveEnd + 46, the engine's 51 (+5): the `BattleScript_MoveMissed` miss-shape delta (bcm1, `HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA` 5) applies to `BattleScript_ButItFailed` too (restart lead 15): +5 -> 0.
+
+### 3. Acceptance (`c4755ad68` -> `37a352926` + test commits)
+| | before | after |
+|---|---:|---:|
+| lab fpr1-rest-leftovers-off PRINTS mass | 8 | 0 |
+| lab hic1-yawn-leftovers-off PRINTS mass | 27 | 9 (the -1 left is carried from the asleep print of turn 3) |
+| lab mechanic-yawn-endturn-items2-chesto-off / -transition-off PRINTS mass | 19 / 16 | 6 / 5 |
+| other OFF item / asleep labs (hie1-{leftovers,sitrus,shellbell,cheri}, ihm1-sbell-{hp,nve}, bcm1-bounce-leftovers-plr, mechanic-yawn-landing, attack-canceler-asleep, pau3-rest, bdt1-rest3-player, etp1-{spore,leftovers}, mechanic-endturn-items1-leftovers, mechanic-sleep-talk-whiscash-spore) PRINTS mass | unchanged | unchanged (all 15 identical) |
+| T2 OFF exact / offset / mass (`rescoreAll.sh`, OFF only) | 923 / 210 / 470 | 923 / 210 / 470 (SE-blind: 0 missing / 0 extra) |
+| T2 ON | unchanged by construction (the ON paths are not edited; the new code is behind HITMARKER_NO_ANIMATIONS / the OFF hold) | |
+
+- Census 0..199 (`lsd194Census.sh` shards 0 1, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 in OFF and ON; ON byte-identical 2 / 2 (0 changes); OFF 21 of 200 battles changed (60010 commands), 4 with a type-sequence change = the inserted Yawn `move-animation` hold (a presentation command, not an event). tree/ copies deleted.
+- Tests: the 260 files importing `battleResolutionPresentation.ts` or naming the constants + `randomRoundSoak*` + `lbrd` pass; one test needed a change: `tests/sag130StatusSeGate.test.ts` (ON vs OFF status-SE gate) now drops the OFF Yawn print pause from its OFF command list (it is not an SE gate; the ROM row it matches is MoveEnd + 12 above). New pin `tests/opr1OffPrintLeads.test.ts`.
+- Play change named: Scene OFF, the end-turn "fell asleep" print appears 11 rows later and the Leftovers / berry print after an asleep turn, a Yawn sleep, or a failed Yawn lands on the ROM row (the next press moves with it); no rule / RNG / event-order change.
+
+### 4. What is left (measured, not landed)
+- hic1-yawn-leftovers-off: the turn-3 asleep print and the Yawn / ButItFailed prints after it are -1 (carried from the turn start, 1 row; the same -1 sits on the turn-2 Yawn print in the chesto lab).
+- The Yawn sleep print lead of 11 is measured on the ButItFailed-preceded shape only (the three OFF Yawn labs); a Yawn sleep after a hit message or a Curse print is unmeasured in OFF (the ON side showed the lead depends on the previous command's tail, hic1 section 4).
+- `mechanic-yawn-endturn-*-off` / `fpr1` "missing" rows are the MoveEnd+0x9 print the lab compare cannot align (unchanged).

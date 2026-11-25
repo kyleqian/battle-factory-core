@@ -2257,6 +2257,26 @@ function heldItemEffectAfterPrintLead(events: readonly BattleKernelSemanticEvent
   return HELD_ITEM_EFFECT_AFTER_PRINT_LEAD_FRAMES + moveEndExecution - printExecution - waitFrames - 2;
 }
 /**
+ * hic1 (lab hic1-yawn-leftovers-on; T2 ON s1415 d1 / d11 / d15 / d18, s2230 d2, s310 d3): the end-turn `BattleScript_YawnMakesAsleep` (`statusanimation; printstring;
+ * waitmessage LONG; updatestatusicon; waitstate; makevisible; end2`) is entered 8 rows after `BattleScript_MoveEnd`'s row (ROM MoveEnd+0x0 874 -> Yawn+0x0 882, SLP SE 886 =
+ * MoveEnd + 12; the engine's SLP command started on the MoveEnd row, SE at +4): the animation (and the print after it) starts that much later. Scene ON only (Scene OFF has no
+ * status-animation command). A real SE gate (the sandstorm path, seg127 `yawn`) already holds the animation and replaces the lead.
+ */
+export const YAWN_SLEEP_ANIMATION_LEAD_ROWS = 8;
+const YAWN_MAKES_ASLEEP_SCRIPT = "BattleScript_YawnMakesAsleep";
+function yawnSleepAnimationLeadRows(event: BattleKernelSemanticEvent): number {
+  return event.provenance?.sourceLabel === YAWN_MAKES_ASLEEP_SCRIPT ? YAWN_SLEEP_ANIMATION_LEAD_ROWS : 0;
+}
+/**
+ * hic1: the item script (Leftovers / Sitrus ...) that restarts right after `BattleScript_YawnMakesAsleep`'s `makevisible` begins its animation 6 rows earlier than the
+ * 15-row restart lead places it (T2 ON s1415 d11 / d15 / d18: item SEs +6 against the SLP SE; the lab's +8; ROM `end2` -> ItemHealHP_End2 5 rows, SEs at the Ret+0x7 row + 8).
+ * Scene ON only (the caller).
+ */
+export const HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_LEAD_FRAMES = 9;
+function heldItemEffectAfterYawnSleepLead(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  return index > 0 && events[index - 1]!.provenance?.sourceLabel === YAWN_MAKES_ASLEEP_SCRIPT ? HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_LEAD_FRAMES : null;
+}
+/**
  * fpr1 (lab fpr1-rest-leftovers-on; T2 s310 d4 / d5, s1415, s2230): an item script that restarts after `BattleScript_MoveUsedIsAsleep`'s SLP status
  * animation (playanimation, then the 3-row jump to MoveEnd) begins its animation 5 rows earlier than the 15-row restart lead places it: the lab's
  * ItemHealHP_Ret+0x7 SEs are ROM +16 from the engine command start, the engine +23. Scene ON only (the caller).
@@ -2269,6 +2289,32 @@ function heldItemEffectAfterAsleepLead(events: readonly BattleKernelSemanticEven
   const event = events[animation]!;
   return event.payload.kind === "status-animation" && event.provenance?.sourceLabel === "BattleScript_MoveUsedIsAsleep"
     ? HELD_ITEM_EFFECT_AFTER_ASLEEP_LEAD_FRAMES : null;
+}
+/**
+ * opr1 (lab fpr1-rest-leftovers-off, ISSUES #219): Scene OFF's Leftovers print after `BattleScript_MoveUsedIsAsleep` (no status animation is drawn; the 3-row jump to MoveEnd, then the
+ * item script restarts) is ROM MoveEnd+0x0 1627 -> `ItemHealHP_Ret+0xa` print 1672 = 45 rows; the 15-row restart lead put it 53 after (+8), so the hold's lead is 7. Scene OFF only (the caller).
+ */
+export const HELD_ITEM_EFFECT_AFTER_ASLEEP_OFF_LEAD_FRAMES = 7;
+/**
+ * opr1 (lab hic1-yawn-leftovers-off): Scene OFF has no SLP status animation, so `BattleScript_YawnMakesAsleep`'s print is the engine's MoveEnd row + 1 where the ROM's is MoveEnd + 12
+ * (ROM MoveEnd+0x0 1638, Yawn+0x0 1647, print 1650; the 8-row YAWN_SLEEP_ANIMATION_LEAD_ROWS plus the skipped animation command's 3 rows), -11 / -12 in every OFF Yawn lab: a pause before the print.
+ * The Leftovers print after it then comes 9 rows too late, so its hold lead is 6.
+ */
+export const YAWN_SLEEP_OFF_PRINT_LEAD_FRAMES = 11;
+export const HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_OFF_LEAD_FRAMES = 6;
+function yawnSleepOffPrintLeadFrames(event: BattleKernelSemanticEvent): number {
+  const provenance = event.provenance;
+  if (provenance === undefined || provenance.sourceLabel !== YAWN_MAKES_ASLEEP_SCRIPT || provenance.programCounter < 1) return 0;
+  return BATTLE_SCRIPT_PROGRAM.instructions[provenance.programCounter - 1]?.opcodeName === "B_SCR_OP_STATUSANIMATION" ? YAWN_SLEEP_OFF_PRINT_LEAD_FRAMES : 0;
+}
+function heldItemEffectAfterAsleepOffLead(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  if (heldItemEffectAfterYawnSleepLead(events, index) !== null) return HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_OFF_LEAD_FRAMES;
+  let print = index - 1;
+  while (print >= 0 && events[print]!.provenance?.sourceLabel === "BattleScript_MoveEnd") print -= 1;
+  if (print < 0 || print === index - 1) return null;
+  const event = events[print]!;
+  return event.payload.kind === "message" && event.provenance?.sourceLabel === "BattleScript_MoveUsedIsAsleep"
+    ? HELD_ITEM_EFFECT_AFTER_ASLEEP_OFF_LEAD_FRAMES : null;
 }
 /**
  * hie1: Scene OFF's presented hold for an item print whose source is `playanimation ..., B_ANIM_HELD_ITEM_EFFECT` right before it
@@ -2336,6 +2382,7 @@ export const HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA = 5;
 const HELD_ITEM_LEAD_DELTA_MESSAGE_LEADS: Readonly<Record<string, number>> = {
   BattleScript_HitFromAtkAnimation: HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES,
   BattleScript_MoveMissed: HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES,
+  BattleScript_ButItFailed: HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES,
 };
 function itemHealAfterResultMessage(events: readonly BattleKernelSemanticEvent[], messageIndex: number, lead: number): boolean {
   let before = messageIndex - 1;
@@ -2357,7 +2404,8 @@ function heldItemEffectOffHoldFrames(
   ) return null;
   if (instruction.operands.some((operand) => operand.expression === "B_ANIM_ITEM_KNOCKOFF")) return ITEM_KNOCKOFF_OFF_HOLD_FRAMES;
   const { executions, lead } = heldItemEffectExecutionsAndLead(events, messageIndex);
-  const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined) ?? lead;
+  const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined)
+    ?? (lead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterAsleepOffLead(events, messageIndex) : null) ?? lead;
   return (executionsPresented ? 0 : executions) + leadFrames - (itemHealAfterResultMessage(events, messageIndex, lead) ? HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA : 0);
 }
 /**
@@ -2844,6 +2892,36 @@ function previousActionBodyIsPlaceholder(events: readonly BattleKernelSemanticEv
   }
   return false;
 }
+/**
+ * dgt1 (Scene ON; chg4-dig-lightscreen-on, T2 s3738 d47): the PLAYER's first charging turn of Dig / Fly / Dive / Bounce / Skull Bash / Sky Attack after another action with a
+ * modelled body is 13 rows short from the charge print to the next action's used print (ROM: `BattleScriptFirstChargingTurn` animation end 468 -> print glyph 476 (the
+ * orword / setmoveeffect / seteffectprimary / copybyte / printfromtable rows, 10 with the chg4 opener's 2 early rows), glyph -> `FirstTurnSemiInvulnerable+0x5` 560 (84
+ * against the engine's 83), `MoveEnd` 562 -> the next turn's used print 585 (25 against 23)). The player's second-turn press lead (`twoTurnSecondPrintLead`) was cover for it;
+ * the rows now sit where the ROM has them (a lead before the glyph, the hold after it) and the second turn drops the lead like the foe's (mmc1).
+ */
+const CHARGE_TURN_PLAYER_AFTER_ACTION_LEAD_ROWS = 10;
+const CHARGE_TURN_PLAYER_AFTER_ACTION_HOLD_ROWS = 3;
+function playerChargeTailMove(moveId: number | undefined): boolean {
+  return moveId !== undefined && TWO_TURN_MOVES.has(moveId) && moveId !== MOVE_SOLAR_BEAM && !bodyGapPrintRuleApplies(moveId);
+}
+function playerChargePrintAfterModelledAction(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+  beforeRules: BattleScriptRulesContext,
+  actionSnapshot: BattleScriptActionMessageSnapshot | null | undefined,
+): boolean {
+  const event = events[index]!;
+  if (actionSnapshot?.attacker !== 0 || !playerChargeTailMove(actionSnapshot.currentMove) || (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) return false;
+  if (event.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT || event.payload.kind !== "message" || event.payload.messageId === "STRINGID_EMPTYSTRING3") return false;
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const candidate = events[i]!;
+    if (candidate.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return false;
+    if (candidate.payload.kind === "message" && candidate.payload.messageId === "STRINGID_EMPTYSTRING3") {
+      return events[i - 1]?.provenance?.sourceLabel === "BattleScript_MoveEnd" && !previousActionBodyIsPlaceholder(events, i);
+    }
+  }
+  return false;
+}
 function twoTurnSecondPrintLead(
   events: readonly BattleKernelSemanticEvent[],
   index: number,
@@ -2858,8 +2936,8 @@ function twoTurnSecondPrintLead(
     || (event.provenance?.sourceLabel !== "BattleScript_HitFromAtkString" && event.provenance?.sourceLabel !== "BattleScript_HitFromAccCheck")) return null;
   if ((beforeRules.battlers[actionSnapshot!.attacker]!.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_MULTIPLETURNS) === 0) return null;
   const exec = event.provenance.instructionExecution;
-  // ttb1 / mmc1: the press lead is a locked continuation's (mmc1: for the foe's Dig / Fly / Bounce too, once the miss / status continuation runs the confirm walk; the player's second turn keeps it, s3738 d47); after another action's MoveEnd the transition already carries the print's ROM row (bht1: residual 0 after KC / Slash / super effective / asleep). A placeholder previous body (Tackle / Growl, no adapter) is 21 .. 27 rows short and keeps the lead as cover.
-  if ((currentMove === MOVE_SOLAR_BEAM || actionSnapshot!.attacker === 1) && previous?.provenance?.sourceLabel === "BattleScript_MoveEnd" && !previousActionBodyIsPlaceholder(events, index)) return null;
+  // ttb1 / mmc1: the press lead is a locked continuation's (mmc1: for the foe's Dig / Fly / Bounce too, once the miss / status continuation runs the confirm walk; dgt1: for the player's too, its charge tail now carrying the rows); after another action's MoveEnd the transition already carries the print's ROM row (bht1: residual 0 after KC / Slash / super effective / asleep). A placeholder previous body (Tackle / Growl, no adapter) is 21 .. 27 rows short and keeps the lead as cover.
+  if ((currentMove === MOVE_SOLAR_BEAM || actionSnapshot!.attacker === 1 || playerChargeTailMove(currentMove)) && previous?.provenance?.sourceLabel === "BattleScript_MoveEnd" && !previousActionBodyIsPlaceholder(events, index)) return null;
   const afterConfusionPrint = previous?.payload.kind === "message" && previous.provenance?.sourceLabel === CONFUSION_ENDED_SCRIPT && previous.provenance.instructionExecution !== undefined
     ? previous.provenance.instructionExecution + TWO_TURN_AFTER_CONFUSION_PRINT_ROWS : 0;
   return { leadFrames: TWO_TURN_SECOND_PRINT_PRESS_ROWS - (actionSnapshot!.attacker === 0 ? TWO_TURN_PLAYER_NO_PRESS_ROWS : 0) + exec - afterConfusionPrint };
@@ -6659,6 +6737,15 @@ export function projectBattleResolutionCommands(
         }
       }
       const selfConfusionOff = payload.messageId === SELF_CONFUSION_HIT_MESSAGE_ID && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+      const yawnOffLead = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 ? yawnSleepOffPrintLeadFrames(event) : 0;
+      if (yawnOffLead > 0) {
+        commands.push(Object.freeze({
+          type: "move-animation",
+          eventSequence: event.sequence,
+          battler: lastMoveAttacker ?? 0,
+          timing: Object.freeze({ minimumFrames: yawnOffLead }),
+        }));
+      }
       const prePrintPause = anchorlessPrePrintPauseFrames(event);
       if (prePrintPause !== null) {
         commands.push(Object.freeze({
@@ -6701,6 +6788,7 @@ export function projectBattleResolutionCommands(
         advance: "automatic",
         ...(selfConfusionOff ? { leadFrames: SELF_CONFUSION_OFF_PRE_PRINT_ROWS } : {}),
         ...(event.provenance?.sourceLabel === FOCUS_PUNCH_LOST_FOCUS_SCRIPT ? { leadFrames: focusPunchLostFocusPrePrintRows(commands) } : {}),
+        ...(playerChargePrintAfterModelledAction(events, index, beforeRules, actionSnapshot) ? { leadFrames: CHARGE_TURN_PLAYER_AFTER_ACTION_LEAD_ROWS } : {}),
         ...(twoTurnSecondPrintLead(events, index, event, beforeRules, actionSnapshot, events[index - 1]) ?? {}),
         ...(carryBeforeGlyph > 0 ? { leadFrames: (twoTurnSecondPrintLead(events, index, event, beforeRules, actionSnapshot, events[index - 1])?.leadFrames ?? 0) + carryBeforeGlyph } : {}),
         ...(endTurnChainLeadRows(events, index, (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) > 0
@@ -6749,6 +6837,9 @@ export function projectBattleResolutionCommands(
                 if (event.provenance?.sourceLabel === "BattleScript_PresentHealTarget" && actionSnapshot?.currentMove === MOVE_REST
                   && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
                   return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + REST_HEAL_PRINT_TAIL_ROWS });
+                }
+                if (playerChargePrintAfterModelledAction(events, index, beforeRules, actionSnapshot)) {
+                  return Object.freeze({ minimumFrames: timing.minimumFrames, holdFrames: timing.holdFrames + CHARGE_TURN_PLAYER_AFTER_ACTION_HOLD_ROWS });
                 }
                 if ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) {
                   const weatherPause = weatherContinuesOffPauseRows(event);
@@ -6871,7 +6962,7 @@ export function projectBattleResolutionCommands(
         ? HELD_ITEM_EFFECT_IDLE_CONTROLLER_EARLY_ROWS.get(weatherPrevious.animation) : undefined;
       const lead = commands.length === playerSendInEnd ? HELD_ITEM_EFFECT_AFTER_SEND_IN_LEAD_FRAMES
         : idleWeatherEarlyRows !== undefined && baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? baseLead - idleWeatherEarlyRows
-        : baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? heldItemEffectAfterAsleepLead(events, index) ?? baseLead : baseLead;
+        : baseLead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterPrintLead(events, index) ?? heldItemEffectAfterAsleepLead(events, index) ?? heldItemEffectAfterYawnSleepLead(events, index) ?? baseLead : baseLead;
       heldItemEffects.push({
         at: commands.length, battler: pendingHeldItemEffectBattler, sequence: event.sequence,
         frames: HELD_ITEM_EFFECT_COMMAND_FRAMES + lead,
@@ -7138,7 +7229,8 @@ export function projectBattleResolutionCommands(
     if (payload.kind === "status-animation") {
       const animation = statusAnimationPresented(payload.isStatus2, payload.status);
       if (animation !== null) {
-        const seGate = statusAnimationSeGate(events, index);
+        const gate = statusAnimationSeGate(events, index);
+        const seGate = gate > 0 ? gate : yawnSleepAnimationLeadRows(event);
         commands.push(Object.freeze({
           type: "status-animation",
           eventSequence: event.sequence,
