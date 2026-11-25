@@ -145,7 +145,10 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
     ? { ...c, timing: { ...c.timing, holdFrames: 65 } }
     : c.type === "message" && (c.timing?.holdFrames === 70 || c.timing?.holdFrames === 67) && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE"
       ? { ...c, timing: { ...c.timing, holdFrames: 65 } } : c;
-  const off = battleSegments(seed, "off").flatMap((s) => s.commands.map((c: any) => ({ c: confusionOffHold(c, s.events), events: s.events })));
+  // opr1: Scene OFF's Yawn-sleep print waits 11 rows (a move-animation hold before the print, ROM MoveEnd + 12); that is not a status-animation gate, so drop it here.
+  const opr1YawnOffPause = (c: any, events: any[]) => c.type === "move-animation" && c.timing?.minimumFrames === 11
+    && events.find((e: any) => e.sequence === c.eventSequence)?.provenance?.sourceLabel === "BattleScript_YawnMakesAsleep";
+  const off = battleSegments(seed, "off").flatMap((s) => s.commands.filter((c: any) => !opr1YawnOffPause(c, s.events)).map((c: any) => ({ c: confusionOffHold(c, s.events), events: s.events })));
   const messages = (l: typeof on) => l.filter((x) => x.c.type === "message").map((x) => x.c.messageId);
   expect(messages(on), `seed ${seed}: identical prints in both scenes`).toEqual(messages(off));
   const ordinal = (l: typeof on, i: number) => l.slice(0, i).filter((x) => x.c.type === l[i]!.c.type).length;
