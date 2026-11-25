@@ -125,6 +125,13 @@ The fixture holds its first 26,089 frames (up to the popup's close). Test frames
 equal to ours at those frames (13094, 26500, 26752; and 3320, the only ROM frame equal to ours at 3150 in the region) measure the same spot
 rows, and 3320's region hashes to the same value as spd2's 3334. Kyle's and seed 10's draft traces are unchanged.
 
+**spd2c (2026-11-25, the Mac's merge of the box's 11-23/24 runs):** the box's battle timing desynced `swapSeed28` again (no swap
+screen at all on the merged tree). Re-made the same way (`makeSpinda.mjs`, seed 28, Scene ON, `winning-swap`) on `box-merge-20261125`:
+same story (battle 1 won, swap 1 takes the enemy SPINDA, battle 2 won, swap 2 opens SPINDA, its SUMMARY and back). Trimmed to 26,283
+frames (the popup's close + 18, as before). Test frames keep their offsets from each phase's first input-ready frame: 12726 -> 12722,
+25789 -> 25983, 26039 -> 26233; FAINT ATTACK body 3150 -> 3158 (the region hash equals `ROM_BODY_REGION_SHA256` at 3158 and again at
+3359, as at 3150 / 3351 before). `ROM_SPOTS` and the ROM hash are unchanged; the new trace's ROM frames were not re-run on the ROM.
+
 Catcher on the new trace (`KEEP=1`), fixed = master f4d16a36a, base = 6a29087e3 (master without spd2). Counts use `picmatch.py --win 80`,
 which gives spd2's table above on its own trace too; at the default 12 the post-summary pic and the FAINT ATTACK body lose 6 and about 150 frames
 on both traces (the ROM's menu anchor there falls mid-fade, so the aligned guess is off by more than 12; not a picture difference).

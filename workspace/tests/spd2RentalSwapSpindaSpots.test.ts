@@ -133,15 +133,15 @@ describe("spd2: SPINDA's spots on the rental and swap screens, as on the ROM", (
   });
 
   it("seed 28's swaps: the enemy's and the player's SPINDA, then the redraw after its summary with the OT id's spots", () => {
-    replay(traces.swapSeed28, [12726, 25789, 26039], (frame, state) => {
+    replay(traces.swapSeed28, [12722, 25983, 26233], (frame, state) => {
       const swap = state.factorySwap!;
       const fb = render(state);
-      if (frame === 12726) {
+      if (frame === 12722) {
         // Swap_CreateMonSprite on the enemy screen (gEnemyParty[cursorPos])
         expect(swap.controller.phase).toBe("acceptPrompt");
         expect(swap.controller.enemyParty[swap.controller.cursor as 0]).toMatchObject({ species: "SPINDA", personality: SEED28 });
         expect(spotRows(fb, 88, 32)).toEqual(ROM_SPOTS[SEED28]);
-      } else if (frame === 25789) {
+      } else if (frame === 25983) {
         // Swap_CreateMonSprite on the player screen, before the summary
         expect(swap.controller.phase).toBe("playerOptions");
         expect(swap.returnedFromSummary).toBe(false);
@@ -159,7 +159,7 @@ describe("spd2: SPINDA's spots on the rental and swap screens, as on the ROM", (
   });
 
   it("seed 28's battle 1: a Scene ON move body (its FAINT ATTACK) draws the opponent SPINDA with its spots, frame for frame as the ROM", () => {
-    replay(traces.swapSeed28, [3150], (_frame, state) => {
+    replay(traces.swapSeed28, [3158], (_frame, state) => {
       const fb = render(state);
       expect(spotRows(fb, 144, 16)).toEqual(ROM_SPOTS[SEED28]);
       const rgb = Buffer.alloc(80 * 72 * 3);
