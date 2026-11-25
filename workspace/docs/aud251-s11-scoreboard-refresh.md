@@ -5848,7 +5848,7 @@ Base: fold-20261124d (`1af980e6d`). Commits: `a4475a832` (264 body lead), `04e84
 ### 4. What is left (measured, not landed)
 - s1415 d50 second Focus Punch pre-pass SE 171 is -11: the turn is a forced (menu-less) one; the ROM has ~11 extra rows (foe AI choose-move rows 705 -> 713, then `BattleScript_FocusPunchSetUp` at 718), the engine's message -> SE gap is 11 in both cases. Needs a forced-turn lead for the pre-pass message in the same place as the Struggle forced-handoff hold (`tests/enc276ForcedTurnNoMenu.test.ts`); one window, not landed.
 - **LANDED by hic1 (the Yawn-sleep shape: `BattleScript_YawnMakesAsleep` SLP animation + Leftovers chain; see "hic1")** s1415 res1 / 11 / 15 / 18 and s2230 res2 item chains after the SLP animation did not move (their receipts before the item script differ from the lab's); the recipe above covers only the status-animation + MoveEnd shape. Re-probe those seeds' preceding events before widening it.
-- Scene OFF: the Leftovers print after the asleep turn is +8 in `fpr1-rest-leftovers-on.off` (print only, no SE, so T2 OFF cannot see it).
+- **LANDED by opr1 (see "opr1")** Scene OFF: the Leftovers print after the asleep turn is +8 in `fpr1-rest-leftovers-on.off` (print only, no SE, so T2 OFF cannot see it).
 - SE 90 -> item chain -3 / -4 (s310 d2, s1415 d47 / d48): mostly carried from fpf1's remaining -5; +-1 / +2 body windows after Rest / Yawn / Cross Chop are jitter / carried from the preceding command.
 
 ## hic1 (2026-11-24, side lane, Scene ON first, OFF checked): t2k10 class 2 (held-item / berry chains) - the end-turn Yawn-sleep chain LANDED (SLP animation lead + item restart lead); the other groups are jitter or carried
@@ -5881,4 +5881,35 @@ Fresh `rescoreAll.sh` (base `2064b6f3d`) + `t2k4/cmd.sh` + `attr.py` + `t2k10/cl
 
 ### 4. What is left (measured, not landed)
 - The Yawn SLP offset depends on the preceding command's tail: ROM MoveEnd -> SE is +12 after ButItFailed / hit messages but the engine's command begins 8 .. 12 rows early depending on the preceding print hold (Curse stat print vs ButItFailed); a single constant of 8 over-shoots the Curse shape (s2230 d2, s310 d3) by about 4 rows. A per-previous-command lead needs the hie5-style kernel term (exec counts do not explain it: T = 1 / 2 / 1 for the three shapes).
-- The items listed under 1 "Not landed". Scene OFF: the Leftovers print after Yawn sleep is -2 (turn 2) / +5 (turn 3), the hie turn-1 +6 term; print only, T2 OFF cannot see it.
+- The items listed under 1 "Not landed". **LANDED by opr1 (see "opr1")** Scene OFF: the Leftovers print after Yawn sleep is -2 (turn 2) / +5 (turn 3); print only, T2 OFF cannot see it.
+
+## opr1 (2026-11-25, side lane, Scene OFF): the two print-only Scene OFF item residuals LANDED (Leftovers after an asleep turn, Yawn sleep print + Leftovers / berry after it, Leftovers after a ButItFailed print)
+
+Base: fold-20261124e (`c4755ad68`). Evidence (git-ignored): `.integration/evidence/opr1/` (`lab-base`, `lab-base2`, `lab-a1`, `lab-a2`, `lab-after`, `t2-{base,after}`). All in `battleResolutionPresentation.ts`, Scene OFF hold only (the ON path is unchanged).
+
+### 1. Item print after an asleep turn (fpr1 section 4 bullet): LANDED by opr1 (`HELD_ITEM_EFFECT_AFTER_ASLEEP_OFF_LEAD_FRAMES` 7, `heldItemEffectAfterAsleepOffLead`)
+- Scene OFF skips `statusanimation`, so the kernel has no status-animation receipt: the event before the item chain is the `BattleScript_MoveUsedIsAsleep` print + MoveEnd. ROM (`fpr1-rest-leftovers-off`): `MoveEnd+0x0` 1627 -> `ItemHealHP_End2+0x0` 1635 -> Pausex20 -> `ItemHealHP_Ret+0xa` print 1672 = 45 rows; the engine's 15-row restart lead put it at 1680 (+8). The hold's lead is now 7 (the hold is the 36 script executions + lead).
+
+### 2. Yawn sleep print and the item chain after it (hic1 section 4 bullet): LANDED by opr1 (`YAWN_SLEEP_OFF_PRINT_LEAD_FRAMES` 11, `HELD_ITEM_EFFECT_AFTER_YAWN_SLEEP_OFF_LEAD_FRAMES` 6, `BattleScript_ButItFailed` in `HELD_ITEM_LEAD_DELTA_MESSAGE_LEADS`)
+- `BattleScript_YawnMakesAsleep` print (Scene OFF, `statusanimation` skipped): ROM `MoveEnd+0x0` 1638 -> `YawnMakesAsleep+0x0` 1647 -> print 1650 = MoveEnd + 12; the engine printed on MoveEnd + 1 (-11 / -12 in every OFF Yawn lab). A `move-animation` hold of 11 rows now sits before the print (a new presentation command in the segment; no event change).
+- The Leftovers / Chesto print after it then came 9 rows late (-2 + 11), so the item hold's lead after the Yawn print is 6 (15 - 9): ROM print 1777 = engine 1777; the Chesto berry print in `mechanic-yawn-endturn-items2-chesto-off` -3 -> -1.
+- Turn 3 shape (Yawn fails: `ButItFailed` print, MoveEnd, Leftovers): the ROM print is MoveEnd + 46, the engine's 51 (+5): the `BattleScript_MoveMissed` miss-shape delta (bcm1, `HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA` 5) applies to `BattleScript_ButItFailed` too (restart lead 15): +5 -> 0.
+
+### 3. Acceptance (`c4755ad68` -> `37a352926` + test commits)
+| | before | after |
+|---|---:|---:|
+| lab fpr1-rest-leftovers-off PRINTS mass | 8 | 0 |
+| lab hic1-yawn-leftovers-off PRINTS mass | 27 | 9 (the -1 left is carried from the asleep print of turn 3) |
+| lab mechanic-yawn-endturn-items2-chesto-off / -transition-off PRINTS mass | 19 / 16 | 6 / 5 |
+| other OFF item / asleep labs (hie1-{leftovers,sitrus,shellbell,cheri}, ihm1-sbell-{hp,nve}, bcm1-bounce-leftovers-plr, mechanic-yawn-landing, attack-canceler-asleep, pau3-rest, bdt1-rest3-player, etp1-{spore,leftovers}, mechanic-endturn-items1-leftovers, mechanic-sleep-talk-whiscash-spore) PRINTS mass | unchanged | unchanged (all 15 identical) |
+| T2 OFF exact / offset / mass (`rescoreAll.sh`, OFF only) | 923 / 210 / 470 | 923 / 210 / 470 (SE-blind: 0 missing / 0 extra) |
+| T2 ON | unchanged by construction (the ON paths are not edited; the new code is behind HITMARKER_NO_ANIMATIONS / the OFF hold) | |
+
+- Census 0..199 (`lsd194Census.sh` shards 0 1, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 in OFF and ON; ON byte-identical 2 / 2 (0 changes); OFF 21 of 200 battles changed (60010 commands), 4 with a type-sequence change = the inserted Yawn `move-animation` hold (a presentation command, not an event). tree/ copies deleted.
+- Tests: the 260 files importing `battleResolutionPresentation.ts` or naming the constants + `randomRoundSoak*` + `lbrd` pass; one test needed a change: `tests/sag130StatusSeGate.test.ts` (ON vs OFF status-SE gate) now drops the OFF Yawn print pause from its OFF command list (it is not an SE gate; the ROM row it matches is MoveEnd + 12 above). New pin `tests/opr1OffPrintLeads.test.ts`.
+- Play change named: Scene OFF, the end-turn "fell asleep" print appears 11 rows later and the Leftovers / berry print after an asleep turn, a Yawn sleep, or a failed Yawn lands on the ROM row (the next press moves with it); no rule / RNG / event-order change.
+
+### 4. What is left (measured, not landed)
+- hic1-yawn-leftovers-off: the turn-3 asleep print and the Yawn / ButItFailed prints after it are -1 (carried from the turn start, 1 row; the same -1 sits on the turn-2 Yawn print in the chesto lab).
+- The Yawn sleep print lead of 11 is measured on the ButItFailed-preceded shape only (the three OFF Yawn labs); a Yawn sleep after a hit message or a Curse print is unmeasured in OFF (the ON side showed the lead depends on the previous command's tail, hic1 section 4).
+- `mechanic-yawn-endturn-*-off` / `fpr1` "missing" rows are the MoveEnd+0x9 print the lab compare cannot align (unchanged).
