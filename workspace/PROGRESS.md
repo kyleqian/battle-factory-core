@@ -5,6 +5,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-25 — mlb1 (worker, ts lane, Scene ON first, OFF checked): Mean Look / Block print rows + Block SE lead landed (T2 ON 4,103 -> 4,069, OFF unchanged); Swords Dance + Leech Seed -1 are ONE per-action used-print lead term, patch measured (T2 ON -274) but not landed
+
+- **State:** master, commit `4f3c9f313` (Mean Look / Block + `tests/mlb1MeanLookBlockBody.test.ts` + ais2 ON fixture re-pin) + this docs / PROGRESS commit; no push. Gates for the commit: census 0..199 both scenes eventsDigest identical 200 / 200 (ON 8 battles change timing, OFF 0), importer / randomRoundSoak / lbrd / aud tests green after the ais2 re-pin. `npm run typecheck` / `npm run test:gate` / `npm run build`: see Notes (not all finished inside the cap).
+- **Did:** Mean Look (212) and Block (335, mtl1's "s165 d17") share `BattleScript_EffectMeanLook`: print 7 rows later (`LIVE_MOVE_LEADLESS_TAIL_ROWS` `[212, 7], [335, 7]`), Block SEs 3 earlier (`BODY_SOUND_LEAD_ROWS` `[335, 3]`). Labs: five Mean Look labs mass 21 -> 14, prints exact; new `mlb1-block-golbat-player-on` 33 -> 14. Swords Dance 11 / 12 / 13 and Leech Seed turn-1 -1 have the same cause: `tickSounds.ts` stamps `min(u - 2, 2)` from the turn's FIRST used print on every later action's SEs; the ROM uses the action's own. Patch `.integration/evidence/mlb1/lead-per-action.patch`: Swords Dance labs 0 / 2 / 4 -> 0, mtl1 Leech Seed lab 11 -> 3, T2 ON 4,069 -> 3,795, census identical; 8 tests in aud260 (Recycle), aud262 (Present), cry1 (Roar) move by 1 and need judged re-pins, so it is not landed.
+- **Next:** apply the patch, re-pin the improving rows (Roar player labs reach the ROM), refit Roar opponent and Pain Split `[220, 3]`, run the other importer chunks, T2 OFF is untouched (Scene ON only). Details: `docs/aud251-s11-scoreboard-refresh.md` "mlb1".
+- **Notes:** play change (Scene ON, ROM-faithful): the Mean Look / Block print 7 rows later, Block SEs 3 earlier; re-pinned `tests/fixtures/ais2-ai-switch-rom-frames.json` (seed 2741 ON: lo / hi +7, `romFrameOffset` 5 -> -2, same ROM frames). Spider Web 169 has no lab. PAPERCUT: Bash auto-backgrounds a command at the tool's 600 s limit even when `timeout` asks for more (typecheck took > 600 s here); `fam1MoveAnimationReads*` are slow in importer sets. `npm test` (full) not run (worker rules).
+
+---
+
 ## 2026-11-24 — mtl1 (worker, ts lane, both scenes): the Leech Seed tick behind Confuse Ray / Pain Split landed as two mechanisms (T2 ON 4,293 -> 4,224, OFF 470 unchanged); s165 d17 is a Mean Look term
 
 - **State:** master, commits `0247732ab` `820078ab7` (Confuse Ray tail + scope) `6940e8a34` (Pain Split) + this docs / PROGRESS commit; no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200; 208 importer / soak / lbrd test files green (re-pinned swi1PainSplitHpTail target tail 6 -> 3, aud261 painsplit offset -4 -> -1); typecheck, test:gate (360 files), build green.
@@ -20,45 +29,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Did:** class 8 grouped by path. Roar (46) / Whirlwind (18) forced switch (Scene ON): the engine's animation body ended 6 rows before the ROM's A1 row; `[18, 6], [46, 6]` in `LIVE_MOVE_LEADLESS_TAIL_ROWS` (`battleResolutionPresentationRender.ts`). Drag labs SE mass 19 / 16 / 16 / 12 / 16 -> 7 / 4 / 8 / 4 / 4; T2 ON cry 200 -> 160, battle-controller 591 -> 545. Party summary after a faint: measured negative (identical AI-choice work features need 0..4 frames; no constant). Class 3: the Leech Seed tick is exact behind a miss, and 3 rows late behind a successful Confuse Ray (s648 d12) and Pain Split (s648 d10): the ROM reaches `BattleScript_MoveEnd` 3 rows later; a message-tail map is needed.
 - **Next:** class 3 message tail (3 rows after the last message of Confuse Ray success / Pain Split; with cre1 for the Confuse Ray entry term), switch-out SE 15 after a faint, OFF switch-in rows, ON s2 d6 / d12, s165 d17 status 148 -6 (not probed).
 - **Notes:** section "snr1" at the end of `docs/aud251-s11-scoreboard-refresh.md`; evidence under `.integration/evidence/snr1/` (git-ignored). s6568 d104 left alone (harness press pulse).
-
----
-
-## 2026-11-24 — pmk1 (worker, ts lane, Scene ON first): the move after an "is in love" head landed (T2 ON 5,116 -> 4,918, OFF 475 unchanged); other class-1 rows are not constants
-
-- **State:** master, commit `033137706` (+ this docs / PROGRESS commit); no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200 (ON 18 battles change commands, OFF 0); 209 importer / soak / lbrd test files green after re-pinning sa125 / sag130 / sub157 (each read from Received, named in the doc); `test:gate` 360 files / 2,839 tests; typecheck; build (see below). `battleSoundTable --check` / fam1 not needed (no script or moveAnimSounds change).
-- **Did:** t2k10 class 1's s1415 Earthquake -8 x3 / Rest -4 / Bulk Up -4 were one mechanism, not per-move constants: every one is the first row after a `BattleScript_MoveUsedIsInLove` head. Scene ON: used print after the head +4 rows, head hold 64 + 1 (first-mover head SEs were +2), second-mover print 0 (was -2; OFF keeps -2). T2 ON mass 5,116 -> 4,918 (exact 3,754 -> 3,855, s1415 only), 0 missing / 0 extra. Labs (new `pmk1-inlove-bulkup-{first,second,second2}-on`) SE mass 29 -> 9, 23 -> 7, 17 -> 5.
-- **Not landed (no constant):** Aerial Ace (-13 / +6, opposite signs), Rock Slide (three causes), Ice Beam (negative result), Surf / Bite / Low Kick (+3 / +4 after a hit SE, hit-tail carries), Rest / status moves after a hit (-3 / -2), Charm / Sandstorm / Double Team / Yawn (one window each). s1415's remaining mass is item / berry, Focus Punch and tick rows (other classes).
-- **Next:** class 2 (SE 152 / 228 / 102 chain, s1415 d1 +19 etc.) and class 4 now dominate s1415; the Bulk Up stat SE +2 and Attract SE 227 -3 in the new labs. Details: `docs/aud251-s11-scoreboard-refresh.md` "pmk1".
-- **Notes:** `npm test` (full) not run (worker rules forbid it; the assignment's "npm test green" is met by `test:gate` + the importer set). Play change (Scene ON only, ROM-faithful): the used print after an "is in love" head 4 rows later, the first-mover head's SEs 2 rows earlier, the second-mover head print 2 rows later.
-
----
-
-## 2026-11-24 — ihl1 (worker, ts lane, Scene OFF first): ihm1 + mem1 / crs1 + bcm1 term A landed (T2 OFF 529 -> 475, ON 5,122 -> 5,116); bcm1 term B not landed
-
-- **State:** master, three commits `7bd12062e` (ihm1) `55969d64a` (mem1 / crs1 + `tests/ihl1MessageHandoff.test.ts`) `cd4f184c1` (bcm1 A) + this docs / PROGRESS commit; no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200; 208 importer + `randomRoundSoak*` + `lbrd` test files green, no pin moved; typecheck, `test:gate` (360 files), `build` green.
-- **Did:** ihm1 Shell Bell heal after an effectiveness message (hit hp floor 0, CONTINUE lead -5): T2 OFF -23, lab ihm1-sbell-nve SE mass 12 -> 2. mem1 / crs1 crit -> result message 81 rows (both scenes): OFF -14, ON -6. bcm1 A item-heal RESTART lead -5 after a MoveMissed message: OFF -17, lab bcm1-bounce-leftovers heal print +6 -> +1.
-- **Not landed:** bcm1 term B (turn end -> second-turn print 31 vs 26 after an end-turn item heal): needs hp / turn-end tail +2 each and a -5 in the orchestrator's locked-continuation handoff; net gain one print row, so left in the doc.
-- **Next:** bcm1 B only if a larger count of locked-continuation-after-heal windows turns up; the crs1 labs need a seed where the ROM and engine crit together. Details: `docs/aud251-s11-scoreboard-refresh.md` "ihl1".
-- **Notes:** `npm test` (full) not run (worker rules), `test:gate` was. Play change (ROM-faithful): print after an effectiveness / MoveMissed message before a held-item heal 5 rows earlier (OFF); crit -> result message gap 81 rows (both scenes).
-
----
-
-## 2026-11-24 — fpl1 (worker, ts lane, Scene ON first): fpm1 + chp1 + ssm1 Psych Up chain landed (T2 ON 5,895 -> 5,835, OFF 537 unchanged)
-
-- **State:** master, three commits `537d1ba7f` (fpm1) `8b9cc0b49` (chp1) `51a5d3d23` (ssm1 chain) + this docs / PROGRESS commit; no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200; ~208 importer test files + randomRoundSoak* + lbrd + fam1* green, `battleSoundTable.ts --check` current, `test:gate` 360 files / 2,839 tests, typecheck, build all 0.
-- **Did:** fpm1: Focus Punch lost-focus print lead 17 after a printed hit message, 7 after an hp command (T2 ON -11). chp1 (Scene ON): confusion head holds 66, used print rows 6, self-hit print 104; labs psychic 4 / 12 / 12 -> 10 / 6 / 6, psychup 55 / 78 / 78 -> 61 / 72 / 72; T2 ON +17 alone. ssm1 chain: self-confusion hit 36 rows, SE +2, bar +2, Psych Up S-lead + trail; psychup labs -> 6 / 17 / 17, T2 ON -66. Re-pinned: sa125 / sag130 (OFF read at 66, exception accepts 4 | 6), sta3 (66, -1), sst1 (5 turns, trajectory).
-- **cfm1 again not possible:** the 6 / 4 rows still sit inside the ON status command (length 106 / 104), so the sa125 / sag130 exception stays.
-- **Next:** the labs' second-mover confusion head (head print -2 / -1, SE 176 -1); s499 d13 / d14 +1 .. +3; move cfa1's rows out of the status command; ssl1 / mhl1. Details: `docs/aud251-s11-scoreboard-refresh.md` "fpl1".
-- **Notes:** `npm test` (full) was not run: the worker rules forbid it, `test:gate` was. Play change (Scene ON only, ROM-faithful): confusion head / used / self-hit print and the self-hit blink / bar timing.
-
----
-
-## 2026-11-24 — lrl1 (worker, ts lane, both scenes): lrm1 + ecm1 landed (T2 ON 6,186 -> 5,895, OFF 597 -> 537); cfm1 test half fails, not landed
-
-- **State:** master, two commits `bc9cbcfad` (lrm1) and `2681af30d` (ecm1) + this docs / PROGRESS commit; no push. Gates: census 0..199 both scenes eventsDigest identical 200 / 200; 259 importer test files green, `test:gate` 360 files / 2,839 tests, typecheck, build all 0.
-- **Did:** lrm1: loss recall lead 20 -> 24 (target / end-of-turn faint), Explosion 22, held-item chain 20; labs SE 15 -4 / -2 -> 0 (4 labs); T2 ON -68, OFF -60. ecm1: Scene ON ConfusedNoMore head `u - 2` hold + 64 + 5 hold; T2 ON -223 more, 0 missing / 0 extra. Pins re-read and re-pinned: lrc1 (A -> SE 28), aud241c (target-faint stage `[0,0,4,...]`), ohs1 (ON hold 69). **Play change (named):** a lost battle's recall / lose text land 4 frames later on a target faint (ROM-faithful), and the next action after a Scene ON ConfusedNoMore shifts the same way.
-- **cfm1 test half FAILED, not landed:** dropping the 71 -> 67 normalisation + `cfa1PreMoveConfusionRows` gives sa125 s7 CONFUSION length 105 (expected 100), sag130 s3 #3 105 (expected 100); tests restored, no `src/` change.
-- **Next:** cfm1 source side (the ON status animation's 5 pre-move rows vs the ROM's print -> used print, with chp1's recipe); ON confusion head / InLove holds. Details: `docs/aud251-s11-scoreboard-refresh.md` "lrl1".
 
 ---
 

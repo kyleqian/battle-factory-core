@@ -4010,7 +4010,7 @@ Evidence (git-ignored): `.integration/evidence/pmc1/` (`t2-{base,A,C,after}-on`,
 | Future Sight 248 | same class, +5 (`etp1-futuresight-on` SE 189 / 184) | C: +5; lab 22 -> 12 (the rest is a later Seismic Toss, not this move) |
 | Soft Boiled 135 | +5 on all three SEs (`aud242r-softboiled-player-on`) | C: +5; lab 15 -> 0 |
 | Belly Drum 187 | +4 (`species-audit-golem-prep5-belly-drum-player`) | C: +4; lab 44 -> 20 (the remaining 20 is the lab's Tackle with no body adapter) |
-| Mean Look 212 | +3 (`species-audit-golbat-prep4-mean-look-player`) | C: +3; lab 39 -> 21 (same Tackle artefact) |
+| Mean Look 212 | +3 (`species-audit-golbat-prep4-mean-look-player`) | C: +3; lab 39 -> 21 (same Tackle artefact) | (print rows LANDED by mlb1: tail 7)
 | Swagger 207 | +3 on the five body SEs (`aud242f-swagger-player-on`) | C: +3; lab 15 -> 0 |
 | Smokescreen 108 | LEAD4 clock lead 5 -> 7 (SE 135 / 159 ROM 71 / 111; three T2 segment starts +2) | D: lab `aud242k-smokescreen-player-on` 6 -> 2 (the stat-change SE 245 is +2, see Left) |
 | Thunderbolt 85 | window exact; SE 215 and both SE 119 are -1 after the third SE 118 (ROM 112 -> 172 = 60 rows; script 11 + two blend waits of 13 + 22 = 59). Blend model symmetric (0 -> 13 and 13 -> 0), segment sprites are not counted by `gAnimVisualTaskCount` | carried: no script term found for the extra row, a trim would be a fit |
@@ -5756,7 +5756,7 @@ Census 0..199, both scenes, `5872b1497` vs HEAD: eventsDigest + error identical 
 
 ### 4. s165 d17 (status 148 -6) is not this class
 
-Probe `probe.sh 165 on 17 -40:2000`: the previous command is **Mean Look** (move 335), not Confuse Ray / Pain Split. The engine's Mean Look print starts 6 rows before the ROM's (ENG 327 vs ROM `EffectMeanLook+0x2a ex1` 333) and its message end 8 before `MoveEnd` (419 vs 427), so the poison tick's SE 148 is -6 (526 vs 532). A stat-move body term (sdb1's class), not a tail rule; left.
+Probe `probe.sh 165 on 17 -40:2000`: the previous command is **Mean Look** (move 335), not Confuse Ray / Pain Split. The engine's Mean Look print starts 6 rows before the ROM's (ENG 327 vs ROM `EffectMeanLook+0x2a ex1` 333) and its message end 8 before `MoveEnd` (419 vs 427), so the poison tick's SE 148 is -6 (526 vs 532). A stat-move body term (sdb1's class), not a tail rule; left. **LANDED by mlb1** (it is Block 335, not Mean Look: print tail 7 + SE lead 3, see "mlb1").
 
 ### 5. What is left
 
@@ -5779,6 +5779,8 @@ Commit `b0c539c20` (master `e071d1be4` -> `b0c539c20`); no push. Evidence (git-i
 - Tail Whip / Leer / Screech / String Shot: no labs built and their scripts not read (not checked whether they share the cause).
 
 ### 3. Left unresolved (context terms, no source-derivable rule)
+
+**Swords Dance's 11 / 12 / 13 gap: mechanism found by mlb1 (carried, patch measured; see "mlb1" section 2) - not a command-shape term, the per-turn used-print lead.**
 - Swords Dance +1 / +2 (cre1): the ROM command -> SE gap is a stable 11 rows; the engine gives 11 / 12 / 13 in three labs with an identical command structure, and the 191 offset equals the 239 offset, i.e. per-use whole-body start lag in the engine scheduling, not a body term.
 - Harden: second SE -2 (ROM spacing 30 for wait 28, engine 28): the `loopsewithpan` task spacing / mixer phase (Defense Curl wait 18 reads 18 / 19 in the ROM). Not landed: one lab.
 - T2 stat-move offsets: within-body offsets are zero; the rest are per-use start lag. No shape rule improves T2.
@@ -5850,3 +5852,24 @@ Base: fold-20261124d (`1af980e6d`). Commits: `a4475a832` (264 body lead), `04e84
 - s1415 res1 / 11 / 15 / 18 and s2230 res2 item chains after the SLP animation did not move (their receipts before the item script differ from the lab's); the recipe above covers only the status-animation + MoveEnd shape. Re-probe those seeds' preceding events before widening it.
 - Scene OFF: the Leftovers print after the asleep turn is +8 in `fpr1-rest-leftovers-on.off` (print only, no SE, so T2 OFF cannot see it).
 - SE 90 -> item chain -3 / -4 (s310 d2, s1415 d47 / d48): mostly carried from fpf1's remaining -5; +-1 / +2 body windows after Rest / Yawn / Cross Chop are jitter / carried from the preceding command.
+
+## mlb1 (2026-11-25, ts lane, Scene ON first, OFF checked; S11 sound timing, ISSUES #219): Mean Look / Block print rows + Block SE lead (LANDED); Swords Dance and Leech Seed share one per-action used-print lead term (measured, patch carried, tests need re-pins)
+
+### 1. Mean Look (212) / Block (335): LANDED by mlb1 (`LIVE_MOVE_LEADLESS_TAIL_ROWS` `[212, 7], [335, 7]`, `BODY_SOUND_LEAD_ROWS` `[335, 3]`)
+- Block shares `BattleScript_EffectMeanLook` with Mean Look / Spider Web. ROM: the "can't escape" print is `EffectMeanLook+0x2a`, 7 rows after the animation's rows (labs: print first glyph 247 for the Mean Look command at 64, 213 for Block at 60); the engine printed it 7 rows early. A leadless body's tail moves the print: tail 7 for both.
+- mtl1's "s165 d17 Mean Look" is Block (move 335): its engine body is the non-live placeholder, which also played its SEs 3 rows late: `[335, 3]` (positive = earlier). Spider Web (169) shares the script but has no lab; unmeasured.
+- Labs ON: five Mean Look labs mass 21 -> 14 each (prints 14 -> 0 each; the rest is the missing Tackle mv33 body SE, not this term); new `tools/battle-lab/mlb1-block-golbat-player-on.json` mass 33 -> 14, prints exact. T2 ON mass 4,103 -> 4,069 (s165 176 -> 142), exact 4,108, 0 missing / 0 extra. OFF unaffected (no Mean Look window; census OFF byte-identical 2 / 2).
+- Census 0..199 (`lsd194Census.sh` shards 0 1, `rst197CensusDelta.py --digest`): eventsDigest + error identical 200 / 200 ON and OFF, ON 8 of 200 battles changed (timing only, 0 type changes). Tree copies deleted.
+- Play change named (Scene ON, ROM-faithful): the Mean Look / Block "can't escape" print starts 7 rows later and Block's SEs 3 rows earlier.
+- **Re-pinned, named:** `tests/fixtures/ais2-ai-switch-rom-frames.json` (Scene ON, seed 2741): the foe's Mean Look now takes the ROM's +7 rows, so lo 3876 -> 3883, hi 4126 -> 4133, `romFrameOffset` 5 -> -2 (the same ROM md5 frames, 7 engine frames later; `BattleScript_EffectMeanLook+0x2a`). New pin: `tests/mlb1MeanLookBlockBody.test.ts` (body start -> print 183 / 153 rows, SE lead 3).
+
+### 2. Swords Dance (14) start lag and Leech Seed (73) turn-1 SE -1: ONE mechanism, measured, NOT landed (needs re-pins past the cap)
+- The engine's command / `liveMoveSourceAge` clock is identical in the three Swords Dance labs (same `stat` 2 rows + `move-animation` lead 1 + tail 5, age 1 at the first row, no seGate), and the stats-change SE 239 after it is off by the same 1 / 2: so it is not a command shape. The cause is the tick lead stamped on the table SEs and the stat-change SEs (`setSoundTickLead(usedMoveBodySoundLeadOf / usedMoveAnimSoundLead)` in `tickSounds.ts`): `min(u - 2, 2)` from the turn's FIRST used print (`usedMovePrintU`, hcr2c), applied to every later action of the turn. The ROM's lead follows the action's own used print: hie5 (foe Swords Dance second, own u 4, turn u 3: lead 1 -> needs 2), cre1 (player Swords Dance after a confused foe Confuse Ray, own u 73, turn u 2: lead 0 -> 2), mtl1-painsplit-leech (Leech Seed second, own u 2, turn u 3: lead 1 -> 0).
+- Patch measured (kept in `.integration/evidence/mlb1/lead-per-action.patch`, 74 lines, git-ignored): `laterActionPrintU(state)` (Scene ON, segment 0, command's own preceding USEDMOVE print that is not the turn's first; u >= 2, no upper bound) feeding `actionSoundLeadBase` (replaces `base` in `usedMoveBodySoundLeadOf`) and a new `usedMoveAnimSoundLeadOf(state)` used by the two `usedMoveAnimSoundLead` stamps in `tickSounds.ts`; the turn's first action keeps the turn-level lead.
+- Result before landing: labs Swords Dance mass aud242a 0 -> 0, hie5 2 -> 0, cre1 4 -> 0 (hie5 12 exact, cre1 28 exact); mtl1-painsplit-leech-s1-on 11 -> 3 (the rest is Pain Split's own `[220, 3]` lead, +1 x 3, fitted with the old second-action lead 1); etp1-leechseed-on 0 -> 0. T2 ON mass 4,069 -> 3,795 (-274), exact 4,108 -> 4,276, 0 missing / 0 extra. Census 0..199 eventsDigest + error identical 200 / 200 ON and OFF, 0 changed commands.
+- Why not landed: 8 tests in 3 files move by 1 and need judged re-pins (the first chunk of the 85 sound-lead importers; the other two chunks were not run): `tests/aud260MoveAnimSounds.test.ts` (Recycle turn 2, rows +1: 1471 / 1495 / 1520 / 1610), `tests/aud262MoveAnimSounds.test.ts` (Present heal offset -4 -> -3), `tests/cry1CryTasks.test.ts` (Roar ROAR_1: pidgey-player 391 -> 392 = the ROM's, jynx-player 389 -> 390 = the ROM's, pidgey-opponent 410 -> 411 = ROM +3, worse by 1; their later rows shift one frame with it). Next step: apply the patch, re-pin the improving ones, refit Roar opponent / Pain Split's `[220, 3]` (probably 2) by lab, run the other two importer chunks, T2 OFF is untouched (Scene ON only).
+
+### 3. Left
+- Spider Web 169 (shares `EffectMeanLook`) has no lab; the Tackle (mv33) body SE missing in the Mean Look labs (mass 14 each).
+- Per-action lead patch above (-274 T2 ON mass), then Pain Split `[220, 3]` and Roar-opponent refits.
+- Not run by this worker: `npm run test:gate` / `npm run build` if listed in PROGRESS.md as not run (see the top entry).
