@@ -6038,3 +6038,28 @@ Not chased: the <=2 clean windows of classes 1, 2 (carried part), 3 and 4 (D4 / 
 - `tools/integration/t2k11/permove.py`: per-cause / per-move window mass, the mode of the clean steps and the mass a constant would remove ("constgain").
 - `tools/integration/t2k11/repeats.py`: windows grouped by (class, cause, previous command, command type, step) with the seed count, to tell a rule from one seed's loop.
 - Reused: `tools/integration/t2k10/{classes.py,scratchT2.sh,seeddiff.py}`.
+
+## rca1 (t2k11 recipe A: AllStatsUp hp -> stat SE early; measurement only, nothing landed)
+
+Engine frozen at ffe35b64a; the scratch edit below was measured and reverted (`git diff ffe35b64a -- src tests` empty).
+
+**Move.** Ancient Power (246) / Silver Wind (318) / Ominous Wind: `BattleScript_EffectAllStatsUpHit` (`setmoveeffect MOVE_EFFECT_ALL_STATS_UP | AFFECTS_USER`, goto `BattleScript_EffectHit`) -> `BattleScript_AllStatsUp` (`jumpifstat`, then per stat `setbyte`, `playstatchangeanimation` all 5 stats, `setstatchanger`, `statbuffchange`, `printfromtable`, `waitmessage`; Atk, Def, Speed, SpAtk, SpDef; `return`). Source: vendor/pokeemerald/data/battle_scripts_1.s ~3452.
+
+**Rows (E = the hp bar end row).** T2 ROM: AllStatsUp+0 at E+6, E+7, E+9, the stat SE at E+13. Lab ROM: the same rows but the SE at E+17 (gAnimScriptActive latency +4 after `playstatchangeanimation`; T2 has 0, cause not found). Engine: the next command after the hit is `stats-change`, not `stat`, so `applyHpHitTails` (src/engine/battleResolutionPresentation.ts ~3540-3580) takes the legacy path (hp floor 28, tail 0), starts the stats-change at the hp end and plays the SE at command start + 5: -8 ON / -9 OFF in T2 (s7295 d0 / d1); in the labs the same gap is 3-4 frames larger (see the tail fit below).
+
+**Labs (new).** `tools/battle-lab/rca1-ap-player-s1-on.json` (player Rattata L50 [Ancient Power x4] vs foe Snorlax, ROM seed 1; run the engine with `ENGINE_RNG_SEED=3`) and `rca1-ap-foe-s9-on.json` (player Snorlax vs foe Rattata, ROM seed 9; `ENGINE_RNG_SEED=12`). The ROM lab keeps its own seed and the engine seed is a separate override, so the 10% secondary effect only fires on both sides at those pairs (found with `tools/integration/rca1/seedscan.py BASE_LAB.json OUTDIR LABEL FIRST LAST [--profile on|off]`, ~9 s per seed, ROM side only). Run: `ENGINE_RNG_SEED=3 tools/integration/labCompare.sh rca1-ap-player-s1-on`.
+
+**Recipe (scratch-measured).** In `applyHpHitTails` treat a hit whose next command is `stats-change` like the Icy Wind shape: `statNext = (hit && rest[0]?.type === "stat") || (hit && rest[0]?.type === "stats-change") || ...` (the existing focus-band term stays), so the hp command gets a tail and the floor goes away. Constants: ON tail 8 / OFF tail 9 fit T2 (the existing `HP_STAT_NEXT_TAIL_FRAMES` 4 / `_OFF` 5 are the Icy Wind values); the labs want ON 11 / OFF 12 (the lab-vs-T2 3-4 frame gap above). A new pair of constants (e.g. `HP_STATS_CHANGE_TAIL_FRAMES` 8 / `_OFF` 9) keeps the Icy Wind rows untouched.
+
+**Expected results (4 T2 seeds 7295 / 310 / 1415 / 499).**
+- Tail 8 ON / 9 OFF: T2 ON mass 1,140 -> 1,068 (-72, all s7295 d0 / d1: 124 -> 52); OFF 151 -> 106 (-45, s7295 49 -> 4). The other three seeds are unchanged. Tail 11 / 12 (lab fit): ON 1,067 / OFF 115 (-36).
+- Labs: tail 8 leaves the stat SE ON -3 / OFF -4; tail 12 gives ON +1 / OFF 0 and the first stat print -1 (mass 1 / 1).
+- Residual in T2 s7295 after tail 8 (`tools/integration/rca1/seedwin.py ENGINE_DIR ROM_DIR SEED SCENE`): the carried chain behind the stat SE stays a uniform -2 (res0 / res1 rows at ROM 862-1078, i.e. tail 10 would clear it), plus unrelated D4-sized +1 / +2 (res3-8) and -1 (res4) windows. So the chain is not removed by the first-SE fit alone.
+
+**Caveats.**
+- T2 and the labs disagree by 3-4 frames (T2 ROM SE = the `+0xa` row + 4, lab ROM SE = row + 8); the choice of 8 vs 11 is T2-vs-lab, unresolved. Untested guess: `IsBattleSEPlaying`'s up-to-30-frame wait.
+- The "not very effective" print shape (s310 d7, s1415 d5, Silver Wind s499 res3, ON -3 / OFF -4) is a separate +3 SE-age-after-message issue; the tail edit does not touch it.
+- The recipe moves only s7295 in T2; it needs the lab pair above before landing (a landing step should re-run labCompare on both labs and the T2 rescore, and update any test that pins the hp command length of an AllStatsUp hit).
+- PROGRESS.md was not edited (the step forbids it).
+
+Tools: `tools/integration/rca1/seedscan.py`, `tools/integration/rca1/seedwin.py`.
