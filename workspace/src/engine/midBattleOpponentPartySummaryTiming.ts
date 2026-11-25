@@ -21,11 +21,23 @@ export const OPPONENT_SUMMARY_FADE_DELAY_FRAMES = 2;
  */
 export const OPPONENT_SUMMARY_SHELL_BELL_LEAD_FRAMES = 6;
 
+/**
+ * fkt1 / aic1m (ROM s8108): a faint raised inside BattleScript_DamagingWeatherLoop returns into the loop before the faint script's tail (HandleFaintedMon, the ball tray) runs:
+ * `checkteamslost` (1 row) and the Increment block (jumpifbyte gBattleOutcome, addbyte, jumpifbytenotequal: 3 rows) = 4 rows, then every battler left in the turn order runs an undamaged
+ * iteration (copyarraywithindex, weatherdamage, jumpifword -> Increment: 3 + 3 = 6 rows), then the ContinuesEnd rows already inside the 23-row lead.
+ */
+export const OPPONENT_SUMMARY_WEATHER_TAIL_BASE_FRAMES = 4;
+export const OPPONENT_SUMMARY_WEATHER_TAIL_ITERATION_FRAMES = 6;
+
+export function weatherTailFrames(battlersAfterFaintedInTurnOrder: number): number {
+  return OPPONENT_SUMMARY_WEATHER_TAIL_BASE_FRAMES + OPPONENT_SUMMARY_WEATHER_TAIL_ITERATION_FRAMES * battlersAfterFaintedInTurnOrder;
+}
+
 export type OpponentPartySummaryTiming = Readonly<{ minimumFrames: number; leadFrames: number }>;
 
 /** The opponent draw command's duration: the optional script lead, then the controller hold to the next print's first glyph. */
-export function opponentPartySummaryDrawTiming(afterFaint: boolean, voluntarySwitch = false, choiceExtraFrames = 0, afterShellBellHeal = false): OpponentPartySummaryTiming {
-  const leadFrames = afterFaint ? OPPONENT_SUMMARY_FAINT_LEAD_FRAMES + choiceExtraFrames - (afterShellBellHeal ? OPPONENT_SUMMARY_SHELL_BELL_LEAD_FRAMES : 0) : 0;
+export function opponentPartySummaryDrawTiming(afterFaint: boolean, voluntarySwitch = false, choiceExtraFrames = 0, afterShellBellHeal = false, weatherTailRows = 0): OpponentPartySummaryTiming {
+  const leadFrames = afterFaint ? OPPONENT_SUMMARY_FAINT_LEAD_FRAMES + choiceExtraFrames + weatherTailRows - (afterShellBellHeal ? OPPONENT_SUMMARY_SHELL_BELL_LEAD_FRAMES : 0) : 0;
   const switchOrder = voluntarySwitch ? OPPONENT_SUMMARY_SWITCH_ORDER_FRAMES : 0;
   return Object.freeze({ minimumFrames: leadFrames + OPPONENT_SUMMARY_HOLD_FRAMES + switchOrder, leadFrames });
 }

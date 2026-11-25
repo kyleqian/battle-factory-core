@@ -1518,9 +1518,9 @@ const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
   // hit1: Thunder Punch 10 (idle94's table measured it, but its template scenario had no body; the frame catcher's ROM runs show the 10
   // rows as the field before the body, the same picture as production's age-0 frame: docs/hit1-move-hit-timing.md).
   [9, 10],
-  [41, 10], [44, 10], [51, 7], [52, 4], [55, 10], [71, 10], [74, 1], [75, 13], [82, 7], [92, 7], [93, 5], [94, 5], [106, 1], [120, 4],
+  [41, 10], [44, 10], [51, 7], [209, 9], [52, 4], [55, 10], [71, 10], [74, 1], [75, 13], [82, 7], [92, 7], [93, 5], [94, 5], [106, 1], [120, 4],
   [53, 18], [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
-  [269, 10], [282, 6], [294, 1], [299, 10], [305, 7], [313, 1], [325, 8], [334, 1], [337, 6], [339, 4], [342, 7], [343, 1], [347, 3],
+  [269, 10], [282, 6], [294, 1], [299, 10], [305, 7], [325, 8], [334, 1], [337, 6], [339, 4], [342, 7], [343, 1], [347, 3],
 ]);
 
 /**
@@ -1549,7 +1549,7 @@ const LIVE_MOVE_POST_ROWS = 2;
 // Sides whose pre rows are NOT proven to be the age-0 frame: idle lead N != 0 outside idle94's 40 static-lead moves, or N unknown.
 // hit1: Thunder Punch (9) left the list with its static lead (LIVE_MOVE_IDLE_LEAD_ROWS).
 const LIVE_MOVE_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
-  [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [209, 3], [223, 3], [227, 3], [235, 3],
+  [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [223, 3], [227, 3], [235, 3],
 ]);
 // Sides whose trail is -1 (production's last row is the ROM's first inactive row): the post rows repeat it.
 const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([
@@ -1568,15 +1568,19 @@ const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([
 // run is P + N + D + 1 rows). A post-row side's trail is -1 by definition; any other body has no tail (null).
 // tl205 (docs/tl204-zero-tail-rows.md): the no-post-row bodies whose script tail tl204 measured against fresh ROM rows (Scene ON, twice fresh) have trail -1
 // (the ROM release row is the body's last row + 1: tail frames = scriptTailRows - 1): Double Team, Rain Dance, Sunny Day, Hail, Leech Seed, Light Screen,
-// Charm, Calm Mind, Scary Face. Fake Tears (313) is held out: its trail is -1 too, but its live body window is 4 rows longer than the ROM's (182 vs 178),
-// so the true 5-row tail would move its residual from -1 to +4 (worse); add 313 when the Move_FAKE_TEARS body is corrected. The other zero-frame ont193 moves stay unknown (0 frames) until measured.
+// Charm, Calm Mind, Scary Face. bwf1: Fake Tears 313 joins (trail -1) now that its live window is the ROM's (84 rows, was 87).
+// ztl1: Spikes 191 / Destiny Bond 194 (labs ztl1-spikes / destinybond), Foresight 193 and Feather Dance 297 join; Charm 204, Spikes 191 and Feather Dance 297 are trail 0 (their stats-change / print rows start one row later than the -1 trail's). The other zero-frame ont193 moves stay unknown (0 frames) until measured.
 const LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS: ReadonlyMap<number, number> = new Map([
-  [28, 0], [104, -1], [240, -1], [241, -1], [258, -1], [73, -1], [113, -1], [204, -1], [347, -1], [184, -1],
+  [28, 0], [104, -1], [240, -1], [241, -1], [258, -1], [73, -1], [113, -1], [204, 0], [347, -1], [184, -1], [191, 0], [193, -1], [194, -1], [297, 0], [313, -1], [244, -1],
 ]);
 // iu120: bodies live only after idle98's evidence (base 3dd2b74b9) whose rows it never measured (lead / trail unknown): Struggle
 // (stl109 / sdl119, incl. its doll cells) keeps 0 / 0.
 const LIVE_MOVE_UNMEASURED_UNIVERSAL_ROW_IDS: ReadonlySet<number> = new Set([165]);
 const NO_UNIVERSAL_ROWS = Object.freeze({ pre: 0, post: 0 });
+// rsl1: the damaging bodies (Flamethrower, Rock Slide, Faint Attack, Spark, Dynamic Punch) in the no-pre list: the ROM reaches attackanimation 3 frames
+// before gAnimScriptActive rises here too (labs: every first SE was 3 rows early with the pre rows dropped), so the SOUND clock keeps the pre rows even
+// where the pixel adapter does not present them (the 3 rows stay folded into the hit tail). The masked status / heal bodies measure exact without them.
+const LIVE_MOVE_SOUND_PRE_ROW_IDS: ReadonlySet<number> = new Set([53, 157, 185, 209, 223]);
 
 /**
  * hit1 (docs/hit1-move-hit-timing.md, src/engine/animEndSeWait.ts): the rows Cmd_end's IsSEPlaying wait keeps a live body active after
@@ -1591,10 +1595,13 @@ const NO_UNIVERSAL_ROWS = Object.freeze({ pre: 0, post: 0 });
 // Metal Claw (232): the box's bdt1 window (154 = the 140-row source body + the ROM script's 14 held rows, ROM labs bdt1-metalclaw-*-on)
 // is the same Cmd_end wait hit1 measured (14 rows); the tdr1 merge keeps bdt1's.
 const CMD_END_SE_WAIT_MODELED_MOVE_IDS: ReadonlySet<number> = new Set([47, 76, 120, 232, LIVE_TRANSFORM_MOVE_ID]);
+// kse1: Scary Face (184), a lead4 S body, keeps its ROM-measured script tail but not the Cmd_end wait: its script ends on SE_M_STRING_SHOT2's song (row 146 + 1 + 60 = 207 =
+// the ROM's gAnimScriptActive length, labs aud242k-scaryface-player-on / mechanic-scary-face-*), 14 rows past the 190-row window (idle 4 + live 190 = 194), so the SE 245 / print after it was -12 / -14.
+const CMD_END_SE_WAIT_S_BODY_MOVE_IDS: ReadonlySet<number> = new Set([184]);
 export function cmdEndSeWaitRuleApplies(request: BattleMoveAnimationRequest): boolean {
   const id = request.moveId;
   return request.turnTrapBody !== true && request.generalRain !== true && !CMD_END_SE_WAIT_MODELED_MOVE_IDS.has(id)
-    && (!bodyLeadRuleApplies(id) || bodyHitTailRuleApplies(id)) && !LSE4_WINDOW_SHORT_ROWS.has(id);
+    && (!bodyLeadRuleApplies(id) || bodyHitTailRuleApplies(id) || CMD_END_SE_WAIT_S_BODY_MOVE_IDS.has(id)) && !LSE4_WINDOW_SHORT_ROWS.has(id);
 }
 // The duration is read many times per row (moveBodyExtraRows walks every command): cached per (request, field, body class, use).
 const END_SE_WAIT_CACHE = new WeakMap<BattleMoveAnimationRequest, WeakMap<BattleResolutionDisplayedField, Map<string, number>>>();
@@ -1668,12 +1675,14 @@ const HPD4_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[49, 3], [82, 
 // liv2: Self-Destruct's presented `hp` command already carries the script lead (the window starts at S + pre, ROM A), so it has no body lead; its hit
 // controller runs 10 rows after the window (the explosion script's own instructions, ROM gap 10), so the tail is 9 (3 + 4 + 123 + 9 = A -> H 139 + pre).
 // lse2: rows after a lead-first lse2 body (on top of its script tail where it has one) that put the next command on the ROM row (R -> H = lead + 3 + len + 4 less the window the body presents).
-const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 3], [347, 3], [59, 2], [227, 10]]);
+// bwf1: Cosmic Power 322 / Calm Mind 347 tail 3 -> 4 (with STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT 4): the stats-change command starts on the ROM A rise + 1, the glow phase the ROM's.
+const LSE2_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[322, 4], [347, 4], [59, 2], [227, 10]]);
 // hie5 / rcv1: a restore-HP body (Recover / Soft-Boiled / Milk Drink / Moonlight) holds the script's animation clear after the body's last visible row so the `hp` command starts on the ROM's
 // `healthbarupdate` (EffectRestoreHp+0x16) row. rcv1 re-fit against the ROM print rows (labs aud242k-recover, aud242r-softboiled / -moonlight, aud261-milkdrink, etp3-recoverls4: the "regained
 // health" print was +19 / +5 / +4 / +21 with hie5's 25 / 10 / 8 / 27, now +0 with 6 / 5 / 4 / 6).
 const HIE5_RESTORE_HP_BODY_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[105, 6], [135, 5], [208, 6], [236, 4], [235, 7]]);
-const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], ...HIE5_RESTORE_HP_BODY_TAIL_ROWS]);
+// stm1 / ssl1: Belly Drum (187) holds its animation clear 3 rows so the hp command starts on the ROM's `healthbarupdate` (stm1-bd-rockslide-on: hp 172 -> 175).
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], [187, 3], [18, 6], [46, 6], [220, 6], [212, 7], [335, 7], ...HIE5_RESTORE_HP_BODY_TAIL_ROWS]);
 // hpd8: the shape-A bodies' tail is whatever the 3 pre + 3 post rows of the ROM span (lead + 3 + len + 4) leave over: 6 - pre - post (T 1 / 3 / 6 in hpd7).
 const HPD8_SHAPE_A_ROWS_AROUND_BODY = 6;
 export function liveMoveHitTailRows(command: Extract<BattleResolutionPresentationCommand, { type: "move-animation" }>, field: BattleResolutionDisplayedField): number {
@@ -1762,7 +1771,9 @@ export function liveMoveSourceAge(
   const field = currentCommandField(state);
   if (liveMoveAnimationDuration(command.animation, field) === null) return null;
   const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0);
-  const pre = liveMoveUniversalRows(command.animation, field).pre;
+  const universalRows = liveMoveUniversalRows(command.animation, field);
+  const pre = universalRows.pre === 0 && LIVE_MOVE_SOUND_PRE_ROW_IDS.has(command.animation.moveId) && !LIVE_MOVE_UNMEASURED_UNIVERSAL_ROW_IDS.has(command.animation.moveId)
+    && liveSubstituteSwapApplies(command.animation, field) !== true ? LIVE_MOVE_PRE_ROWS : universalRows.pre;
   // lse2: a body whose lead is presented in front of it keeps the sound clock of the ROM script rows (the clock is the pre-lead one, shifted by the lead's difference to its 7-row calibration).
   let precedingStatRows = 0;
   for (let c = state.commandIndex - 1; c >= 0 && segment!.commands[c]!.type === "stat"; c -= 1) precedingStatRows += battleResolutionCommandDuration(segment!.commands[c]!, field);
@@ -1820,8 +1831,10 @@ export function moveAnimationScriptStartRow(segment: BattleResolutionPresentatio
 
 
 const STATS_CHANGE_AFTER_BODY_AGE_SHIFT = 4;
-// lse2: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stat SE sits 1 row later than the generic shift's (ROM - ours +1 in both labs).
-const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 3;
+// lse2 / bwf1: after a lead-first lse2 body (Cosmic Power, Calm Mind) the stats-change command starts 1 row after the generic one (tail 4), so the age shift matches the generic 4 and the SE stays on the ROM row.
+const STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT = 4;
+// ztl1: after an S-lead body the stat SE sat 2 rows after the ROM's (Smokescreen 245, Agility 239, Scary Face 245 in the aud242 labs): the command starts 2 rows later than the generic age assumed.
+const STATS_CHANGE_AFTER_S_LEAD_BODY_AGE_SHIFT = 2;
 // sta5: after a Flatter / Swagger body (lead + tail landed) and its 2-row `stat` command the `stats-change` command starts 2 rows (the not yet landed
 // pre-print rows) before the ROM's `playanimation`, whose SE is exec + 4: the generic age (calibrated on the old, earlier start) is shifted by 1.
 const STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT = 1;
@@ -1848,7 +1861,7 @@ export function statsChangeSourceAge(
     && beforeStat.animation !== undefined && bodyStatusTailRuleApplies(beforeStat.animation.moveId);
   // lead4: an S body's lead moved in front of it and its tail shrank by the same rows, so the stats-change command starts where it did: the generic age is unchanged.
   const afterBodyLead = previous?.type === "move-animation" && (previous.timing.bodyLeadFrames ?? 0) > 0
-    ? (previous.animation !== undefined && bodySLeadRuleApplies(previous.animation.moveId) ? 0
+    ? (previous.animation !== undefined && bodySLeadRuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_S_LEAD_BODY_AGE_SHIFT
       : previous.animation !== undefined && bodyLse2RuleApplies(previous.animation.moveId) ? STATS_CHANGE_AFTER_LSE2_BODY_AGE_SHIFT : STATS_CHANGE_AFTER_BODY_AGE_SHIFT)
     : afterStatBody ? STATS_CHANGE_AFTER_STAT_BODY_AGE_SHIFT : 0;
   const rules = state.segments[state.segmentIndex]!.beforeRules;

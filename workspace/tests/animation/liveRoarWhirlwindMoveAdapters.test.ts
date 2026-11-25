@@ -6,7 +6,7 @@ import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { iu120Ages, iu120Extra } from "../helpers/iu120Rows.ts";
+import { hpd4BodyRows, iu120Ages, iu120Extra } from "../helpers/iu120Rows.ts";
 
 // Roar (46) / Whirlwind (18) live bodies (docs/next-adapters-prep11.md s0.2; dense fixtures tools/integration/fixtures/prep11-live/
 // roar-* / whirlwind-*, receipt tools/integration/fixtures/roar-live-receipt.json) and the Scene ON forced switch-out continuation
@@ -49,8 +49,9 @@ describe("live Roar / Whirlwind adapters + Scene ON forced switch-out", () => {
     expect([hold!.type, recall!.type, sendIn!.type]).toEqual(["switch-out", "sprite-visibility", "switch-in"]);
     expect(hold!.command).toMatchObject({ battler: 1, skipAnimation: true });
     expect(recall!.command).toMatchObject({ battler: 1, visible: false, recall: true });
+    // snr1: the drag body holds the ROM's 6 tail rows (LIVE_MOVE_LEADLESS_TAIL_ROWS [18, 6] / [46, 6]) before the forced hold.
     expect([hold!.frame - body!.frame, recall!.frame - hold!.frame, sendIn!.frame - recall!.frame])
-      .toEqual([duration + iu120Extra(r.id), FORCED_RETURN_TO_BALL_HOLD_FRAMES, FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES]);
+      .toEqual([duration + iu120Extra(r.id) + hpd4BodyRows(r.id), FORCED_RETURN_TO_BALL_HOLD_FRAMES, FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES]);
     // offs152: Scene OFF takes the same forced hold (Cmd_returntoball skips the return animation in both scenes) with the target
     // drawn at rest (no body ran); tests/offs152SceneOffForcedSwitch.test.ts pins its ROM rows.
     const offHold = off.commands.find(c => c.type === "switch-out");

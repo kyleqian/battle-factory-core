@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createInitialState, tick } from "../src/engine/core.ts";
-import { PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS, WAITMESSAGE_LONG_HOLD_FRAMES } from "../src/engine/battleResolutionPresentation.ts";
+import { PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS, PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS, WAITMESSAGE_LONG_HOLD_FRAMES } from "../src/engine/battleResolutionPresentation.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 
 const appTracePath = "../tools/compare/appTrace.ts";
@@ -38,14 +38,20 @@ function commandStarts(name: string): Row[] {
 describe("sta3: pre-move print -> status animation timing against the ROM step-mode windows", () => {
   it("the pre-move message holds the 64-row waitmessage plus the 3 launch rows (both scenes' shared print)", () => {
     expect(PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS).toBe(3);
+    // cfx1 (docs/aud251-s11-scoreboard-refresh.md "cfx1"): the Scene ON confusion head's wait is two rows shorter than the asleep head's 3 (fpl1 had 2): its message now sits on the
+    // ROM's first-glyph row (print exec row + 2, after MoveEffectConfusion's print is no longer 2 rows early), and the head's status animation starts on the ROM's `status2animation` exec row.
+    expect(PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS).toBe(1);
     for (const [name, window] of Object.entries(windows)) {
       const rows = commandStarts(name);
       const second = rows.map((r, i) => ({ r, i })).filter(({ r }) => r.type === "status-animation").at(-1)!;
       const message = rows[second.i - 1]!;
       expect(message.type, name).toBe("message");
-      expect(message.hold, name).toBe(WAITMESSAGE_LONG_HOLD_FRAMES + PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS);
-      // print exec row -> status2animation exec row: the same rows in the engine (message start -> status-animation start).
-      expect(second.r.frame - message.frame, name).toBe(window.launch - window.print);
+      const confusion = second.r.animation === "CONFUSION";
+      const lead = confusion ? PRE_MOVE_CONFUSION_STATUS_ANIMATION_LEAD_ROWS : PRE_MOVE_STATUS_ANIMATION_LEAD_ROWS;
+      expect(message.hold, name).toBe(WAITMESSAGE_LONG_HOLD_FRAMES + lead);
+      // print exec row -> status2animation exec row: the same rows in the engine (message start -> status-animation start); the confusion head's message is on the first-glyph
+      // row, 2 after the print exec row (cfx1: lab aud242f-swagger-player-on, first glyph 632 -> launch 720 = 88; ROM SE 176 = launch + 3).
+      expect(second.r.frame - message.frame, name).toBe(window.launch - window.print - (confusion ? 2 : 0));
       // The action transition: the previous print's exec row -> this print's exec row is the ROM's, less the 1 row of the message-start convention.
       const anchorMessage = rows.slice(0, second.i - 1).filter((r) => r.type === "message").at(-1)!;
       expect(message.frame - anchorMessage.frame, name).toBe(window.print - window.anchorPrint - 1);

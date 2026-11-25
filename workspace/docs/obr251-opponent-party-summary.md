@@ -63,3 +63,30 @@ Receipts: `tools/compare/traces/obr251-opponent-faint-{on,off}.json`, `tools/aud
   9825 -> 9947 (Foe NIDORINA replacement).
 * `tests/audioProbeFixtures.test.ts`: file list gained the two obr251 fixtures. (20 pre-existing failures there are the aud242b fixtures: `pan` kind not in
   EVENT_KINDS and the list lacks the aud242 files; untouched.)
+
+## 6. obr2 (2026-11-23): residuals 1-4 re-measured; what is closed
+
+Base `fold-20261123d` (53a20133a). Evidence `.integration/evidence/obr2/` (git-ignored).
+
+* **1 / 2 (the faint box before the bar) -- already exact, closed.** `npm run compare` on `obr251-opponent-faint-{on,off}` now matches every frame 495..710 in both
+  scenes (the 37 px `▾` and the 608 px blank-box residuals are gone: ON 303/306, OFF 216/306 over the whole 306-frame window, all remaining diffs after 711 / 798, below).
+  Mechanism, source-proven by fnt1 (`docs/fnt1-fainted-box-clear.md`, text.c `RENDER_STATE_CLEAR`): the `\p` press at A is taken from G+1; the clear reaches the screen
+  only with the same frame's `TextPrinterDrawDownArrow` copy (wait frame k % 9 == 0), otherwise the print and the frozen arrow stay until the next print. Scene ON's A
+  lands on a non-redraw frame (text + frozen arrow to 625), Scene OFF's on a redraw frame (blank from 502 = A+1); both then print "sent out" at 626. Pinned in
+  `tests/obr2OpponentFaintBox.test.ts` (both scenes, per frame 495..640, from the app's render view).
+* **3 (ball tile names) -- pixels were wrong in unreachable-today paths; renamed.** `CreatePartyStatusSummarySprites` adds `oam.tileNum += 1` for an empty slot,
+  `+= 3` for hp == 0 and `+= 2` for a major status (battle_interface.c:1546-1586); the sheet names (`HEALTHBOX_GFX_STATUS_BALL_FAINTED` / `_STATUSED`) are in the
+  opposite order. `ballDisplay.states` followed the enum, so `ballIcons` (intro tray), `drawOpponentSummaryExit` and `drawTypedPartyStatusSummary` drew a fainted mon
+  with the status tile and a status mon with the fainted tile. Reachability: the intro tray holds only healthy / empty balls (a Factory party is whole at battle
+  start), the exit path is that same tray, and `drawTypedPartyStatusSummary` is player-side only, which `PlayerHandleDrawPartyStatusSummary` never draws mid-battle
+  (ISSUES #78: the render view already drops battler 0). The canonical Battle 2 trays (TURN5 / TURN13) used the label `"Statused"` for FAINTED mons because that
+  was the tile that matched the oracle. Fix: `states` is now `["Full","Empty","Statused","Fainted"]` (tile order 0..3 = ROM offsets; extractor and JSON), and the two
+  canonical constants say `"Fainted"`: no pixel moves (`compare:differential` byte-identical on sendout / turn5-faint / turn13-dragonbreath-faint, 507 captures, and on
+  both obr251 traces, 612 captures; census command streams byte-identical 0..199 both scenes). Pin `tests/obr2PartyBalls.test.ts` (red without the rename).
+  Not oracle-compared: a *status* ball (needs an AI voluntary switch-out of a poisoned opponent mon, the tray's `+2` tile); the fainted ball (tile 3) is oracle-exact in the
+  obr251 bar frames 527..546.
+* **4 (fade across a segment boundary) -- measured, nothing to land.** Scanning the app's render view over census seeds 0..139 in both scenes (~600 opponent trays: faint
+  replacements and AI switch-outs) found 0 frames where a summary with a fade running (or still shown) disappears because the presentation segment changed: the hide is always
+  followed in its own segment by the switch-in (> 18 frames). The 18-frame fade does not cross a boundary in any reachable route; the code (`summary` is per segment) stays.
+* The compare diffs that remain after the window (OFF 711..800, ON 798..800 on the obr251 traces) are the action-menu / opponent healthbox idle bounce after the replacement
+  (ISSUES #56 class), not the party bar.

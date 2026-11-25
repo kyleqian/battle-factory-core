@@ -10753,7 +10753,7 @@ export const turn5FaintedCursorX = lazyValue(() => LINE2_ORIGIN.x + measureText(
 
 
 
-/** Pidgeotto's own former slot (index 3, DESTIN's SECOND fainted mon) flips `"Full"` -> `"Statused"` - oracle-pixel-confirmed (0-diff tile match against `battle-interface-ball-display.json`'s own 4 states at the settled tick 16900) directly against `TURN5_OPPONENT_ICON_STATES`: index 3 flips, index 4 (MURKROW, freshly sent out) stays `"Full"`, index 5 (GROVYLE) stays `"Statused"` unchanged from turn 5. */
+/** Pidgeotto's own former slot (index 3, DESTIN's SECOND fainted mon) flips `"Full"` -> `"Fainted"` (the label was "Statused" while the sheet was named in enum order; obr2 renamed the tiles to the ROM offsets) - oracle-pixel-confirmed (0-diff tile match against `battle-interface-ball-display.json`'s own 4 states at the settled tick 16900) directly against `TURN5_OPPONENT_ICON_STATES`: index 3 flips, index 4 (MURKROW, freshly sent out) stays `"Full"`, index 5 (GROVYLE) stays `"Statused"` unchanged from turn 5. */
 
 
 /**
@@ -31231,6 +31231,8 @@ export function renderSceneOnMovePresentation(
     const onixIdle = playerToOpponent
       ? sceneOnBattlerFrontIdleRest(view.target)
       : { x2: 0, y2: 0 };
+    // bwf2: MoveBattlerSpriteToBG reads x2, so a live opponent attacker keeps its front idle rest (RATTATA +1) while it sits on the BG.
+    const attackerIdle = liveField && opponentToPlayer ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
     drawTileBg(
       fb,
       battleBg.static.tileset,
@@ -31248,10 +31250,10 @@ export function renderSceneOnMovePresentation(
       opponent.palette,
       playerToOpponent
         ? view.target.geometry.spriteCorner.x + onixIdle.x2
-        : view.attacker.geometry.spriteCorner.x,
+        : view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
       playerToOpponent
         ? view.target.geometry.spriteCorner.y + onixIdle.y2
-        : view.attacker.geometry.spriteCorner.y,
+        : view.attacker.geometry.spriteCorner.y + attackerIdle.y2,
     );
     if (displayed.wall && view.alpha && view.alpha.eva > 0) {
       const palette = lightScreenArt.greenLightWall.palette.slice();

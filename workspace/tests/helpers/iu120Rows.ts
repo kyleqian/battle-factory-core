@@ -12,7 +12,7 @@ export const IU120_PRE_ROWS = 3;
 export const IU120_POST_ROWS = 2;
 // hit1: Thunder Punch (9) left the masks with its static 10-row lead (LAND97_LEAD_ROWS).
 export const IU120_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
-  [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [209, 3], [223, 3], [227, 3], [235, 3],
+  [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [223, 3], [227, 3], [235, 3],
 ]);
 /**
  * hit1 (docs/hit1-move-hit-timing.md): the test-side copy of Cmd_end's IsSEPlaying rows (production: liveMoveEndSeWaitRows) of the ordinary
@@ -21,12 +21,13 @@ export const IU120_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
  * production's end) + 1, plus the lead rows production does not present (Supersonic 7, Recover 10, Milk Drink 13, Dynamic Punch 19,
  * Synthesis 4), or the frame catcher's CATCHER_WATCH windows (Thunder Punch 135 rows, Twineedle 63, Metal Claw 157, Sludge 111, Ember 69,
  * Fire Punch 101 from the activation to gAnimScriptActive's fall). The rows after the body show the field (every script command has run).
+ * kse1: Scary Face (184@190: 12 of the 14 rows are body ages; the S-body lead shift takes 2 of them) 14 = SE_M_STRING_SHOT2's song (row 146 + 1 + 60) end 207 minus its 190-row window + idle 4 - 1 (the ROM's gAnimScriptActive length, 207 rows).
  * Metal Claw (14) left the table in the tdr1 merge: the box's bdt1 window (154) models the same wait.
  */
 export const HIT1_CMD_END_SE_WAIT_ROWS: ReadonlyMap<number | string, number> = new Map<number | string, number>([
-  [7, 1], [9, 22], [16, 44], [41, 17], [48, 21], [52, 3], [64, 14], [74, 20], [75, 20], [105, 15], [124, 6], [158, 2], [176, 3], [179, 1],
-  [190, 1], [200, 1], [206, 13], [208, 17], [209, 9], [223, 46], [225, 1], [235, 10], [299, 9], [316, 63], [342, 4], [343, 21],
-  [350, 1], [143, 1], ["143@180", 0],
+  [7, 1], [9, 22], [16, 44], [41, 17], [52, 3], [64, 14], [74, 20], [75, 20], [105, 15], [124, 6], [158, 2], [176, 3], [179, 1],
+  [184, 14], [190, 1], [200, 1], [206, 13], [208, 17], [223, 46], [235, 10], [299, 9], [316, 63], [342, 4], [343, 21],
+  [350, 1], [143, 1], ["143@180", 0], ["184@190", 12],
 ]);
 export function hit1SeWaitRows(id: number, _side: Iu120Side = "player", duration?: number): number {
   return (duration === undefined ? undefined : HIT1_CMD_END_SE_WAIT_ROWS.get(`${id}@${duration}`)) ?? HIT1_CMD_END_SE_WAIT_ROWS.get(id) ?? 0;
@@ -68,7 +69,13 @@ export function iu120Extra(id: number, side: Iu120Side = "player", duration?: nu
  */
 const ONT193_SCRIPT_TAIL_FRAMES: ReadonlyMap<number, number> = new Map(Object.entries({ 14: 3, 28: 6, 39: 3, 43: 3, 50: 4, 97: 3, 103: 3, 106: 3, 107: 3, 108: 3, 112: 3, 115: 3, 116: 4, 133: 3, 148: 3, 151: 3, 178: 3, 180: 4, 182: 3, 195: 3, 197: 3, 201: 4, 203: 3, 213: 4, 215: 4, 219: 4, 230: 3, 254: 3, 259: 4, 266: 3, 269: 4, 271: 5, 272: 4, 275: 3, 277: 2, 281: 9, 288: 3, 294: 3, 312: 4, 319: 3, 321: 5, 334: 3, 336: 3, 339: 4, 349: 4,
   // tl205 (docs/tl204-zero-tail-rows.md): the tl204-measured zero-tail moves, tail frames = scriptTailRows - 1 (trail -1, post 0): Leech Seed, Double Team, Light Screen, Scary Face, Charm, Rain Dance, Sunny Day, Hail, Calm Mind (lse2: Leech Seed 3 and Calm Mind 4, their leads are presented in front of the body).
-  73: 3, 104: 5, 113: 6, 184: 5, 204: 5, 240: 5, 241: 6, 258: 6, 347: 4 }).map(([id, frames]) => [Number(id), frames]));
+  73: 3, 104: 5, 113: 6, 184: 5, 204: 6, 240: 5, 241: 6, 258: 6, 347: 4,
+  // ztl1: Spikes 191 / Foresight 193 / Destiny Bond 194 / Feather Dance 297 (S-lead bodies; Charm 204, Spikes and Feather Dance are trail 0).
+  191: 5, 193: 5, 194: 5, 297: 6,
+  // bwf1: Fake Tears 313 (S-lead, trail -1: scriptTailRows 6 - 1).
+  313: 5,
+  // cfx1 (fpl1 / ssm1 51a5d3d23): Psych Up 244 joins the S-lead moves with the -1 trail (6 - 1): lab ztl1-psychup-player-on, body command 187 rows = ROM print 251 exact.
+  244: 5 }).map(([id, frames]) => [Number(id), frames]));
 export function ont193ScriptTail(id: number): number {
   return ONT193_SCRIPT_TAIL_FRAMES.get(id) ?? 0;
 }
@@ -82,20 +89,20 @@ export function ont193ScriptTail(id: number): number {
  */
 interface Iu120BodyRule { readonly lead?: number; readonly defaultLead?: number; readonly tail: number | "shape-a" }
 // lead2 B1: Double Kick 24 (hit 1) 16, Icy Wind 196, Water Pulse 352, Facade 263, Mega Kick 25, Counter 68 (4), Comet Punch 4 / Doubleslap 3 (hit 1: 15), Mega Drain 72.
-const SHAPE_A_RULE_IDS: readonly number[] = [9, 24, 196, 352, 263, 25, 68, 4, 72, 3, 332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59, 247, 317, 60, 242, 282, 8, 29, 21, 175, 232, 163, 189, 7, 154, 67, 210, 149, 32, 337, 315, 124, 51, 93, 52, 224, 290, 129, 231, 309, 306, 238, 211, 138, 161, 55, 348, 228, 314, 183, 87, 65, 62, 23, 323, 179, 172, 136, 75, 36, 326, 229, 152, 351, 327, 310, 299, 284, 190, 162, 158, 146, 122, 66, 330, 325, 257, 123, 27, 305, 304, 245];
+const SHAPE_A_RULE_IDS: readonly number[] = [9, 2, 5, 11, 16, 88, 265, 302, 341, 342, 343, 101, 276, 295, 296, 318, 324, 24, 196, 352, 263, 25, 68, 4, 72, 3, 332, 94, 85, 38, 98, 34, 246, 202, 58, 57, 91, 165, 157, 61, 126, 345, 53, 76, 44, 188, 89, 185, 56, 59, 247, 317, 60, 242, 282, 8, 29, 21, 175, 232, 163, 189, 7, 154, 67, 210, 149, 32, 337, 315, 124, 51, 93, 52, 224, 290, 129, 231, 309, 306, 238, 211, 138, 161, 55, 348, 228, 314, 183, 87, 65, 62, 23, 323, 179, 172, 136, 75, 36, 326, 229, 152, 351, 327, 310, 299, 284, 190, 162, 158, 146, 122, 66, 330, 325, 257, 123, 27, 305, 304, 245, 167, 155, 131, 209, 225, 41, 42, 350, 19];
 // lead3 B2 (the trailing ids): the measured bodies Shadow Ball .. Fire Punch (lead 5), Fury Swipes 154 / Low Kick 67 / Fury Cutter 210 / Psywave 149 / Horn Drill 32 (leads below), then the predicted counter-5 A? bodies.
-const SHAPE_A_LEADS: ReadonlyMap<number, number> = new Map([[89, 11], [24, 16], [4, 15], [3, 15], [68, 4], [154, 15], [67, 8], [210, 9], [149, 6], [32, 7]]);
+const SHAPE_A_LEADS: ReadonlyMap<number, number> = new Map([[89, 11], [24, 16], [4, 15], [3, 15], [68, 4], [154, 15], [67, 8], [210, 9], [149, 6], [32, 7], [41, 15], [42, 15], [350, 15]]);
 const shapeA = (id: number): Iu120BodyRule => ({ lead: SHAPE_A_LEADS.get(id) ?? 5, defaultLead: id === 91 || id === 76 ? undefined : SHAPE_A_LEADS.get(id) ?? 5, tail: "shape-a" });
 // lead4 B3: the S status bodies (test-side copy of production's LEAD4_S_LEAD_MOVE_IDS): the script lead (passed by the caller) is presented before the body, and the script tail ONT193_SCRIPT_TAIL_FRAMES
 // holds (lead included) shrinks by it: the row total is unchanged, so `hpd4BodyRows` adds nothing for them.
 const S_LEAD_RULE_IDS: ReadonlySet<number> = new Set([
   104, 182, 113, 240, 184, 108, 201, 204, 219, 266, 28, 241, 213, 97, 334, 230, 151, 133, 258, 14, 203, 197, 349, 254, 215, 107, 281, 180, 288, 195, 115, 103,
-  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116,
+  277, 178, 43, 39, 148, 106, 275, 112, 321, 259, 319, 271, 339, 294, 272, 50, 269, 116, 191, 193, 194, 297, 313, 244,
 ]);
 // b4l c-lead (test-side copy of production's C_LEAD_WINDOW_ADJUST + the kernel lead L = A0 - R - 3, ROM-measured by b4m / b4l): the lead rows are presented in front of the body, the window adjust
 // (ROM next command - engine next command) after it. Thunder Wave 86 / Stun Spore 78 / Sleep Powder 79 (9 / 9 / 7, +0), Sing 47 (7, +3), Grasswhistle 320 (7, -2), Confuse Ray 109 (6, +2),
 // Curse 174 (4, +4; its Ghost branch 6 / +4: ROM A1 430 -> first command 433 is the engine's 433), Lovely Kiss 142 (7, +3), Will-O-Wisp 261 (8, +2), Glare 137 (9, +2), Brick Break 280 (7, +3).
-const C_LEAD_RULE_IDS: ReadonlySet<number> = new Set([86, 78, 79, 47, 320, 109, 174, 142, 261, 137, 280]);
+const C_LEAD_RULE_IDS: ReadonlySet<number> = new Set([86, 78, 79, 47, 320, 109, 174, 142, 261, 137, 280, 48]);
 const cLead = (lead: number, tail: number): Iu120BodyRule => ({ defaultLead: lead, tail });
 const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu120BodyRule>([
   // hpd4 lead-table bodies (explicit tails)
@@ -103,8 +110,8 @@ const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu1
   ...SHAPE_A_RULE_IDS.map((id): [number, Iu120BodyRule] => [id, shapeA(id)]),
   // sta5 status bodies: the script tail only (their lead is passed by the caller: Flatter / Swagger 2, Spore 7, Toxic 10); Hypnosis (95) is lead 7 by default
   [260, { tail: 4 }], [207, { tail: 5 }], [147, { tail: 0 }], [92, { tail: 7 }], [95, { defaultLead: 7, tail: 0 }],
-  // lse2 lead-first status bodies
-  [73, { defaultLead: 36, tail: 0 }], [322, { defaultLead: 2, tail: 3 }], [347, { defaultLead: 2, tail: 3 }], [227, { defaultLead: 2, tail: 10 }],
+  // lse2 lead-first status bodies (bwf1: Cosmic Power / Calm Mind tail 3 -> 4, the stat command starts on the ROM's A rise + 1)
+  [73, { defaultLead: 36, tail: 0 }], [322, { defaultLead: 2, tail: 4 }], [347, { defaultLead: 2, tail: 4 }], [227, { defaultLead: 2, tail: 10 }],
   // lse4 (production's gap-print / lead-only classes and LSE4_SHAPE_A_MOVE_IDS): Revenge 279 is shape A (lead 5, tail 3); Absorb 71 lead 5, tail 3 + 2 window-short rows; Recycle 278 lead 2, tail 2 (gap 3);
   // Razor Wind 13 unleash lead 5, tail 4 (its charge turn: lead 1, tail 4, the caller passes the lead); Wish 273 lead 2, no tail (its pause is a separate command).
   [279, shapeA(279)], [71, { defaultLead: 5, tail: 5 }], [278, { defaultLead: 2, tail: 2 }], [13, { defaultLead: 5, tail: 4 }], [273, { defaultLead: 2, tail: 0 }],
@@ -112,16 +119,20 @@ const IU120_BODY_RULES: ReadonlyMap<number, Iu120BodyRule> = new Map<number, Iu1
   [59, { ...shapeA(59), tail: 2 }],
   // b4l c-lead
   [86, cLead(9, 0)], [78, cLead(9, 0)], [79, cLead(7, 0)], [47, cLead(7, 3)], [320, cLead(7, 0)], [109, cLead(6, 2)], [174, cLead(4, 4)], [142, cLead(7, 3)], [261, cLead(8, 2)], [137, cLead(9, 2)], [280, cLead(7, 3)],
+  // ssl1: Supersonic 48 (lead 6, window adjust 28: ROM labs ttf1-supersonic-*, status exec 155 = print release 70 + 85)
+  [48, cLead(6, 28)],
 ]);
 export const HPD4_BODY_LEAD_ROWS: ReadonlyMap<number, number> = new Map([...IU120_BODY_RULES].filter(([, r]) => r.lead !== undefined).map(([id, r]): [number, number] => [id, r.lead!]));
 // liv2 / mxp1: Self-Destruct and Explosion have no body lead (their hp command carries it) but a 9-row hit tail after the live window; the age holds the last body row there.
-const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], [105, 6], [135, 5], [208, 6], [236, 4], [235, 7]]);
+const LIVE_MOVE_LEADLESS_TAIL_ROWS: ReadonlyMap<number, number> = new Map([[120, 9], [153, 9], [187, 3], [105, 6], [135, 5], [208, 6], [236, 4], [235, 7], [18, 6], [46, 6], [220, 6], [212, 7], [335, 7]]);
 // sta5: ids whose age holds the last body row through the tail (test-side copy of production's STA5 status-tail class).
 const STA5_STATUS_TAIL_IDS: ReadonlySet<number> = new Set([260, 207, 147, 92, 95]);
+// lpm1 / mhl1 (test-side copy of production's LSE4_WINDOW_SHORT_ROWS for the shape-A ids): Luster Purge 295 / Signal Beam 324 are one row short of the ROM's A + 1 (hit SE 401 / 213, hp row 249).
+const SHAPE_A_WINDOW_SHORT_ROWS: ReadonlyMap<number, number> = new Map([[295, 1], [324, 1]]);
 function hpd4BodyTail(id: number, side: Iu120Side, duration?: number): number {
   const tail = IU120_BODY_RULES.get(id)?.tail;
   if (tail === undefined) return 0;
-  return tail === "shape-a" ? Math.max(0, 6 - iu120Pre(id, side) - iu120Post(id, side, duration)) : tail;
+  return tail === "shape-a" ? Math.max(0, 6 - iu120Pre(id, side) - iu120Post(id, side, duration)) + (SHAPE_A_WINDOW_SHORT_ROWS.get(id) ?? 0) : tail;
 }
 const defaultBodyLead = (id: number): number => IU120_BODY_RULES.get(id)?.defaultLead ?? 0;
 /** The rows an audited body's lead and hit tail add; 0 unless the caller passes the body's lead (Ice Ball: 10 on turn 1, 9 after; the others HPD4_BODY_LEAD_ROWS). */

@@ -5,6 +5,7 @@
 // hpf2: cry1-roar-{pidgey,jynx}-player-on drift 13 -> -1, command start 388 / 386 -> 374 / 372: the earlier turn's heal / recoil hp rows are now the ROM's hp -> print hold (no 28-row floor); the first cry is 1 frame before the ROM's instead of 13 after.
 // hcr2c: the command starts move by the hcr2 used-move hold (u - 2 = 1 / 1 / 1 / 2 / 2 / 2: 374 / 372 / 393 / 46 / 53 / 51 -> 375 / 373 / 394 / 48 / 55 / 53); the cry rows keep their drifts (master pins: the body lead
 // is min(u - 2, 2) = the hold), so the start-to-cry offsets read 16 / 16 / 16 / 43 / 14 / 14.
+// lpa1 (start-to-cry offsets 16 -> 17 x3 with it): the lead of a later action is its own used print's: cry1-roar-{pidgey,jynx}-player-on drift -1 -> 0 (ROM ROAR_1 392 / 390 exact), cry1-roar-pidgey-opp-on drift 2 -> 3 (ROM 408; one frame worse, left: no constant fits the player labs and the foe lab together).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
@@ -54,9 +55,9 @@ function romFirstCry(rom: Fixture): { duck: number; cry: FixtureEvent } {
 
 // ROM first-cry frame, species, pan, mode, engine-minus-ROM drift at the first cry, the engine's command start (first presented frame of the animation) and the row's age in it.
 const SITES = [
-  { name: "cry1-roar-pidgey-player-on", species: 16, pan: -64, mode: "ROAR_1", rom: 392, drift: -1, commandStart: 375 },
-  { name: "cry1-roar-jynx-player-on", species: 124, pan: -64, mode: "ROAR_1", rom: 390, drift: -1, commandStart: 373 },
-  { name: "cry1-roar-pidgey-opp-on", species: 16, pan: 63, mode: "ROAR_1", rom: 408, drift: 2, commandStart: 394 },
+  { name: "cry1-roar-pidgey-player-on", species: 16, pan: -64, mode: "ROAR_1", rom: 392, drift: 0, commandStart: 375 },
+  { name: "cry1-roar-jynx-player-on", species: 124, pan: -64, mode: "ROAR_1", rom: 390, drift: 0, commandStart: 373 },
+  { name: "cry1-roar-pidgey-opp-on", species: 16, pan: 63, mode: "ROAR_1", rom: 408, drift: 3, commandStart: 394 },
   { name: "cry1-howl-jynx-player-on", species: 124, pan: -64, mode: "HIGH_PITCH", rom: 87, drift: 4, commandStart: 48 },
   { name: "cry1-hypervoice-pidgey-player-on", species: 16, pan: -64, mode: "ECHO_START", rom: 69, drift: 0, commandStart: 55 },
   { name: "cry1-hypervoice-jynx-player-on", species: 124, pan: -64, mode: "ECHO_START", rom: 67, drift: 0, commandStart: 53 },
@@ -78,7 +79,7 @@ describe("cry-task first cries (cry1, Scene ON)", () => {
   }
 
   it("the first cry is at the animation command start + 11 + script frame: Roar 6, Howl 34, Hyper Voice 5 (engine frames, drift-free offsets)", () => {
-    expect(SITES.map((s) => s.rom + s.drift - s.commandStart)).toEqual([16, 16, 16, 43, 14, 14]);
+    expect(SITES.map((s) => s.rom + s.drift - s.commandStart)).toEqual([17, 17, 17, 43, 14, 14]);
   });
 
   it("ROM facts the second cries build on: ROAR_2 is ROAR_1 + 11, and Hyper Voice's first stop (a ROM no-op, nothing playing) is 2 frames before ECHO_START", () => {

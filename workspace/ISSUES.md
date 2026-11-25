@@ -87,6 +87,9 @@ Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp com
   anchor fix is part of it). Open (ranked in the handoff "Next work"): the OFF faint box's press-ready frame (s6568 d104), the Focus Punch family's next row (s310 d3 -9), Supersonic s5569 d12 -9 (no
   supported lab pair), the end-turn last-print box blank (~30 frames, sbx1), the Leech Seed drain body pixels (age 21 vs SE 7 + 2), Slack Off / Morning Sun (no live body adapter), shb1's 49 / ftp1's 16
   on few windows, Water Gun / Pay Day effectiveness SE -1 after the ClearMonBg tail (sbm1).
+- **2026-11-23/24 run** (`docs/aud251-s11-scoreboard-refresh.md` "ldw1" .. "bwf2", rankings "t2k8" / "t2k9"): T2 ON 8,684 -> 6,186, OFF 719 -> 597 (0 / 0). Open, ranked in t2k9 / the handoff
+  "Next work": the battle-end loss recall SE 15 -4, OFF hit-SE rows, the Toxic next-action gap, Rest -> Chesto +6, Rock Slide after Belly Drum -6, Dig after Dig / confusion, Supersonic tail,
+  Twineedle / Pin Missile / Rock Blast, Luster Purge / Signal Beam 1 row; the T2 OFF s6568 d104 -20 is the replay tool's press mapping (fbp1, Mac-owned file).
 - **Bodies measured, not landed (lse3, docs/hpd1-hp-hold.md "lse3"):** Absorb +10, Mega Drain +8, Counter +5, Revenge +8, Recycle +4, Razor Wind charge / unleash +8 / +9 (+ ~5 turn-end rows of a
   locked continuation), Pound / Scratch / Tackle (+13 / +12 / +21; phy1m: outsideFactory, reachable only through Metronome; every Factory body is live in play, but 63.6 % of body commands have no audited lead, +6 .. +14 rows: `docs/phy1m-nonlive-bodies.md`), Wish (+14: the generic action-transition rows that `actionTransitionPauseFrames` drops in Scene ON
   when the anchor is the used print). hpf3 re-pinned Absorb / Revenge / Recycle / Razor Wind windows that these bodies now dominate.
@@ -109,9 +112,9 @@ Hydro Pump / Cosmic Power / Calm Mind / Encore / Hypnosis / Blizzard, ROM hp com
 
 `docs/ais1-ai-switch-withdraw.md` (ais1 / ais2 / ais3): the AI withdraw, recall ball effect, species anchors (opponent front / player back y_offset), the 101-frame tray and the 2-frame-earlier AI send-in ball are done; seed 2741 is pixel-exact through the send-in in both scenes.
 ais4 (2026-11-18, same doc "ais4"): the opponent faint replacement runs the AI send-in timeline (obr251 OFF 6 -> 91, ON 6 -> 178 / 306; aud253 2741 SE 15 / cry exact). Still open: (2) Pursuit-interception
-and Focus-Punch-pre-pass AI switches unsynthesized / unprobed; (3) a same-turn player voluntary switch + AI switch uses the player's recall clock only; (5) player send-in 1 frame late in Scene OFF
-(`pmo239-switch-0-to-2-reopen-off`, one species pair) and no Scene ON lab for the player recall / send-in (238-250); the OFF `\p` box clear at A+1, the post-send-in clear (OFF 9 early, ON 1 late),
-the staged replacement's gender (harness).
+and Focus-Punch-pre-pass AI switches unsynthesized / unprobed; the OFF `\p` box clear at A+1, the post-send-in clear (OFF 9 early, ON 1 late),
+the staged replacement's gender (harness). ais5 (2026-11-23, same doc "ais5") closed (3) (each side already on its own clock; pinned in 7 labs) and (5) (player "Go! X!" print holds glyphs + 1 rows,
+ball-open SE = print + 54 + name length, 12 species). New: the AI tray -> "sent out" print is 102 frames in 12 / 14 ROM observations, 101 in the rest (engine 101; no source rule found).
 
 ## #214 — Leads from the Mac lane's 2026-11-12 passes (source-read only, no ROM seed)
 
@@ -119,15 +122,6 @@ the staged replacement's gender (harness).
   battler; the engine ports only White Herb there (a status berry cures a few steps early in the ROM). Low value.
 - Census battle 32 trips `sa125`'s ON - OFF row check on a CONFUSION anchor (139 vs 100); presentation, not looked at.
 - Long / endless Struggle-Leftovers stalls (796, 1986, ... `docs/parity-mac/STATUS.md` "Still open") match every state up to the ROM cap; not bugs.
-
-## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
-
-`docs/obr251-opponent-party-summary.md`: bar slide / hold / fade / SE are ROM-timed and the bar frames 527..546 are exact
-(`obr251-opponent-faint-on`). Remaining: (a) Scene ON drops the faint-text `▾` cursor at A, the ROM keeps it until the "sent out"
-first glyph (37 px, bbox 61,141-67,147); (b) Scene OFF: the ROM clears the message box at A+1, ours keeps the text (608 px), mechanism
-unproven; (c) `ballDisplay.states` fainted / status labels are swapped relative to the ROM tile order (healthy 0, empty 1, status 2,
-fainted 3) in the intro tray, `drawTypedPartyStatusSummary` and the opponent exit path (left alone to keep the aud241a pins);
-(d) the fade is not drawn across a presentation segment boundary.
 
 ## #199 — BAG / RUN / forfeit presentation residuals (frf250a / frf250b, 2026-11-06)
 
@@ -268,9 +262,8 @@ windows (the next message one frame late); cause named, not proven.
 
 Landed pieces (Rest, stat-stage-change-next class, Wish, the action transition in both scenes, Scene ON tails, faints, Rest /
 Bulk Up second stat) are in the archive entry and git. Still open:
-- **Scene ON zero-tail live bodies** (tl204, `docs/tl204-zero-tail-rows.md`): next print early by Double Team -5, Rain Dance -5,
-  Sunny Day / Hail -6, Leech Seed -39, Light Screen -4, Charm -6, Fake Tears -1, Calm Mind -10, Scary Face -19 (tl205 was to
-  implement the script-row tail on a branch). 24 further moves carry a 0-frame tail pending a ROM scenario (ont193).
+- **Scene ON zero-tail live bodies:** closed by tl205 / kse1 / ztl1 / bwf1 (2026-11-23, `docs/aud251-s11-scoreboard-refresh.md` "ztl1" table, "bwf1") except Psych Up 244 as a
+  second mover (T2 s7295: every body after a confusion animation was ~5 rows early, cfa1 landed that; Psych Up's own -4 is unexplained; held out).
 - **Named residuals:** Toxic's upstream -19 (status body before the message), Snore +10, Toxic -2, Curse +2 / -4 (re-measure after
   the floor drop), msg175's Rest-route Tackle HP anchor -3 ON / +18 OFF, Roar OFF +17, Baton Pass OFF -66.
 - **Unmeasured:** switches, end of turn and pre-move prints after the anchor.

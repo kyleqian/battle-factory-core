@@ -8,6 +8,21 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Worker / supervisor friction, 2026-11-24 run
+
+- **Test-side mirrors of production timing tables go stale on almost every body-length change** (`tests/helpers/iu120Rows.ts` copies `LIVE_MOVE_LEADLESS_TAIL_ROWS`,
+  the shape-A id sets, `S_LEAD_RULE_IDS`, `C_LEAD_RULE_IDS`, ...): workers ran the importer set of the engine file, which does not include the `tests/animation/live*`
+  adapter-duration tests that read the helper. Hits: 5 in one run (Psych Up 244 / fpl1, Roar 18 / Whirlwind 46 / snr1, Fly 19 / mmc1, Mean Look 212 / Block 335 / mlb1;
+  Pain Split 220 pre-empted by the supervisor), each found by the supervisor's merge check or full suite, ~10-20 min each. Fix idea: have the helper import the
+  production tables (export them) or add a test that compares the two; until then briefs say "grep tests/helpers/iu120Rows.ts for every table you touch".
+- **`git apply -p2 <patch>` run from `workspace/` passes `--check` and applies nothing** (ssl1, ihl1: ~3 / ~10 min). Apply from the repo root or by hand.
+- **`tools/audio/rescoreAll.sh` (~3.5-5 min per scene) and focused test batches over ~100 files exceed the foreground limit and get auto-backgrounded** (mhl1, sdb1,
+  snr1, mtl1, mlb1: ~5-10 min each). Briefs should give the timeout (600000 ms) and say to split by scene.
+- **Worker worktrees have no `.integration/`** (t2k10, cfx1, hic1): T2 seeds / ROM lab captures come from the main checkout (`--rom-from`, `FROM_DIR`), ~5-10 min each.
+  `tools/integration/t2k10/classes.py` needs `attr-off.json` even for an ON-only run (hic1).
+- **Briefs ending "npm test green" conflict with the worker rule "never the full npm test"** (several workers asked which wins, ~2 min each): the common brief now says
+  `test:gate` + importers; the supervisor runs the full suite.
+
 ## Worker / supervisor friction, 2026-11-21 run
 
 - **Worktree workers `cd` into the main tree** (rrh6, side lane: most Bash calls began with `cd /srv/pokebench/pokeemerald-factory-core/workspace`, so its 8 commits

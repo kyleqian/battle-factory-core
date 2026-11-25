@@ -9,7 +9,6 @@ import {
   ITEM_KNOCKOFF_ANIMATION_ROWS_OPPONENT_TARGET,
   ITEM_KNOCKOFF_ANIMATION_ROWS_PLAYER_TARGET,
   ITEM_KNOCKOFF_OFF_HOLD_FRAMES,
-  ITEM_KNOCKOFF_PRINT_TAIL_ROWS,
   ITEM_KNOCKOFF_SCRIPT_TAIL_ROWS,
   ITEM_KNOCKOFF_SE_FIXED_ROWS,
   itemKnockoffCommandFrames,
@@ -64,8 +63,8 @@ describe("kno3 constants", () => {
   it("pins the ROM rows (kno2: W + A + 2; Pausex20 35 rows)", () => {
     expect([
       ITEM_KNOCKOFF_ANIMATION_ROWS_OPPONENT_TARGET, ITEM_KNOCKOFF_ANIMATION_ROWS_PLAYER_TARGET, ITEM_KNOCKOFF_SCRIPT_TAIL_ROWS,
-      ITEM_KNOCKOFF_OFF_HOLD_FRAMES, ITEM_KNOCKOFF_SE_FIXED_ROWS, ITEM_KNOCKOFF_PRINT_TAIL_ROWS,
-    ]).toEqual([43, 94, 3, 35, 44, 4]);
+      ITEM_KNOCKOFF_OFF_HOLD_FRAMES, ITEM_KNOCKOFF_SE_FIXED_ROWS,
+    ]).toEqual([43, 94, 3, 35, 44]);
   });
 
   it("command length = SE gate + animation rows + script rows, per target side", () => {

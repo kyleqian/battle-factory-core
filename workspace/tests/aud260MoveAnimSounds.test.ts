@@ -106,7 +106,8 @@ describe("Recycle (aud260)", () => {
     const ours = pick(ourEvents(rom));
     // hpd5: Seismic Toss joins the audited leads; the player's recycle rows moved from ROM - 4 (hpd4) to ROM + 3 (the turn's Toss bodies are now ROM-length; the held-item rows follow the next unaudited command).
     // hpf3: +3 -> +4. The player's hit -> the next turn's ATTACKSTRING is now the ROM's (hpf2Shape: ROM bar rise 1357 + 73 = 1430 = ours); the +4 is Recycle's own ATTACKSTRING -> first SE gap (ROM 36, ours 40), not hp.
-    expect(ours.map((e) => e.frame)).toEqual(romRows.map((e) => e.frame + 4));
+    // lpa1: the later action's SE lead is its own used print's (one less than the turn's), which alone moves +4 -> +5 (Recycle's ATTACKSTRING -> first SE gap, ROM 36, ours 40, was hidden by the turn-level lead); BODY_SOUND_LEAD_ROWS [278, 5] takes the whole gap: the four rows are the ROM's 1466 / 1490 / 1515 / 1605 (lab aud260-recycle-player-on mass 21 -> 5, the rest the held-item rows +1).
+    expect(ours.map((e) => e.frame)).toEqual(romRows.map((e) => e.frame));
   });
 });
 

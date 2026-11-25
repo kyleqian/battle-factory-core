@@ -44,8 +44,8 @@ function frames(field: BattleResolutionDisplayedField, attacker: 0 | 1, callback
 
 describe("spark62: Spark opponent-attacker live adapter", () => {
   it("has a 115-row live body for BOTH attackers (window activation + 9; prep10 s3.5)", () => {
-    expect(liveMoveAnimationDuration(request(0))).toBe(115);
-    expect(liveMoveAnimationDuration(request(1))).toBe(115);
+    expect(liveMoveAnimationDuration(request(0))).toBe(117);
+    expect(liveMoveAnimationDuration(request(1))).toBe(117);
   });
 
   it("keeps the known-order lend gate for the opponent attacker (the tie order is history, not derived)", () => {

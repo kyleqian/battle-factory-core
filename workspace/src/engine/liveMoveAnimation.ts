@@ -1329,7 +1329,7 @@ function liveMoveAnimationDurationOf(
     // resource destruction. The following success printer starts next.
     case 112:
     case 277: return 76; // Defensive wall script through its first inactive cleanup row.
-    case 113: return 88;
+    case 113: return 86; // bwf1: Move_LIGHT_SCREEN A rows (85) + the first inactive row; was 88 (the extra 2 idle rows pushed the tail late).
     case 115: return 79; // Reflect script (activation..cleanup pointer row).
     case 182: return 123; // Protect script through its first inactive row.
     case 243: return 86; // Mirror Coat script (activation..cleanup pointer row).
@@ -1503,7 +1503,9 @@ function liveMoveAnimationDurationOf(
     // Knock Off: 59 rows (70..128 / 74..132) at accepted presentation age -11 (ageOffset -11): reducer age 0 = frame 81/85 =
     // activation + 6 (prep6 s2.4), so live age 0 is the reducer's age 0 and the activation is live age -6 (no #142 row).
     // The window ends 4 frames after the script end (124/128); duration = rows + ageOffset (the Dragon Breath convention).
-    case 282: return 48;
+    // kse1: the ROM's gAnimScriptActive is high 49 rows (labs out2-knockoff{,rev}-on: 68 -> 117), the shape-A window (idle 6 + live) is len + 1 = 50, so the live body is 44:
+    // the 4 rows past the script end (reducer ages 44..47) repeat the settled age-35 frame (the slides end at 35). The hit / print after it were +4 in 4 of 4 T2 segments.
+    case 282: return 44;
     // Faint Attack: 221 rows with the restore lag (2344..2564 accepted player attacker), reducer ages 0..220 (faintAttack.ts
     // LAST_ANIMATION_OWNED_AGE); the window starts 4 frames after the script activation (row -4, no #142 shadow row). Both attacker sides
     // (prep6 s0 player; S10A sides opponent). Faithful timing (fa185): the policy's per-side restore lag (player none: 220 rows, the
@@ -1518,7 +1520,7 @@ function liveMoveAnimationDurationOf(
     // windows start 35/31 (AA) and 37/33 (QA) rows earlier with idle body rows owned by the queue's `message` command.
     case 332: return 50; // Aerial Ace: activation..first inactive row (81..130 / 77..126); the later hit/HP/text rows are queue commands.
     case 98: return 33; // Quick Attack (83..115 / 79..111).
-    case 313: return 87; // Fake Tears 80..166 / 76..162: the first displayed row is one after activation (row -1, no shadow row), 83 script + 4 clear rows.
+    case 313: return 84; // bwf1: Fake Tears = 83 ROM script rows (A active) + the first inactive row; was 87 (4 clear rows) before the S-lead / trail -1 rule.
     // Sleep Talk accepted windows start at activation and end at the first inactive script row (1356..1541 / 4570..4758).
     case 214: return request.attacker === 0 ? 186 : 189;
     // Rock Slide: activation..first inactive script row (1967..2104); the 37 later accepted rows are the target hit flash
@@ -1529,8 +1531,8 @@ function liveMoveAnimationDurationOf(
     // Magnitude 411..585 (power 70, 174 frames) / 191..397 (power 110, 206 frames): the reducer's first inactive age, 118 + 8 * floor(power / 10) (mxp1: the ROM's gAnimScriptActive length, 158 at power 50).
     case 222: return request.power >= 10 ? magnitudeFirstInactiveAge(request.power) + 1 : null;
     // Razor Wind: setup 45 frames (195..240 / 192..237), unleash 72 (553..625 / 661..733); gAnimMoveTurn bit 0 selects the body.
-    // Spark 79..193 / 83..197 (activation + 9, row -9: no #142 shadow row), both attackers (spark62); the script runs 2 rows past the window.
-    case 209: return 115;
+    // Spark 79..193 / 83..197 (activation + 9, row -9: no #142 shadow row), both attackers (spark62).
+    case 209: return 117; // bwf2: window 115 + the 2 rows the script runs past it (ROM A 125 = idle 9 + 117 - 1; idle lead 9).
     case 13: return (request.turn & 1) === 0 ? 45 : 72;
     case 350: return 89; // Rock Blast per-hit body: activation..ROCK_BLAST_FIRST_INACTIVE_AGE (84/266/448 + 89 each).
     case 220: return 81; // Pain Split 445 / 446 .. +80 (81 accepted rows; the live window ends at the script's last active row).
@@ -1564,7 +1566,7 @@ function liveMoveAnimationDurationOf(
     case 126: return 197; // Fire Blast (1147..1343 / 215..411): window start = activation, window end = script end.
     case 7: return 101; // Fire Punch body A..first inactive (prep22 s0.1/A.1: identical across burn / no-burn / faint, both sides); Status_Burn is a later body.
     case 8: return 184; // Ice Punch script activation..first inactive row (staged 1966..2149 / 2339..2522); HP/text/freeze/Sitrus rows are queue commands.
-    case 225: return 83; // Dragon Breath: 85 rows 395..479 / 449..533 starting at presentation age -2.
+    case 225: return 87; // Dragon Breath (bwf2, shape A): ROM A 66..158 (93 rows) = idle lead 6 + 87 - 1 (+ the hit tail); was 83.
     case 248: return 114; // Future Sight turn-1 accepted window (77..190 / 81..194).
     case 153: return 213; // Explosion: ROM A length 216 (mxp1 labs, 61..276 / 65..280) - 3, as Self-Destruct (126 -> 123); was the older accepted 212.
     case 347: return CALM_MIND_CLEANUP_AGE + 1;

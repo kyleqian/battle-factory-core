@@ -52,13 +52,14 @@ describe("trn178: the Scene OFF action-transition pause", () => {
     }
   });
 
+  // tnl1: the move-inflicted Toxic icon spends 2 rows (BattleScript_MoveEffectToxic goto UpdateEffectStatusIconRet, tnm1 1.C; ROM gsp3-toxic-player-on next print exact).
   it("Toxic: the status icon anchors (E = updatestatusicon's row, d 6), P = 16; HP anchor (Rest): P = 7 + 6 + 2 = 15", () => {
     const toxic = trn176Production("PRIMEAPE", MOVE.TOXIC, "ONIX", MOVE.TACKLE, true, "off");
     const icon = toxic.rows.findIndex((row) => row.type === "status-icon");
     expect(toxic.rows.slice(icon, icon + 4).map((row) => [row.type, row.frames])).toEqual([
-      ["status-icon", 1], ["move-animation", 16], ["sprite-visibility", 1], ["sprite-visibility", 1],
+      ["status-icon", 2], ["move-animation", 16], ["sprite-visibility", 1], ["sprite-visibility", 1],
     ]);
-    expect(evaluate("off108-toxic-ply-primeape-onix", "off").residual).toBe(-2); // interior (print 90 vs 91 + the 2-row status)
+    expect(evaluate("off108-toxic-ply-primeape-onix", "off").residual).toBe(0); // tnl1: was -2 (print 90 vs 91 + the 2-row status); the 2-row Toxic icon is the ROM's, off108 interior exact
     // Rest after the foe's Tackle (the ROM scenario's order): Snorlax's HP update anchors.
     const rest = trn176Production("SNORLAX", MOVE.REST, "ONIX", MOVE.TACKLE, false, "off");
     expect(transitionPauses(rest.rows)).toEqual([15]);

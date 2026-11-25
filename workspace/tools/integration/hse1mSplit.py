@@ -67,8 +67,11 @@ for (seed, si), lst in seg.items():
             ci = next((i for i, c in enumerate(cmds) if c[0] == r["ecf"] and c[3] == r["ecmd"]), None)
             if ci is not None:
                 d["engPrev"] = [(cmds[j][3], cmds[j][0], cmds[j][10]) for j in range(max(0, ci - 3), ci + 1)]
-                if r["ecmd"] == "hit-animation" and ci >= 2 and cmds[ci - 1][3] == "move-animation" and cmds[ci - 2][3] == "message":
-                    mp, ms = cmds[ci - 2][0], cmds[ci - 1][0]
+                # ohr1: the SE can sit on the last frame of the 42-frame move-animation itself (ecmd move-animation: message -> that move-animation)
+                hitCmd = r["ecmd"] == "hit-animation" and ci >= 2 and cmds[ci - 1][3] == "move-animation" and cmds[ci - 2][3] == "message"
+                maCmd = r["ecmd"] == "move-animation" and ci >= 1 and cmds[ci - 1][3] == "message"
+                if hitCmd or maCmd:
+                    mp, ms = (cmds[ci - 2][0], cmds[ci - 1][0]) if hitCmd else (cmds[ci - 1][0], cmds[ci][0])
                     d.update(ep=mp, ems=ms)
                     if start is not None and rel is not None:
                         ec = ef - r["off"] - r["rel"]  # engine commit, from off = (ef - ec) - (rf - rc), rel = rf - rc
@@ -87,7 +90,7 @@ for (seed, si), lst in seg.items():
 # context signature of the pre-print span: ROM script labels (deduped) from the previous matched event / commit to the used print, and the engine commands in the span
 if "--ctx" in sys.argv:
     for d in out:
-        if "pre" not in d or d["ecmd"] != "hit-animation":
+        if "pre" not in d:
             continue
         rrows, names, cmds = load(d["seed"])
         rp = d["rp"]

@@ -44,7 +44,7 @@ describe("Soft Boiled (aud259)", () => {
     expect(ours.map((e) => `${e.id}:${e.pan}`)).toEqual(romRows.map((e) => `${e.id}:${e.pan}`));
     const offsets = romRows.map((e, i) => e.frame - ours[i]!.frame);
     expect(new Set(offsets).size).toBe(1);
-    expect(offsets[0]).toBe(-5);
+    expect(offsets[0]).toBe(0); // pmc1 (2026-11-23): the short-lead sound clock (+5) is gone, ROM = ours (was -5)
   });
 });
 

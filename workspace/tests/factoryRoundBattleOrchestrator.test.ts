@@ -12,6 +12,8 @@ import { createBattleCommandPresentation } from "../src/engine/battleCommandPres
 import { PARTY_SELECT_CANCEL_CLOSE_TOTAL_FRAMES, PARTY_SELECT_CLOSE_MENU_FRAMES, PARTY_SELECT_OPEN_TOTAL_FRAMES, battlePartySelectClosePhase } from "../src/engine/battlePartySelect.ts";
 import { createFactoryAiBattleHistory } from "../src/engine/factoryAiLiveDriver.ts";
 import {
+  MOVE_INFLICTED_STATUS_ICON_FRAMES,
+  MOVE_INFLICTED_STATUS_PRINT_HOLD_EXTRA_ROWS,
   createBattleResolutionPresentation,
   type BattleResolutionPresentationCommand,
 } from "../src/engine/battleResolutionPresentation.ts";
@@ -368,6 +370,7 @@ function createStagedOpponentStatusMoveResolutionCarrier(input: Readonly<{
 function expectSourceWaitmessageHoldAtFirstAutomaticEdge(
   initial: FactoryRoundBattleOrchestratorState,
   messageId: string,
+  holdFrames = 64,
 ): void {
   const resolution = initial.battleResolutionPresentation!;
   const commandIndex = resolution.segments[0]!.commands.findIndex((command) =>
@@ -393,7 +396,7 @@ function expectSourceWaitmessageHoldAtFirstAutomaticEdge(
     operands: [{ expression: "B_WAIT_TIME_LONG" }],
   });
   const sourceWaitDuration = battleResolutionCommandDuration(command, resolution.field);
-  expect(command.timing).toMatchObject({ holdFrames: 64 });
+  expect(command.timing).toMatchObject({ holdFrames });
 
   let state = initial;
   for (let budget = 0; budget < 2_000; budget += 1) {
@@ -1170,6 +1173,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expectSourceWaitmessageHoldAtFirstAutomaticEdge(
       state,
       "STRINGID_PKMNBADLYPOISONED",
+      // tnl1: the BattleScript_MoveEffectToxic print's hold carries the `goto BattleScript_UpdateEffectStatusIconRet` row after the 64-row waitmessage (ROM gsp3-toxic: print -> icon 94 vs 93).
+      64 + MOVE_INFLICTED_STATUS_PRINT_HOLD_EXTRA_ROWS,
     );
   });
 
@@ -1245,7 +1250,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       battler: 1,
       status1: 1 << 4,
       status2: 0,
-      timing: { minimumFrames: 1 },
+      // tnl1: the icon request after a move-inflicted BRN / PSN / TOX / PRZ print is 2 rows (ROM gsp3-willowisp: next print 425 vs 429 with the goto row).
+      timing: { minimumFrames: MOVE_INFLICTED_STATUS_ICON_FRAMES },
     });
 
     for (

@@ -117,9 +117,10 @@ describe("live physical2b move adapters", () => {
     expect(on.requests.some(moveRequest => moveRequest.moveId === row.id), JSON.stringify(route)).toBe(true);
     const bodies = on.animations.filter(animation => animation.moveId === row.id && animation.attacker === 0);
     expect(bodies, JSON.stringify(route)).toHaveLength(row.id === 42 ? 2 : 1);
-    for (const body of bodies) {
-      expect(body.ages).toEqual(iu120Ages(row.id, row.duration));
-    }
+    // mhl1 (mhm1): Pin Missile is shape A: hit 1 leads 15 rows (the used print's lead, ROM lab mhm1-pinmissile-s*-on hit SE exact), hits 2+ lead 12 (box rows - trim 7)
+    bodies.forEach((body, i) => {
+      expect(body.ages).toEqual(iu120Ages(row.id, row.duration, "player", row.id === 42 ? (i === 0 ? 15 : 12) : undefined));
+    });
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);
     expect(off.boundaries).toHaveLength(2);

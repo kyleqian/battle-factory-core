@@ -49,6 +49,8 @@ const DAMAGING_WEATHER_LOOP_SCRIPT = "BattleScript_DamagingWeatherLoop";
  * 3 ticks after our command start tick (the etp1Engine frame + 2) in both scenes, not the controller lag (ON 7 less the lead rows, which put it 4-6 rows late once the etp1 print leads moved the loop).
  */
 const WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS = 3;
+/** fpl1 (ssm1): the Scene ON self-confusion hit command starts 3 rows before the ROM's hitanimation, its effectivenesssound one row before it. */
+const SELF_CONFUSION_HIT_SE_AFTER_COMMAND_ROWS = 2;
 
 function currentCommand(
   resolution: BattleResolutionPresentationState | null,
@@ -152,7 +154,7 @@ export function emitBattleHitSounds(
       // the end-turn hail / sandstorm loop: etp2's constant) keeps its own anchor.
       const anchor = previous?.type === "move-animation" ? sceneLag(segment) : lag;
       // etp2: the end-turn weather loop's hit SE is 3 ticks after its hit command in both scenes.
-      scheduleAfter(song.weatherLoop ? WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS : Math.max(0, anchor), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
+      scheduleAfter(song.weatherLoop ? WEATHER_LOOP_HIT_SE_AFTER_COMMAND_ROWS : command.timing.selfConfusion === true ? SELF_CONFUSION_HIT_SE_AFTER_COMMAND_ROWS : Math.max(0, anchor), () => playPannedSe(song.song, panBattler === 0 ? SE_PAN_PLAYER : SE_PAN_OPPONENT));
     }
     return;
   }
@@ -162,8 +164,8 @@ export function emitBattleHitSounds(
   // mxp1: after a leadless Self-Destruct / Explosion body (ON) the presented hit / hp / message rows are on the ROM's rows, so the faint SE carries no controller lag
   // (ROM labs eqk1-{expl,sd}-{p,f}-on: target faint +7, user faint +5 with it); the user's own faint (the script's second tryfaintmon) is 2 rows later still.
   const explosionBody = segment.commands.find((c) => c.type === "move-animation" && c.animation !== undefined && EXPLOSION_FAMILY_MOVE_IDS.has(c.animation.moveId));
-  const faintLag = followsFutureSightHit(segment, command) ? 0
-    : explosionBody?.type === "move-animation" && sceneLag(segment) > 0 ? (explosionBody.battler === command.battler ? EXPLOSION_USER_FAINT_EXTRA_ROWS : 0) : lag;
+  const faintLag = followsFutureSightHit(segment, command) || followsEndTurnTickDamage(segment, command) ? 0
+    : explosionBody?.type === "move-animation" && sceneLag(segment) > 0 ? (explosionBody.battler === command.battler ? EXPLOSION_USER_FAINT_EXTRA_ROWS : 0) : faintControllerLag(segment, after, command);
   // snd2: {Player,Opponent}HandleFaintingCry cry the party mon at gBattlerPartyIndexes[battler] (battle_controller_player.c /
   // battle_controller_opponent.c): the mon on the field at the faint. segment.field is the field the segment opened with, so a mon
   // sent in earlier in the same segment and knocked out there cried as the one it replaced (frame catcher, seed 3: "Go! PHANPY!" ...
@@ -183,7 +185,19 @@ export function faintSeOffsetRows(state: BattleResolutionPresentationState): num
   const segment = state.segments[state.segmentIndex];
   const command = segment?.commands[state.commandIndex];
   if (segment === undefined || command?.type !== "faint" || command.timing.leadFrames === undefined) return null;
-  return Math.max(0, command.timing.leadFrames + FAINT_SOUND_OFFSET + (followsFutureSightHit(segment, command) ? 0 : Math.max(0, sceneLag(segment) - moveBodyExtraRows(state, false))));
+  return Math.max(0, command.timing.leadFrames + FAINT_SOUND_OFFSET + (followsFutureSightHit(segment, command) || followsEndTurnTickDamage(segment, command) ? 0 : faintControllerLag(segment, state, command)));
+}
+
+/**
+ * fcl1 (ROM labs fcl1-{aerialace,slash,facade,leafblade,psychic}-*-on): after a lead body (`moveBodyExtraRows` > 0) the faint cry and SE_FAINT of a KO whose chain is hit -> hp -> print -> faint
+ * (BattleScript_FaintTarget straight after the hit's datahpupdate) sit at the ROM's rows with no controller lag (hit SE -> cry 94 rows in every lab); hpd4's `sceneLag - extra` left
+ * them 1 row late whenever the extra was 6. A faint behind a second hp command (Double-Edge's recoil, aud252 seed 2230) keeps hpd4's lag, which the ROM rows there still show.
+ */
+function faintControllerLag(segment: BattleResolutionSegment, after: BattleResolutionPresentationState | null, faint: BattleResolutionPresentationCommand): number {
+  const extra = after === null ? 0 : moveBodyExtraRows(after, false);
+  let hpRows = 0;
+  for (let at = segment.commands.indexOf(faint) - 1; at >= 0 && segment.commands[at]!.type !== "hit-animation"; at -= 1) if (segment.commands[at]!.type === "hp") hpRows += 1;
+  return extra > 0 && hpRows <= 1 ? 0 : Math.max(0, sceneLag(segment) - extra);
 }
 
 /**
@@ -196,6 +210,29 @@ function followsFutureSightHit(segment: BattleResolutionSegment, faint: BattleRe
     if (segment.commands[at]!.type !== "hit-animation") continue;
     const before = segment.commands[at - 1]!;
     return before.type === "general-animation" && before.animation === "FUTURE_SIGHT_HIT";
+  }
+  return false;
+}
+
+/** The scripts whose `datahpupdate` is an end-turn tick (the Leech Seed drain and its heal, the poison / burn tick, the damaging weather loop). */
+const END_TURN_TICK_DAMAGE_SCRIPTS: ReadonlySet<string> = new Set([
+  "BattleScript_LeechSeedTurnDrain",
+  "BattleScript_LeechSeedTurnPrintAndUpdateHp",
+  "BattleScript_DoTurnDmg",
+  DAMAGING_WEATHER_LOOP_SCRIPT,
+]);
+
+/**
+ * fkt1 (ROM labs fkt1-{kols,kotoxic,kosand}-on, T2 s310 d17 / s499 d20): `FaintAttacker+0` -> SE_FAINT is 67 rows in every ROM faint (`playfaintcry`, the 64-row `pause`, `dofaintanimation`), and the
+ * faint box follows 19-20 rows after it. The controller lag (SCENE_ON_LAG) stands for the hit chain's hit-animation -> hp rows that the engine presents shorter than the ROM's, so after a move hit the
+ * engine's faint command starts early and the lag carries the SE back to the ROM row; the end-turn tick chains (drain, poison, weather: no hit body of their own) have no such deficit, and the lag put the SE
+ * 6 rows late against the faint print (SE16 -> print 14 against the ROM's 20). True when the damage that fainted the battler (the last hp-change before the faint animation) came from one of those scripts.
+ */
+function followsEndTurnTickDamage(segment: BattleResolutionSegment, faint: Extract<BattleResolutionPresentationCommand, { type: "faint" }>): boolean {
+  const index = segment.events.findIndex((event) => event.sequence === faint.eventSequence);
+  for (let at = index - 1; at >= 0; at -= 1) {
+    const event = segment.events[at]!;
+    if (event.payload.kind === "hp-change") return END_TURN_TICK_DAMAGE_SCRIPTS.has(event.provenance?.sourceLabel ?? "");
   }
   return false;
 }

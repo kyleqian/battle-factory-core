@@ -40,8 +40,8 @@ const PLAYER_DEFEATED_MESSAGE_ID = "STRINGID_PLAYERDEFEATEDTRAINER1";
 export const VICTORY_BGM_AFTER_FAINT_DISMISS = 22;
 export const VICTORY_BGM_AFTER_AUTOMATIC_MESSAGE = 19;
 export const VICTORY_BGM_AFTER_CONTROLLER_COMMAND = 14;
-// The loss's `returnopponentmon1toball` SE_BALL_OPEN (aud241c: 22 ticks after the first tick of its command) is the recall `switch-out`'s own
-// ball open since lrc1 (battleStartSounds.ts emitMidBattleSwitchSounds; LOSS_RECALL_LEAD_FRAMES + 2 = 22, battleResolutionPresentation.ts).
+// The loss's `returnopponentmon1toball` SE_BALL_OPEN (aud241c: 22 ticks after the first tick of its command on the Explosion path; lrm1: 26 on a target / end-of-turn faint) is the recall `switch-out`'s own
+// ball open since lrc1 (battleStartSounds.ts emitMidBattleSwitchSounds; LOSS_RECALL_LEAD_FRAMES + 2 = 26 (target faint; 24 for an Explosion), battleResolutionPresentation.ts).
 /** Ticks from P (the A on the trainer's lose / win text) to each end sound. */
 export const END_FADE_AFTER_TEXT_DISMISS = 6;
 export const RETURN_BGM_AFTER_TEXT_DISMISS = 53;

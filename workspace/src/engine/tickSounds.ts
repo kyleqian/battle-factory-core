@@ -3,7 +3,7 @@ import { setSoundTickLead, soundCollecting } from "../audio/soundEvents.ts";
 import { emitBattleEndSounds, emitForfeitEndSounds } from "./battleEndSounds.ts";
 import { emitBattleHitSounds, emitDoubleTeamStatsChangeSound } from "./battleHitSounds.ts";
 import { emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
-import { usedMoveBodySoundLeadOf } from "./battleResolutionPresentation.ts";
+import { usedMoveAnimSoundLeadOf, usedMoveBodySoundLeadOf } from "./battleResolutionPresentation.ts";
 import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
 import { ENTRY_STATS_CHANGE_SE_AGE, emitGeneralAnimSounds, emitMoveAnimSounds, emitStatsChangeSounds } from "./moveAnimSounds.ts";
 import { factoryBattleStartEntryFrame } from "./factoryBattleStartEntry.ts";
@@ -61,9 +61,9 @@ export function emitTickSounds(state: TickSoundState, next: TickSoundState): voi
     }
     setSoundTickLead(presentationAfter ? usedMoveBodySoundLeadOf(presentationAfter) : 0);
     if (presentationAfter) emitMoveAnimSounds(presentationAfter, orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined);
-    setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
+    setSoundTickLead(presentationAfter ? usedMoveAnimSoundLeadOf(presentationAfter) : 0);
     if (presentationAfter) emitStatsChangeSounds(presentationAfter);
-    setSoundTickLead(presentationAfter?.usedMoveAnimSoundLead ?? 0);
+    setSoundTickLead(presentationAfter ? usedMoveAnimSoundLeadOf(presentationAfter) : 0);
     if (presentationAfter) emitDoubleTeamStatsChangeSound(presentationAfter);
     setSoundTickLead(presentationAfter?.usedMoveScriptSoundLead ?? 0);
     if (presentationAfter) emitGeneralAnimSounds(presentationAfter);

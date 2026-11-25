@@ -90,7 +90,9 @@ describe("Pain Split (aud261)", () => {
       const romRows = rom.events.filter((e) => e.kind === "se" && e.id === 194);
       expect(romRows.map((e) => e.frame - romRows[0]!.frame)).toEqual([0, 25, 50]);
       expect(romRows.every((e) => e.pan === 0)).toBe(true);
-      expect(expectConstantOffset(rom, [194], 3)).toBe(-4);
+      // mtl1: Pain Split's body end (LIVE_MOVE_LEADLESS_TAIL_ROWS [220, 6]) and SE lead (BODY_SOUND_LEAD_ROWS [220, 3]) carry the ROM's rows: -4 -> -1 (labs mtl1-painsplit-leech-*: 50 -> 11 mass).
+      // lpa1: the SE lead of a later action follows its own used print (min(u - 2, 2): Leech Seed's second turn 0, not the turn's 1), so [220, 3] -> [220, 4] and all three labs (aud261 x2, mtl1-painsplit-leech) are the ROM's rows exactly: -1 -> 0.
+      expect(expectConstantOffset(rom, [194], 3)).toBe(0);
     });
   }
 });

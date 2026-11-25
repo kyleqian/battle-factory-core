@@ -12,6 +12,7 @@ import {
   beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,
 } from "../src/engine/factoryRoundBattleOrchestrator.ts";
 import {
+  WAITMESSAGE_LONG_HOLD_FRAMES, WEATHER_CONTINUES_OFF_PAUSE_ROWS,
   WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_LAUNCH_TAIL_ROWS, WEATHER_CONTINUES_MOVE_IDS,
   weatherContinuesAnimationOf, weatherContinuesCommandFrames, type WeatherContinuesAnimation,
 } from "../src/engine/battleResolutionPresentation.ts";
@@ -23,12 +24,18 @@ import type { GbaButton } from "../src/input.ts";
 import { NO_MOVES_MESSAGE_HOLD_AT } from "../src/engine/battleCommandPresentation.ts";
 
 const FRAME_BUDGET = 200_000;
+const WEATHER_PRINT_IDS = new Set([
+  "STRINGID_SUNLIGHTSTRONG", "STRINGID_RAINCONTINUES", "STRINGID_DOWNPOURCONTINUES", "STRINGID_RAINSTOPPED",
+  "STRINGID_SANDSTORMRAGES", "STRINGID_HAILCONTINUES",
+]);
 
 type WeatherCommand = { animation: string; animated: boolean; minimumFrames: number; battler: number };
 type Battle = {
   digest: string;
   weather: WeatherCommand[];
   weatherEvents: number;
+  /** The end-turn weather prints (Sun / Rain / Sandstorm / Hail continues, rain stopped): id and the message command's hold. */
+  weatherPrints: { messageId: string; holdFrames: number }[];
   /** The render effect while the first weather command's body plays (Scene ON). */
   bodyEffect: { type: string; moveId?: number; age?: number; generalRain?: boolean } | null;
 };
@@ -46,6 +53,7 @@ function playCensusBattle(seed: number, scene: "on" | "off"): Battle {
   const seen = new Set<unknown>();
   const weather: WeatherCommand[] = [];
   let weatherEvents = 0;
+  const weatherPrints: Battle["weatherPrints"] = [];
   let bodyEffect: Battle["bodyEffect"] = null;
   let frame = 0;
   let ended = false;
@@ -67,6 +75,12 @@ function playCensusBattle(seed: number, scene: "on" | "off"): Battle {
           if (event.payload.kind === "animation" && weatherContinuesAnimationOf(event.payload) !== null) weatherEvents += 1;
         }
         for (const c of s.commands) {
+          if (c.type === "message") {
+            const printed = s.events.find((e) => e.sequence === c.eventSequence);
+            if (printed?.payload.kind === "message" && WEATHER_PRINT_IDS.has(printed.payload.messageId)) {
+              weatherPrints.push({ messageId: printed.payload.messageId, holdFrames: c.timing?.holdFrames ?? 0 });
+            }
+          }
           if (c.type === "general-animation" && Object.hasOwn(WEATHER_CONTINUES_BODY_ROWS, c.animation)) {
             weather.push({ animation: c.animation, animated: c.animated === true, minimumFrames: c.timing.minimumFrames, battler: c.battler });
           }
@@ -130,7 +144,7 @@ function playCensusBattle(seed: number, scene: "on" | "off"): Battle {
     until(() => !state.battleCommandPresentation);
     until(() => phase() === "action-menu");
   }
-  return { digest: events.digest("hex").slice(0, 16), weather, weatherEvents, bodyEffect };
+  return { digest: events.digest("hex").slice(0, 16), weather, weatherEvents, weatherPrints, bodyEffect };
 }
 
 /** Census seeds that use each weather move, with their eventsDigest (lsd194Census arms; Rain / Sun seeds re-staged by dmg264 to seeds the fix leaves unchanged, cda886899 arms). */
@@ -173,4 +187,26 @@ describe("wth236: end-turn weather animations", () => {
       expect(sceneOff.weather).toEqual([]);
     });
   }
+
+  // sbx3: Scene OFF's Sun / Rain continues take Cmd_playanimation's BattleScript_Pausex20 branch (pause B_WAIT_TIME_SHORT, text on screen),
+  // so the print's hold runs on by the pause (ROM-measured etp1-sun-off +30, etp1-rain5-off +31 with the jumpifbyte row); every other weather
+  // print (rain stopped, sandstorm / hail via playanimation_var, and all of Scene ON) is unchanged.
+  it("sbx3: Scene OFF Sun continues holds +30 rows, Rain / Downpour continues +31, other weather prints and Scene ON unchanged", () => {
+    expect(WEATHER_CONTINUES_OFF_PAUSE_ROWS).toBe(30);
+    const sun = playCensusBattle(SEEDS.SUN_CONTINUES.seed, "off").weatherPrints;
+    expect(sun.filter((p) => p.messageId === "STRINGID_SUNLIGHTSTRONG").length).toBeGreaterThan(0);
+    for (const p of sun) expect(p.holdFrames).toBe(p.messageId === "STRINGID_SUNLIGHTSTRONG" ? WAITMESSAGE_LONG_HOLD_FRAMES + 30 : WAITMESSAGE_LONG_HOLD_FRAMES);
+    const rain = playCensusBattle(SEEDS.RAIN_CONTINUES.seed, "off").weatherPrints;
+    const rainContinues = (id: string) => id === "STRINGID_RAINCONTINUES" || id === "STRINGID_DOWNPOURCONTINUES";
+    expect(rain.filter((p) => rainContinues(p.messageId)).length).toBeGreaterThan(0);
+    for (const p of rain) expect(p.holdFrames).toBe(rainContinues(p.messageId) ? WAITMESSAGE_LONG_HOLD_FRAMES + 31 : WAITMESSAGE_LONG_HOLD_FRAMES);
+    for (const animation of ["SANDSTORM_CONTINUES", "HAIL_CONTINUES"] as const) {
+      const prints = playCensusBattle(SEEDS[animation].seed, "off").weatherPrints;
+      expect(prints.length).toBeGreaterThan(0);
+      for (const p of prints) expect(p.holdFrames).toBe(WAITMESSAGE_LONG_HOLD_FRAMES);
+    }
+    for (const animation of ["SUN_CONTINUES", "RAIN_CONTINUES"] as const) {
+      for (const p of playCensusBattle(SEEDS[animation].seed, "on").weatherPrints) expect(p.holdFrames).toBe(WAITMESSAGE_LONG_HOLD_FRAMES);
+    }
+  });
 });

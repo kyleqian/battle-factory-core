@@ -464,7 +464,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // hpb3 (a Focus Band survival's hit bar is floor-free, ROM bar + datahpupdate + 3 rows, drv2 OFF s4235 d2): frames + render calls, 43_693 -> 43_698, renderCalls 3_054 -> 3_060; same battle 7, turn 3, end state, diagnostics. A trajectory pin, not a ROM frame.
       // swt1 (the opponent faint replacement / AI send-in's next print: ROM FaintedMonSendOutNew+0x10 release -> next label +11 -> glyph +12, the command used to start at +3):
       // frames 43_698 -> 43_712, renderCalls 3_060 -> 3_058; same battle 7, turn 3, end state, outcome.
-      frames: 43_712,
+      // mhs1 (Triple Kick / Bonemerang / Spike Cannon hit 1 shape A + the DoMultiHit / DoTripleKickAttack loop boxes at the ROM's 25 / 27 rows; the strong-route policy reads presentation state): frames 43_712 -> 43_655, renderCalls 3_058 -> 3_054; same battle 7, turn 3, end state, outcome. A trajectory pin, not a ROM frame.
+      // kst1 (the Knock Off print tail removed, ITEM_KNOCKOFF_PRINT_TAIL_ROWS 4 -> 0: the next mover's used print is ROM-exact, labs out2-knockoffrev-on; the strong-route policy reads presentation state): frames 43_655 -> 43_695, renderCalls 3_054 -> 3_056; same battle 7, turn 3, end state, outcome. A trajectory pin, not a ROM frame.
+      frames: 43_695,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -476,7 +478,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: "no",
-        renderCalls: 3_058,
+        renderCalls: 3_056,
       },
     });
     expect(second).toEqual(first);
@@ -740,7 +742,8 @@ describe("random round soak driver (green milestone pin)", () => {
     // swt1 (an opponent faint replacement / AI send-in's next print is 9 frames later, ROM FaintedMonSendOutNew+0x10 release -> next print +12; the exploring presses land on new phases): seed 12 no longer commits
     // Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 2, same options): candidates 5, 14, 25. Seed 5 is the lowest (Baton Pass commits 3, first commit 76136,
     // halt 76176 on LEDIAN in battleIndex 0, three Lobby new challenges). Pin 12 -> 5.
-    const result = runSeed(5, {
+    // mhs1 (multi-hit rows; the exploring presses land on new phases): seed 5 no longer commits Baton Pass. Re-scanned full-policy seeds 0..39 (tools/soak/batonPassSearch.ts --seeds 0:40 --parallel 2): candidates 14, 16, 19, 29. Seed 14 is the lowest. Pin 5 -> 14.
+    const result = runSeed(14, {
       maxFrames: 80_000,
       renderEvery: 0,
       coverage: observer as never,
@@ -1188,15 +1191,18 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // same battle 3 / depth 2 / turn 15 / roundLost. Matches the T2 send-in SE 15 rows (ROM rel 133 + glyphs, 47 windows per scene all at offset 0). A trajectory pin, not a ROM frame.
       // supervisor merge of fsi1 with master + rmw1, measured on the merged tree: 57622; same battle 3 / depth 2 / turn 15 / roundLost.
       // ohs1 (Scene OFF ConfusedNoMore / InLove pre-move prints hold 64 + 5 / 64 + 6 before the used print, T2 OFF s7295 d8 / s6568 d29): frames only, 57622 -> 57634; same battle / depth / turn / end state (the diff shows only frames).
+      // ohr1 (Scene OFF pre-move head prints start on commit + 6 + u + 1 as the used print does, and the self-hit print's lead 5 -> 3; T2 OFF s499 d23 / s7295 d11 / d15 / d17 / s830 d11): frames only, 57634 -> 57658; same battle 3 / depth 2 / turn 15 / roundLost.
+      // mhs1 (Triple Kick / Bonemerang / Spike Cannon multi-hit rows; the exploring presses land on new phases): 57658 / turn 15 -> 58897 / turn 19; same battle 3 / depth 2 / roundLost. A trajectory pin, not a ROM frame.
+      // ais5 (the player's voluntary "Go! X!" print holds glyphs + 1 rows instead of max(13, glyphs) + 1, ROM labs ais5-sp*: ball-open SE = print + 54 + nickname length): frames only, 57658 -> 57662; same battle 3 / depth 2 / turn 15 / roundLost.
       // swi1 swap popup (see seed 0), measured on the trial merge: 57634 -> 57776; same battle 3 / depth 2 / turn 15 / roundLost.
       // srt1 (see seed 0; its first summary closes with A at 20047, the next press, LEFT, lands at 20106 instead of 20109), measured on the
       // trial merge: 57776 -> 57761; same battle 3 / depth 2 / turn 15 / roundLost.
-      frames: 57761,
+      frames: 59054, // Mac merge 2026-11-25 of the box's 11-23/24 runs (58901) with swi1 + srt1, measured on the merged tree; same battle 3 / depth 2 / turn 19 / roundLost
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 2,
       battle: 3,
-      turn: 15,
+      turn: 19,
     });
   });
 

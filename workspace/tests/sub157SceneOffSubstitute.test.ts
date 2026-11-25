@@ -22,7 +22,7 @@ import { LIVE_BATTLER_X2_SCENE_OFF_INPUT, liveTrackedFrontIdleRest } from "../sr
 import type { GbaButton } from "../src/input";
 import { NO_MOVES_MESSAGE_HOLD_AT } from "../src/engine/battleCommandPresentation.ts";
 
-type Use = { move: number; attacker: number; attack: string | null; label: string | null; commands: unknown[] };
+type Use = { move: number; attacker: number; attack: string | null; label: string | null; commands: unknown[]; nextIsInLove: boolean };
 const FRAME_BUDGET = 200000;
 const MOVE_TRANSFORM = 144;
 const MOVE_SUBSTITUTE = 164;
@@ -36,11 +36,16 @@ function usesOf(segment: any, out: Use[]) {
     if (p.kind !== "message" || p.messageId !== "STRINGID_USEDMOVE") continue;
     const u = ev[i].provenance?.instructionExecution ?? null;
     const seqs = new Set<number>([ev[i].sequence]);
-    let exec = u, attack: string | null = null, label: string | null = null;
+    let exec = u, attack: string | null = null, label: string | null = null, nextIsInLove = false;
     for (let j = i + 1; j < ev.length; j++) {
       const q = ev[j].payload, x = ev[j].provenance?.instructionExecution ?? null;
       if (q.kind === "message" && q.messageId === "STRINGID_USEDMOVE") break;
-      if (exec !== null && x !== null && x < exec) break;
+      if (exec !== null && x !== null && x < exec) {
+        // pmk1: the next action's first print, when it is the "is in love" head, is the one Scene ON's transition pause (ROM glyph row) differs on.
+        const next = ev.slice(j).find((e) => e.payload.kind === "message");
+        nextIsInLove = next?.payload.messageId === "STRINGID_PKMNINLOVE";
+        break;
+      }
       exec = x;
       seqs.add(ev[j].sequence);
       if (q.kind === "animation" && (q.animationId === "SCENE_OFF_ATTACK_PAUSE" || q.animationId === "MOVE_ANIMATION") && attack === null) {
@@ -51,7 +56,7 @@ function usesOf(segment: any, out: Use[]) {
     }
     // Commands without their absolute event sequence (the two scenes' segments differ by the other moves' pauses).
     const commands = cmds.filter((c) => seqs.has(c.eventSequence)).map(({ eventSequence: _s, ...c }) => c);
-    out.push({ move: p.actionSnapshot?.currentMove ?? null, attacker: p.actionSnapshot?.attacker ?? null, attack, label, commands });
+    out.push({ move: p.actionSnapshot?.currentMove ?? null, attacker: p.actionSnapshot?.attacker ?? null, attack, label, commands, nextIsInLove });
   }
 }
 
@@ -175,7 +180,9 @@ describe("sub157: Scene OFF Substitute / Transform keep the controller move anim
       expect(pauses(a).some((x: any) => x.actionTransition !== undefined)).toBe(false);
       // sta3: the pause into a sleeping battler's pre-move print (its `status` counter write precedes the print) exists in Scene ON only: the OFF status command is unmeasured (docs/aud249 sta3).
       if (pauses(a).length === 0 && pauses(b).length === 1) continue;
-      expect(pauses(b).map((x: any) => x.timing)).toEqual(pauses(a).map((x: any) => x.timing));
+      // pmk1: before an "is in love" head (BattleScript_MoveUsedIsInLove) Scene ON's pause is 2 rows longer than OFF's (ROM Scene ON glyph row; OFF keeps gsp3's -2, T2 OFF unchanged).
+      const inLoveRows = a.nextIsInLove ? 2 : 0;
+      expect(pauses(b).map((x: any) => x.timing)).toEqual(pauses(a).map((x: any) => ({ ...x.timing, minimumFrames: x.timing.minimumFrames + inLoveRows })));
     }
     const stripped = (u: any) => ({ ...u, commands: u.commands.filter((x: any, i: number, all: any[]) => !transitionPause(x, i, all)) });
     expect(off.map(stripped)).toEqual(on.map(stripped));

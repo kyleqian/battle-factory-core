@@ -203,6 +203,11 @@ const SCRIPT_START_CLOCK_MOVE_IDS: ReadonlySet<number> = new Set([MOVE_TRANSFORM
  * 7-row lag put every body SE 7 rows late).
  */
 const NO_SOUND_LAG_MOVE_IDS: ReadonlySet<number> = new Set([120, 153]);
+/**
+ * pmc1: rows the ROM's first SE sits past the generic clock where the window is already exact. Surf (57): SE_M_SURF is at gAnimScriptActive + 30 (script row 29) after `delay 24`, the table's
+ * model gives row 26 (lab hpd8-surf-player-on ROM 88 / ENG 85, the hit SE 13 exact; T2 ON: 17 of 21 Surf segments -3 on SE 163, the SE 13 / 12 / 14 after it +0).
+ */
+const SOUND_EXTRA_LAG_ROWS: ReadonlyMap<number, number> = new Map([[57, 3]]);
 
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */
 export function emitMoveAnimSounds(after: BattleResolutionPresentationState | null, frontierBrain = false): void {
@@ -220,7 +225,7 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     attackerSide: request.attacker === 0 ? "player" : "opponent",
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
-  const soundLag = NO_SOUND_LAG_MOVE_IDS.has(request.moveId) ? 0 : AGE_TO_SOUND_ROWS;
+  const soundLag = NO_SOUND_LAG_MOVE_IDS.has(request.moveId) ? 0 : AGE_TO_SOUND_ROWS + (SOUND_EXTRA_LAG_ROWS.get(request.moveId) ?? 0);
   const genericRow = age - FIRST_COMMAND_AGE - soundLag;
   const start = SCRIPT_START_CLOCK_MOVE_IDS.has(request.moveId) ? moveAnimationScriptStartRow(segment, command.eventSequence) : null;
   const scriptRow = start === null ? genericRow : after.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0) - start;

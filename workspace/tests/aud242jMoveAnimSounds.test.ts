@@ -54,7 +54,8 @@ function ourEvents(rom: Fixture): SoundEvent[] {
 
 // delta = ROM frame - our frame. ids selects the rows the aud242j lifetimes time (rows before the waits are older work with their own lead).
 const SPECS: Array<{ name: string; ids: number[]; delta: number; rows: number }> = [
-  { name: "struggle-player", ids: [162, 141], delta: 7, rows: 5 },
+  // kst1: BODY_SOUND_LEAD_ROWS [165, -2] (the body SEs 2 rows later: delta 7 -> 5, the lab's hit SE 13 / faint SE 16 offset in the same window; was 2 rows earlier than them).
+  { name: "struggle-player", ids: [162, 141], delta: 5, rows: 5 },
   { name: "silverwind-player", ids: [132, 228, 133], delta: 0, rows: 3 },
   { name: "silverwind-opponent", ids: [132, 228, 133], delta: 0, rows: 3 },
   { name: "dig-player", ids: [114], delta: 0, rows: 1 },

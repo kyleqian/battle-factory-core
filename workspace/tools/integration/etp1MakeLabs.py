@@ -62,13 +62,45 @@ S = {
     "recoverls4": (19, 50, [73], 0, 19, 12, [105], 0, [0] * 4),
     # rcv1: the foe's restore-HP move after the drain damaged it (turn 2): hp -> "regained health" print
     "slackoffls2": (19, 50, [73], 0, 19, 12, [303], 0, [0] * 2),
+    # ldw1: a seeded foe's weather move (first turn sets it, every end turn ticks the weather and then drains)
+    "sunls3": (19, 50, [73], 0, 19, 12, [241], 0, [0] * 3),
+    "haills3": (19, 50, [73], 0, 19, 12, [258], 0, [0] * 3),
+    "sandls3": (19, 50, [73], 0, 19, 12, [201], 0, [0] * 3),
+    # ldw1: the foe is KOed on turn 2 and replaced; the seeded player's drain follows the foe's send-in
+    "foesendls2": (19, 50, [106, 69], 0, 19, 12, [73], 0, [0, 1]),
+    # ldw2: the same with an immune battler (Sandshrew / Snorunt): p = the seeding player immune, f = the seeded foe immune, b = both
+    "sandls3p": (27, 50, [73], 0, 19, 12, [201], 0, [0] * 3),
+    "sandls3f": (19, 50, [73], 0, 27, 12, [201], 0, [0] * 3),
+    "sandls3b": (27, 50, [73], 0, 27, 12, [201], 0, [0] * 3),
+    # a long weather bar (Chansey): the hit SE has ended before the script's exec row, so only the undamaged trailing iteration (6 rows) is left
+    "sandls3fc": (113, 50, [73], 0, 27, 12, [201], 0, [0] * 3),
+    "haills3p": (346, 50, [73], 0, 19, 12, [258], 0, [0] * 3),
+    "haills3f": (19, 50, [73], 0, 346, 12, [258], 0, [0] * 3),
+    "haills3b": (346, 50, [73], 0, 346, 12, [258], 0, [0] * 3),
+    # ptc2: a side condition wears off (Reflect turn 5, Safeguard cast on turn 1 ends turn 5 (the Toxic / wisp the player casts on turn 2 poisons the foe)) on the turn a poisoned / burned battler takes its tick
+    "reflecttox5": (19, 50, [115], 0, 19, 12, [92], 0, [0] * 5),
+    "reflectwisp5": (19, 50, [115], 0, 19, 12, [261], 0, [0] * 5),
+    "safeguardtox5": (19, 50, [219, 92], 0, 113, 50, [106], 0, [0, 1, 0, 0, 0]),
+    "safeguardwisp5": (19, 50, [219, 261], 0, 113, 50, [106], 0, [0, 1, 0, 0, 0]),
+    # ptc2: the foe's Reflect wears off (end of turn 5) before the weather the player set on turn 1 ends / ticks; "ls" = the player also seeds the foe on turn 2 (the drain follows)
+    "reflectsun5": (19, 50, [241], 0, 19, 12, [115], 0, [0] * 5),
+    "reflectsunls5": (19, 50, [241, 73], 0, 19, 12, [115], 0, [0, 1, 0, 0, 0]),
+    "reflectrain5": (19, 50, [240], 0, 19, 12, [115], 0, [0] * 5),
+    "reflectsand5": (19, 50, [201], 0, 19, 12, [115], 0, [0] * 5),
+    "reflectsandls5": (19, 50, [201, 73], 0, 19, 12, [115], 0, [0, 1, 0, 0, 0]),
     "morningsunls2": (19, 50, [73], 0, 19, 12, [234], 0, [0] * 2),
     "synthesisls2": (19, 50, [73], 0, 19, 12, [235], 0, [0] * 2),
     "moonlightls2": (19, 50, [73], 0, 19, 12, [236], 0, [0] * 2),
     "softboiledls2": (19, 50, [73], 0, 19, 12, [135], 0, [0] * 2),
     "milkdrinkls2": (19, 50, [73], 0, 19, 12, [208], 0, [0] * 2),
+    # fkt1: a 1-HP Shedinja foe is KOed by the first end-turn tick (drain / poison / sandstorm; "first" = Lv100 so the foe is first in the turn order), then replaced
+    "kols": (19, 50, [73], 0, 303, 5, [33], 0, [0]),
+    "kotoxic": (19, 50, [92], 0, 303, 5, [33], 0, [0]),
+    "kosand": (19, 50, [201], 0, 303, 5, [33], 0, [0]),
+    "kosandfirst": (74, 50, [201], 0, 303, 100, [150], 0, [0]),
 }
-ETP3 = {"sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4", "slackoffls2", "morningsunls2", "synthesisls2", "moonlightls2", "softboiledls2", "milkdrinkls2"}
+ETP3 = {"reflectsun5", "reflectsunls5", "reflectrain5", "reflectsand5", "reflectsandls5", "reflecttox5", "reflectwisp5", "safeguardtox5", "safeguardwisp5", "sandstormu3", "lightscreen6", "reflect6", "lightscreenls6", "reflectls6", "recoverls4", "sunls3", "haills3", "sandls3", "foesendls2", "sandls3p", "sandls3f", "sandls3b", "sandls3fc", "haills3p", "haills3f", "haills3b", "slackoffls2", "morningsunls2", "synthesisls2", "moonlightls2", "softboiledls2", "milkdrinkls2"}
+FKT1 = {"kols", "kotoxic", "kosand", "kosandfirst"}
 want = sys.argv[1:] or list(S)
 for name in want:
     us, ul, um, ui, ts, tl, tm, ti, slots = S[name]
@@ -87,6 +119,11 @@ for name in want:
                 seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 700, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 1100, "buttons": []}]
             else:
                 seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 1100, "buttons": []}]
+        if name == "foesendls2" or name in FKT1:  # the KO turn: the faint box waits for A presses (swt1-foe-faint-poison's tail)
+            seg[-1]["frames"] = (650 if scene == "on" else 900) if name in ("kosand", "kosandfirst") else 400
+            for _ in range(6):
+                seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 120, "buttons": []}]
+            seg += [{"frames": 1200, "buttons": []}]
         lab["trace"]["segments"] = seg
-        json.dump(lab, open(LAB / f"{'etp3' if name in ETP3 else 'etp1'}-{name}-{scene}.json", "w"))
-    print(("etp3-" if name in ETP3 else "etp1-") + name)
+        json.dump(lab, open(LAB / f"{'fkt1' if name in FKT1 else 'etp3' if name in ETP3 else 'etp1'}-{name}-{scene}.json", "w"))
+    print(("fkt1-" if name in FKT1 else "etp3-" if name in ETP3 else "etp1-") + name)

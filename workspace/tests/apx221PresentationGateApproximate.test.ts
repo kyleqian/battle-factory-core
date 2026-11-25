@@ -30,7 +30,7 @@ describe("apx221: one staged command per class draws non-static rows, classifies
       "approx:other:extrasensory-player-later-target", 173],
     ["endeavor-power: Endeavor 283 with the stale battleMovePower register unknown (census seed 415)", 415, 283, 0, "approx:endeavor-power", 73],
     ["endeavor-power: Endeavor 283, a second census battle", 419, 283, 0, "approx:endeavor-power", 73],
-    ["later-body-idle-rest: Signal Beam 324 by the player's later body at a battler off its rest offset", 312, 324, 0, "approx:other:later-body-idle-rest", 148],
+    ["later-body-idle-rest: Signal Beam 324 by the player's later body at a battler off its rest offset", 312, 324, 0, "approx:other:later-body-idle-rest", 157], // lpm1 / mhl1: + 1 row (LSE4_WINDOW_SHORT_ROWS 324: hit SE 213 / hp row 249 = ROM, labs hsw1-signalbeam-pfirst-on); was 156, hsw1: shape-A lead 5 + tail 3 on the 145-row body (hsw1 Signal Beam lab: window 156, hp start on the ROM healthbarupdate -1)
     ["later-body-idle-rest: Fury Cutter 210 (hardware-row model with zeroed frontIdleRest)", 851, 210, 0, "approx:other:later-body-idle-rest", 58],
     ["later-body-idle-rest: Extrasensory 326 (later body, idle rest)", 731, 326, 0, "approx:other:later-body-idle-rest", 173],
     ["seismic-toss-damage-branch: Seismic Toss 69 by the opponent whose damage is outside the proven 33..65 branch", 567, 69, 1, "approx:other:seismic-toss-damage-branch", 233],

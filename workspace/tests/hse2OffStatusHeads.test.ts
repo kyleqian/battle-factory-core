@@ -50,7 +50,7 @@ describe("hse2: Scene OFF wake-up and confusion heads", () => {
     const rows = commandRows("hpf4m-confuse-off");
     const holds = rows.filter((r) => r.type === "message" && [67, 71].includes(r.hold!)).map((r) => ({ frame: r.frame, hold: r.hold }));
     expect(holds).toContainEqual({ frame: 1323, hold: 67 });
-    expect(holds).toContainEqual({ frame: 3396, hold: 71 });
+    expect(holds).toContainEqual({ frame: 3397, hold: 71 });
   });
 
   it("enc276-struggle-off: the dismiss -> used print hold is one frame shorter in Scene OFF, so the hit animation (SE 13) starts on the ROM's frame 526", () => {

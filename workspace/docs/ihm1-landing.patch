@@ -1,0 +1,36 @@
+diff --git a/workspace/src/engine/battleResolutionPresentation.ts b/workspace/src/engine/battleResolutionPresentation.ts
+index d649053cf..6a46f6b09 100644
+--- a/workspace/src/engine/battleResolutionPresentation.ts
++++ b/workspace/src/engine/battleResolutionPresentation.ts
+@@ -2167,8 +2167,12 @@ function heldItemEffectOffHoldFrames(
+   if (instruction.operands.some((operand) => operand.expression === "B_ANIM_ITEM_KNOCKOFF")) return ITEM_KNOCKOFF_OFF_HOLD_FRAMES;
+   const { executions, lead } = heldItemEffectExecutionsAndLead(events, messageIndex);
+   const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined) ?? lead;
+-  return (executionsPresented ? 0 : executions) + leadFrames;
++  let before = messageIndex - 1;
++  while (before >= 0 && events[before]!.provenance?.sourceLabel === "BattleScript_MoveEnd") before -= 1;
++  const afterMessage = lead === HELD_ITEM_EFFECT_CONTINUE_LEAD_FRAMES && before >= 0 && before < messageIndex - 1 && events[before]!.payload.kind === "message" && events[before]!.provenance?.sourceLabel === "BattleScript_HitFromAtkAnimation";
++  return (executionsPresented ? 0 : executions) + leadFrames - (afterMessage ? SCRATCH_AFTER_MESSAGE : 0);
+ }
++const SCRATCH_AFTER_MESSAGE = Number(process.env.SCRATCH_AM ?? "5");
+ /**
+  * off121 (docs/off121-status-command.md): in Scene OFF `Cmd_statusanimation` is skipped (HITMARKER_NO_ANIMATIONS,
+  * battle_script_commands.c:5753), so nothing is drawn between a status-data receipt (BtlController_EmitSetMonData
+@@ -3004,7 +3008,7 @@ function hpItemAnimationRows(events: readonly BattleKernelSemanticEvent[], index
+   const second = events[index + 2];
+   const animation = events[index + 3];
+   const programCounter = animation?.provenance?.programCounter;
+-  if (first?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || second?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || animation?.payload.kind !== "animation"
++  if (first?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || second?.provenance?.opcodeName !== "B_SCR_OP_MOVEEND" || (animation?.payload.kind !== "animation" && animation?.payload.kind !== "message")
+     || programCounter === undefined || programCounter < ITEM_HEAL_RET_PC || programCounter >= ITEM_HEAL_RET_PC + ITEM_HEAL_RET_SCRIPT_ROWS) return null;
+   const execution = animation.provenance?.instructionExecution;
+   return execution === undefined || execution - hpExecution - 1 <= HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS ? null : execution - hpExecution - 1 - HP_ITEM_ANIMATION_COMMAND_LEAD_ROWS;
+@@ -3248,6 +3252,8 @@ function applyHpHitTails(
+     const faint = hit && rest[0]?.type === "faint" && leads.faintNext;
+     const statNext = (hit && rest[0]?.type === "stat") || (hit && leads.focusBand);
+     const itemAnimation = hit && leads.itemAnimationRows !== null && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility" && rest[2]?.type === "general-animation";
++    const offItemHeal = hit && leads.sceneOff && leads.itemAnimationRows !== null && rest[0]?.type === "sprite-visibility" && rest[1]?.type === "sprite-visibility" && rest[2]?.type === "move-animation";
++    if (offItemHeal) { commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: 0 }) }); continue; }
+     const tailFrames = statNext ? (leads.sceneOff ? HP_STAT_NEXT_TAIL_FRAMES_OFF : HP_STAT_NEXT_TAIL_FRAMES) : transition ? (leads.moveEndRows === null ? 0 : HP_DATAHPUPDATE_ROW_FRAMES)
+       : endsTurn ? leads.moveEndRows ?? 0 : bars > 0 ? bars : endTurnPrint ? leads.moveEndRows! + HP_END_TURN_PRINT_LEAD_ROWS
+       : itemAnimation ? leads.itemAnimationRows! + (leads.sceneOff ? 0 : leads.itemAnimationSeGate) : printHold ? leads.messageRows! : 0;

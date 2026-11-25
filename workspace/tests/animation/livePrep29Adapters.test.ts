@@ -127,15 +127,19 @@ describe("live prep29 ordinary routes", () => {
   // route = generated rentals, party member 0 knows the move, one turn (tools/integration/r3ProfileRouteSearch.ts <id> 4 1 4000: first seeds ascending).
   // Outrage and Luster Purge: no generated rental route within seeds 0..3999 x streaks 0..42.
   it.each([
-    ["BONEMERANG 246/21 MAROWAK (both hits)", 155, 246, 21, 0 as const, 71, 2],
-    ["RAPID_SPIN 80/14 WARTORTLE", 229, 80, 14, 2 as const, 130, 1],
-  ])("route %s: bodies reached, adapter active every age, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages, hits) => {
+    // mhs1: Bonemerang is a shape-A body; hit 1 carries the kernel lead 16 (ROM lab mhs1-bonemerang-pfirst-on: hit SE exact).
+    // cfa1: hit 2 leads with the script rows from the previous loop box's printstring to its attackanimation less the DoMultiHit trim 5 (this route: 22 - 5 = 17; the lab's 19 - 5 = 14: hit 2 SEs exact, mass 7 -> 2).
+    ["BONEMERANG 246/21 MAROWAK (both hits)", 155, 246, 21, 0 as const, 71, 2, [16, 17]],
+    ["RAPID_SPIN 80/14 WARTORTLE", 229, 80, 14, 2 as const, 130, 1, undefined],
+  ])("route %s: bodies reached, adapter active every age, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages, hits, leads) => {
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
     const bodies = on.animations.filter((a) => a.moveId === id && a.attacker === 0);
     expect(bodies).toHaveLength(hits);
-    for (const body of bodies) {
-      expect(body.ages).toEqual(iu120Ages(id, ages));
+    for (const [i, body] of bodies.entries()) {
+      // cfa1: a loop hit 2+ lead has no shape-A hit tail after the body (the loop box carries the rows): the age counts on through the lead rows, 74 + lead rows, not iu120Ages' 3-row hit tail on top.
+      const lead = leads?.[i];
+      expect(body.ages).toEqual(i > 0 && lead !== undefined && lead > 0 ? Array.from({ length: iu120Ages(id, ages, "player", 0).length + lead }, (_, k) => k) : iu120Ages(id, ages, "player", lead));
       expect(body.adapterActive.every(Boolean)).toBe(true);
     }
     parityOf(on, off);

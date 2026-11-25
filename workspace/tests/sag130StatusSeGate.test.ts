@@ -137,11 +137,18 @@ type Anchor = { k: number; animation: string; side: "player" | "opponent"; path:
 function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnimations: number } {
   const on = battleSegments(seed, "on").flatMap((s) => s.commands.map((c: any) => ({ c, events: s.events })));
   // hse2 item 2: the Scene OFF confusion print before the used print holds 64 + 3 + 4 (ROM print -> used print 94 vs ON 90, hpf4m-confuse-off,
-  // tests/hse2OffStatusHeads.test.ts); this test is about the status-SE gate alone, so read that print at the ON hold.
-  const confusionOffHold = (c: any, events: any[]) => c.type === "message" && c.timing?.holdFrames === 71
+  // tests/hse2OffStatusHeads.test.ts); this test is about the status-SE gate alone, so read that print at the ON hold (cfx1: 64 + 1).
+  // pmk1: the Scene OFF "is in love" head (64 + 3 + 3) is read at the ON head hold 64 + 1 as well.
+  // cre1: the OFF used print also holds the used move's attackcanceler -> attackstring gap (71 + gap - 1 = 70 / 71 / 72), read at 65 too.
+  const confusionOffHold = (c: any, events: any[]) => c.type === "message" && (c.timing?.holdFrames === 71 || c.timing?.holdFrames === 67 || c.timing?.holdFrames === 70 || c.timing?.holdFrames === 72)
     && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNISCONFUSED"
-    ? { ...c, timing: { ...c.timing, holdFrames: 67 } } : c;
-  const off = battleSegments(seed, "off").flatMap((s) => s.commands.map((c: any) => ({ c: confusionOffHold(c, s.events), events: s.events })));
+    ? { ...c, timing: { ...c.timing, holdFrames: 65 } }
+    : c.type === "message" && (c.timing?.holdFrames === 70 || c.timing?.holdFrames === 67) && events.find((e: any) => e.sequence === c.eventSequence)?.payload.messageId === "STRINGID_PKMNINLOVE"
+      ? { ...c, timing: { ...c.timing, holdFrames: 65 } } : c;
+  // opr1: Scene OFF's Yawn-sleep print waits 11 rows (a move-animation hold before the print, ROM MoveEnd + 12); that is not a status-animation gate, so drop it here.
+  const opr1YawnOffPause = (c: any, events: any[]) => c.type === "move-animation" && c.timing?.minimumFrames === 11
+    && events.find((e: any) => e.sequence === c.eventSequence)?.provenance?.sourceLabel === "BattleScript_YawnMakesAsleep";
+  const off = battleSegments(seed, "off").flatMap((s) => s.commands.filter((c: any) => !opr1YawnOffPause(c, s.events)).map((c: any) => ({ c: confusionOffHold(c, s.events), events: s.events })));
   const messages = (l: typeof on) => l.filter((x) => x.c.type === "message").map((x) => x.c.messageId);
   expect(messages(on), `seed ${seed}: identical prints in both scenes`).toEqual(messages(off));
   const ordinal = (l: typeof on, i: number) => l.slice(0, i).filter((x) => x.c.type === l[i]!.c.type).length;
@@ -192,6 +199,24 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
   return { anchors: out, unanchored, offAnimations };
 }
 
+// cfa1 (2026-11-23): the pre-move "is confused!" status animation carries the 5 script rows before the used / self-hit
+// print (preMoveConfusionToUsedPrintRows). cfm1 (2026-11-24, ROM probe of 15 chains in both scenes, docs/aud251-s11-scoreboard-refresh.md
+// "cfm1") showed the ROM identity holds (ON - OFF = 100 from `return` on) and the engine is right (OFF exact, ON within 1 row):
+// the extra here is this test's own normalisation of the OFF confusion hold (71 -> 67) applied to OFF only. fpl1 (chp1): the ON "is confused!" head
+// holds 64 + 1 (cfx1: 65; fpl1 had 64 + 2) against the normalised OFF 67, and the command carries 6 rows before the used
+// print (cfa1's 5 re-derived with the shorter head on the six cfa1 labs), 5 / 7 when the used move has 0 / 2 script rows between its `attackcanceler` and `attackstring` (cre1: BattleScript_EffectPsychUp, EffectStatDown; ROM labs cfa1-conf-psychup-s1-on, cre1-conf-growl-s1-on), or 4 before the self-hit print (ROM `DoSelfConfusionDmg` 104, not 105), so
+// ON - OFF is the command length less that 1-row hold difference. Not dropped: the rows are still inside the ON command (docs/aud251 "fpl1").
+// Only when the next message is the used / self-hit print (the engine's condition), so on this path the extra is 0, 4 or 6.
+const cfa1PreMoveConfusionRows = (a: { animation: string; path: string; length: number; gate: number }): number => {
+  const extra = a.length - a.gate - ROWS[a.animation]!;
+  return (a.animation === "CONFUSION" && a.path === "STRINGID_PKMNISCONFUSED" && (extra >= 4 && extra <= 7) ? extra : 0)
+    || (a.animation === "INFATUATION" && a.path === "STRINGID_PKMNINLOVE" && extra === 4 ? extra : 0);
+};
+// tnl1 (ROM labs gsp3-toxic / b4m-thunderwave, docs/aud251-s11-scoreboard-refresh.md "tnm1" 1.C): a move-inflicted PSN / BRN / PRZ (BattleScript_MoveEffect{Poison,Toxic,Burn,Paralysis}) holds its animation 2 rows longer, the ROM's print row (369 vs 367).
+// cfx1: so does BattleScript_MoveEffectConfusion's chosenstatus2animation on every path but the pre-move head (labs aud242f-swagger-player-on / aud242b-flatter-player-on / cfa1-conf-psychic-s2-on: SE 176 -> print 99 rows, the engine's 97).
+const tnl1MoveInflictedRows = (a: { animation: string; path: string; length: number; gate: number }): number =>
+  ((a.path === "inflicted" && (a.animation === "PSN" || a.animation === "BRN" || a.animation === "PRZ")) || (a.animation === "CONFUSION" && a.path !== "STRINGID_PKMNISCONFUSED"))
+  && a.length - a.gate - ROWS[a.animation]! === 2 ? 2 : 0;
 describe("sag130: the IsBattleSEPlaying gate in production (census routes, Scene ON vs OFF)", () => {
   it("every gated class lands its following print on the ROM row: ON - OFF = gate + controller rows, gate == seg127's projection", () => {
     const covered = new Map<string, number[]>();
@@ -211,11 +236,11 @@ describe("sag130: the IsBattleSEPlaying gate in production (census routes, Scene
           expect(a.gate, `seed ${seed} #${a.k}: not an open receipt -> gate 0`).toBe(0);
         }
         expect(a.orderOk, `${seed} ${a.animation} ${a.path}`).toBe(true);
-        expect(a.length, `${seed} #${a.k} ${a.animation}`).toBe(a.gate + ROWS[a.animation]!);
-        expect(a.on - a.off, `${seed} #${a.k} ${a.animation} ${a.side} ${a.path}`).toBe(a.gate + ROWS[a.animation]!);
+        expect(a.length, `${seed} #${a.k} ${a.animation}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a) + tnl1MoveInflictedRows(a));
+        expect(a.on - a.off, `${seed} #${a.k} ${a.animation} ${a.side} ${a.path}`).toBe(a.gate + ROWS[a.animation]! + cfa1PreMoveConfusionRows(a) + tnl1MoveInflictedRows(a));
         if (a.gate === 0) continue;
         // sa125's gate-0 rule: short by exactly the gate on every gated anchor
-        expect(a.on - a.off - ROWS[a.animation]!, `${seed} #${a.k}`).toBe(a.gate);
+        expect(a.on - a.off - ROWS[a.animation]!, `${seed} #${a.k}`).toBe(a.gate + tnl1MoveInflictedRows(a));
         gatedTotal += 1;
         gateFrames += a.gate;
         const key = `${a.gatePath}|${a.animation}|${a.side}`;
