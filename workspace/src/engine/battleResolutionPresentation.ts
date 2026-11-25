@@ -2935,7 +2935,7 @@ const REST_SOUND_LEAD_ROWS = -2;
  * fpr1: the opposite sign for Focus Punch 264 (-2, like Struggle / Rest): `Move_FOCUS_PUNCH` reaches its first `playsewithpan` after two loadspritegfx, `delay 1`, the IsContest / IsTargetPlayerSide task + jump pairs, waitbgfadein, monbg and setalpha;
  * the four body SEs are 2 rows early on the clock in the mechanic-focus-punch-*-on labs and T2 s1415 (every strike window -2).
  */
-const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3], [165, -2], [220, 3], [111, 4], [74, 4], [264, -2]]);
+const BODY_SOUND_LEAD_ROWS: ReadonlyMap<number, number> = new Map([[273, 5], [248, 5], [135, 5], [187, 4], [212, 3], [207, 3], [165, -2], [220, 3], [111, 4], [74, 4], [264, -2], [335, 3]]);
 const REST_HEAL_PRINT_TAIL_ROWS = 10;
 function bdt1BodySoundLead(events: readonly BattleKernelSemanticEvent[], index: number, moveId: number): { soundAgeLeadFrames?: number } {
   if (events[index]!.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return chargeTurnSoundLead(events, index);
