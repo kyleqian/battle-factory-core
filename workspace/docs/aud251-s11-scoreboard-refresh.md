@@ -6075,7 +6075,7 @@ Measured with the patch (scratch, then reverted):
 | T2 OFF mass / exact / offset | 470 / 923 / 210 | 467 / 929 / 204 | s1028 15 -> 13, s3738 33 -> 31, s499 19 -> 20 |
 | ticks with step 0 (ON, 3 seeds) | 4 of 20 | **18 of 20** | the 2 left: s3738 d60 (wore-off -> tick, 0 -> -1) and s3738 d61 (after a self-confusion hit, -1 -> -2) |
 | labs `gsp3-{toxic,willowisp}-{player,foe}-on` SE mass | 18 / 12 / 3 / 3 | **0 / 0 / 0 / 0** | all SE rows exact, print first glyphs unchanged (12 / 8 / 12 / 12 exact) |
-| `etp1-{poison,toxic,toxic3,willowisp,willowisp3}-{on,off}`, `aud242e-toxic-player-on`, `aud260-willowisp-{player,opponent}-on`, `hcr2-toxic-foe-on`, `gsp3-{toxic,willowisp}-player-off`, `hcr1b-toxic-foe-off`, `fkt1-kotoxic-off` | exact on the after tree (no regression) | 22 labs, mass 0 | |
+| `etp1-{poison,toxic,toxic3,willowisp,willowisp3}-{on,off}`, `aud242e-toxic-player-on`, `aud260-willowisp-{player,opponent}-on`, `hcr2-toxic-foe-on`, `gsp3-{toxic,willowisp}-player-off`, `hcr1b-toxic-foe-off`, `fkt1-kotoxic-off` | exact on the after tree (no regression) | 18 labs, mass 0 | |
 | `fkt1-kotoxic-on` | 154 | 161 | the lab's own -21 print offset (a desynced lab), the tick is moved 1 earlier on top of it |
 | `hpf4m-{burn,toxic}-{on,off}`, `hpf4m-faintpoison-{on,off}` | desynced labs (missing rows) | 22,349 -> 22,348, 34,812 -> 34,800, 3,377 -> 3,414 (ON); OFF 11 -> 10 | not readable |
 
