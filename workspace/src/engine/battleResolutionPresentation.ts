@@ -2291,6 +2291,19 @@ function heldItemEffectAfterAsleepLead(events: readonly BattleKernelSemanticEven
     ? HELD_ITEM_EFFECT_AFTER_ASLEEP_LEAD_FRAMES : null;
 }
 /**
+ * opr1 (lab fpr1-rest-leftovers-off, ISSUES #219): Scene OFF's Leftovers print after `BattleScript_MoveUsedIsAsleep` (no status animation is drawn; the 3-row jump to MoveEnd, then the
+ * item script restarts) is ROM MoveEnd+0x0 1627 -> `ItemHealHP_Ret+0xa` print 1672 = 45 rows; the 15-row restart lead put it 53 after (+8), so the hold's lead is 7. Scene OFF only (the caller).
+ */
+export const HELD_ITEM_EFFECT_AFTER_ASLEEP_OFF_LEAD_FRAMES = 7;
+function heldItemEffectAfterAsleepOffLead(events: readonly BattleKernelSemanticEvent[], index: number): number | null {
+  let print = index - 1;
+  while (print >= 0 && events[print]!.provenance?.sourceLabel === "BattleScript_MoveEnd") print -= 1;
+  if (print < 0 || print === index - 1) return null;
+  const event = events[print]!;
+  return event.payload.kind === "message" && event.provenance?.sourceLabel === "BattleScript_MoveUsedIsAsleep"
+    ? HELD_ITEM_EFFECT_AFTER_ASLEEP_OFF_LEAD_FRAMES : null;
+}
+/**
  * hie1: Scene OFF's presented hold for an item print whose source is `playanimation ..., B_ANIM_HELD_ITEM_EFFECT` right before it
  * (battle_script_commands.c:4014-4018 -> BattleScript_Pausex20, `pause B_WAIT_TIME_SHORT` = 32 frames). Every instruction from the
  * previous receipt to the print runs once per frame (the pause's own blocked retries included), so the hold is that execution count
@@ -2377,7 +2390,8 @@ function heldItemEffectOffHoldFrames(
   ) return null;
   if (instruction.operands.some((operand) => operand.expression === "B_ANIM_ITEM_KNOCKOFF")) return ITEM_KNOCKOFF_OFF_HOLD_FRAMES;
   const { executions, lead } = heldItemEffectExecutionsAndLead(events, messageIndex);
-  const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined) ?? lead;
+  const leadFrames = instruction.operands.map((operand) => WSH1_OFF_HOLD_LEAD[operand.expression]).find((value) => value !== undefined)
+    ?? (lead === HELD_ITEM_EFFECT_RESTART_LEAD_FRAMES ? heldItemEffectAfterAsleepOffLead(events, messageIndex) : null) ?? lead;
   return (executionsPresented ? 0 : executions) + leadFrames - (itemHealAfterResultMessage(events, messageIndex, lead) ? HELD_ITEM_AFTER_MESSAGE_LEAD_DELTA : 0);
 }
 /**
