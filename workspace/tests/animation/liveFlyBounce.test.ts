@@ -93,7 +93,7 @@ describe("live Fly / Bounce adapters", () => {
 
   // Generated-rental routes (prep11 s4): one input; the locked strike turn runs without an action prompt.
   const routes = [
-    { move: "FLY 38/7 SWELLOW", id: 19, seed: 38, slot: 0 as const, streak: 7, rows: [43, 76] },
+    { move: "FLY 38/7 SWELLOW", id: 19, seed: 38, slot: 0 as const, streak: 7, rows: [43, 68] },
     { move: "BOUNCE 65/7 PONYTA", id: 340, seed: 65, slot: 1 as const, streak: 7, rows: [64, 55] },
   ];
   it.each(routes)("completes ordinary $move: both bodies live, attacker hidden across the gap, ON/OFF rules and RNG", r => {
