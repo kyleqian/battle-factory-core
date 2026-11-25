@@ -6038,3 +6038,33 @@ Not chased: the <=2 clean windows of classes 1, 2 (carried part), 3 and 4 (D4 / 
 - `tools/integration/t2k11/permove.py`: per-cause / per-move window mass, the mode of the clean steps and the mass a constant would remove ("constgain").
 - `tools/integration/t2k11/repeats.py`: windows grouped by (class, cause, previous command, command type, step) with the seed count, to tell a rule from one seed's loop.
 - Reused: `tools/integration/t2k10/{classes.py,scratchT2.sh,seeddiff.py}`.
+
+## wcl1 (2026-11-25, integration lane, Scene ON, measurement only): the wake-up -> charge lab pair for dgt1 mechanism 2 -- VERDICT: land `64ca8a034` as is (wake-up only; thaw not covered)
+
+Base `ffe35b64a` (T2 ON 3,659 / 4,292, OFF 470 / 923). `64ca8a034` was applied as a scratch edit (`git cherry-pick -n`, clean on this base: +7 / -1 in `battleResolutionPresentation.ts`), measured, and reverted; `git diff ffe35b64a -- src tests` is empty. Evidence (git-ignored): `.integration/evidence/wcl1/` (`base/`, `patched/`, `reg-{base,patched}/`, `t2-patched{,-off}/`, `score-{base,patched}.{txt,json}`, `labs.txt`).
+
+**Labs.** `tools/integration/wcl1/makeLabs.py` writes `tools/battle-lab/wcl1-{dig,fly,bounce,solarbeam,skullbash,razorwind}-player-on.json` from `wkl1m-wakeup-player-off` (Snorlax L50 vs Rattata L50 Seismic Toss, seed 1, Scene ON): moves `[Rest, M, M, M]`; turns 1-3 are the wkl1m Rest turns (Rest, asleep, asleep; `A`, 18, `A`, 1000 idle: 700 is too short in Scene ON, the press lands inside the previous turn's text), turn 4 wakes and `A`, 18, `RIGHT`, 18, `A` picks slot 1 (the cursor remembers slot 0), 2000 idle covers the charge turn and the forced strike. Run: `labCompare.sh --out DIR wcl1-dig-player-on` (ROM + engine ~24 s per lab; the other five with `--reuse-rom`). RNG: the first charging turn has no accuracy roll and the lab's default engine RNG agreed with the ROM on every strike turn (no missing / extra rows in five of six), so unlike the chg2 Bounce labs these need no `ENGINE_RNG_SEED`; the rows after the strike turn's accuracy roll could still depend on it.
+
+**Rows: first charging-turn SEs of the woken user (`BattleScriptFirstChargingTurn+0x6`), ENG - ROM.**
+
+| lab | rows (ROM frame) | base | with `64ca8a034` |
+|---|---|---:|---:|
+| wcl1-dig | SE 175 x5 (3607 / 3641 / 3675 / 3709 / 3743) | +13 x5 | +0 x5 |
+| wcl1-fly | SE 158 (3593) | +13 | +0 |
+| wcl1-bounce | SE 203 (3596) | +13 | +0 |
+| wcl1-solarbeam | SE 140 (3595) | +13 | +0 |
+| wcl1-razorwind | SE 132 / 133 (3589 / 3630) | +13 x2 | +0 x2 |
+| wcl1-skullbash | SE 152 x2 | no engine row: no live body adapter for mv130 (`missing`), mass 1050 both ways | unchanged (unmeasurable) |
+
+The +13 is the same for every move with a body adapter, so the rule is a property of the wake-up detour, not of Bounce. The wake print itself (`MoveUsedWokeUp+0xe`) is +0 in every lab (the rule moves the sound clock only).
+- **SUMMARY mass (labCompare), base -> patched:** dig 75 -> 10, fly 26 -> 13, bounce 25 -> 12, solarbeam 26 -> 13, razorwind 96 -> 70 (-26, two SEs), skullbash 1050 -> 1050. PRINTS lines identical before / after in all six (the print rows `FirstChargingTurn+0x26` / `MoveEnd+0x9` pair badly with an extra engine charge print in the woken turn, -54 .. -119 in the table, in both runs: a table-pairing artifact outside the rule, not measured).
+- **What is left in these labs (not the rule's):** the strike turn after the charge is -3 (Dig / Fly / Bounce: the foe's `PrintMoveMissed` chain, mmc1's miss-shape terms) and Razor Wind +3 / +8; Solar Beam -1 / -2.
+
+**T2** (`rescoreAll.sh`, `soundScoreboard.py --per-seed`): ON 3,659 / 4,292 -> **3,646 / 4,293** (-13, exact +1; 0 missing / 0 extra), only s2230 moves (move-animation SE 286 -> 273; the d5 Bounce window). OFF **470 / 923 / 210 unchanged** (24 aligned seeds, rule is Scene ON). The base figures reproduce t2k11 exactly.
+**Regression labs:** 53 labs (chg2-* / chg3 / chg4 / bdt1-dig / ttb1 / ttf1 / stm1 / wkl1m / prep18-dig / prep11-bounce-alt / prep11-fly-alt / bcm1-bounce / mechanic-bounce / cfs1-dig / ekd1 / fsc1 `-on`; list in `labs.txt`; the three `mechanic-bounce-*` labs do not run in the engine stage, base or patched): 50 SUMMARY lines byte-identical base vs patched, i.e. no existing lab has a woken charger (the earlier "no lab" statement holds) and no lab got worse.
+
+**Verdict: land as is.** Two independent ROM windows now agree: T2 s2230 d5 (Bounce) and five lab moves (Dig / Fly / Bounce / Solar Beam / Razor Wind), all +13 on the base and +0 after, with T2 -13 and no lab regression. The constant 13 is exact on the labs, not just a fit to one window.
+- **Recipe:** `git cherry-pick 64ca8a034` (or its diff): `workspace/src/engine/battleResolutionPresentation.ts`, constant `CHARGE_TURN_AFTER_WAKE_UP_SOUND_LEAD_ROWS = 13` beside `CHARGE_TURN_AFTER_CONFUSION_SOUND_LEAD_ROWS`, and in `chargeTurnSoundLead` the after-detour branch returns `{ soundAgeLeadFrames: 13 }` when the event before the opener has `sourceLabel === WAKE_UP_SCRIPT`. Expected: the six labs above (five SE rows exact as in the table), T2 ON 3,646 / 4,293, OFF unchanged, census eventsDigest unchanged (sound rows only; dgt1 measured 200 / 200). Pin to add when landing: `wcl1-*-player-on` first-charge SE rows ENG == ROM (frames in the table; Dig 3607 / 3641 / 3675 / 3709 / 3743).
+- **Caveats.** Player side only (the foe-side lab was not built: a foe that rests then charges depends on the AI picking Rest at full HP; the code path is side-agnostic). Skull Bash cannot be confirmed at the SE level (no mv130 body adapter); it takes the same lead through the same branch. The Bounce wake-up lab needed no seed override but the strike-turn rows were not checked against other seeds.
+
+**Thaw: does NOT share the rule on the evidence, and the patch leaves it out.** The patch keys on `WAKE_UP_SCRIPT`; `BattleScript_MoveUsedUnfroze` (`THAW_SCRIPT`) falls through to `{}` as before. Structurally the thaw detour differs (no `bicword`, and ftp1 measured its ROM print -> icon at 91 rows against the wake-up's 81 / 82), so the 13 cannot be assumed. A frozen-charger lab cannot be built deterministically (freeze is a 10% roll, thaw 20% per turn, both seed-dependent in the ROM and engine), and no T2 window or census seed with thaw -> charge was found (the T2 engine / cmdtrace files carry no script labels; a census scan for `MoveUsedUnfroze` followed by `BattleScriptFirstChargingTurn` was not run). Recipe for later: search the 0..199 census for that pair, ROM-probe the seed with `labCompare` / a T2 replay, and add a thaw constant only if its first-SE offset is not 13.
